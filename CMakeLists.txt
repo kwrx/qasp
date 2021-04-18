@@ -19,7 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
 
 if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
     set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -Wall -fprofile-arcs -ftest-coverage -include ${PROJECT_BINARY_DIR}/config.h")
-    set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3")
+    set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3 -Werror")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fomit-frame-pointer")
 endif()
 

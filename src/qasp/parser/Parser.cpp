@@ -74,6 +74,16 @@ std::vector<Program> Parser::parse() const {
         }
 
 
+        tokens.emplace_back(TK_ANNOTATION, 0, 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'c', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'o', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'm', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'm', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'o', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, 'n', 0, 0, source);
+        tokens.emplace_back(TK_SOURCE, '\n', 0, 0, source);
+
+
         uint32_t line = 1;
         uint32_t column = 1;
 
@@ -83,6 +93,9 @@ std::vector<Program> Parser::parse() const {
             char ch;
             switch((ch = fd.get())) {
 
+                case EOF:
+                    break;
+
                 case '%':
 
                     if(fd.good() && fd.get() == '@') {
@@ -90,7 +103,7 @@ std::vector<Program> Parser::parse() const {
                         tokens.emplace_back(TK_ANNOTATION, 0, line, column++, source);
 
 #ifdef DEBUG
-                        LOG(__FILE__, TRACE) << "[LEXER] Found annotation"
+                        LOG(__FILE__, TRACE) << "<LEXER> Found annotation"
                                              << " in " << source
                                              << " at " << line << ":" << column << std::endl;
 #endif
@@ -105,7 +118,6 @@ std::vector<Program> Parser::parse() const {
                     }
 
                     break;
-
 
                 default:
                     tokens.emplace_back(TK_SOURCE, ch, line, column, source);
@@ -125,7 +137,6 @@ std::vector<Program> Parser::parse() const {
         fd.close();
 
     }
-
 
 
 
@@ -183,14 +194,16 @@ std::vector<Program> Parser::parse() const {
 
 
 #ifdef DEBUG
-                LOG(__FILE__, TRACE) << "[PARSER] Found annotation with identifier: " << identifier.str()
+                LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: " << identifier.str()
                                      //<< " and source: \n" << source.str() << "\n"
                                      << " in " << (*begin).tk_source
                                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 #endif
 
                 
-                if(identifier.str() == ANNOTATION_EXISTS)
+                if(identifier.str() == ANNOTATION_COMMON)
+                    programs.emplace_back(source.str(), ProgramType::TYPE_COMMON);
+                else if(identifier.str() == ANNOTATION_EXISTS)
                     programs.emplace_back(source.str(), ProgramType::TYPE_EXISTS);
                 else if(identifier.str() == ANNOTATION_FOREACH)
                     programs.emplace_back(source.str(), ProgramType::TYPE_FOREACH);
@@ -199,7 +212,7 @@ std::vector<Program> Parser::parse() const {
                 else {
 
 #ifdef DEBUG
-                    LOG(__FILE__, ERROR) << "unexpected annotation: " << identifier.str()
+                    LOG(__FILE__, ERROR) << "Unexpected annotation: " << identifier.str()
                             << " in " << (*begin).tk_source
                             << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 #endif

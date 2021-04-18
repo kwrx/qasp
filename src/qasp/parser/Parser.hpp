@@ -30,6 +30,7 @@
 #include "Program.hpp"
 
 
+#define ANNOTATION_COMMON           "common"
 #define ANNOTATION_EXISTS           "exists"
 #define ANNOTATION_FOREACH          "foreach"
 #define ANNOTATION_CONSTRAINTS      "constraints"

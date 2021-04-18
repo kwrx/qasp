@@ -30,6 +30,7 @@
 namespace qasp::parser {
 
     enum ProgramType {
+        TYPE_COMMON,
         TYPE_EXISTS,
         TYPE_FOREACH,
         TYPE_CONSTRAINTS

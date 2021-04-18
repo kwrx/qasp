@@ -39,12 +39,14 @@
 #ifdef DEBUG
 
 #define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+    severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
 
 #define ALL     0
 #define TRACE   1
 #define INFO    2
 #define WARN    3
 #define ERROR   4
+
+extern int quiet;
 
 #endif

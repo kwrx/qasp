@@ -32,12 +32,16 @@
 #include "qasp/parser/Parser.hpp"
 
 
+
+int quiet = false;
+
+
 static void show_usage(int argc, char** argv) {
 
     std::cout 
         << "Use: " << QASP_PROGRAM_NAME << " SOURCES\n"
         << "Process qasp SOURCES and blabla...\n\n"
-        << "    -v, --verbose               print process information\n"
+        << "    -q, --quiet                 hide log information\n"
         << "        --help                  show this help\n"
         << "        --version               print version info and exit\n";
 
@@ -68,37 +72,36 @@ static void show_version(int argc, char** argv) {
 }
 
 
+
 int main(int argc, char** argv) {
 
 
-#ifdef DEBUG
+#ifndef DEBUG
 
-    qasp::parser::Parser parser({ "../../test/source01.asp" });
-    parser.parse();
-
-#else
-    
     if(argc < 2)
         show_usage(argc, argv);
+
+#endif
+    
     
     static struct option long_options[] = {
-        { "verbose", no_argument, NULL, 'v' },
+        { "quiet",   no_argument, NULL, 'q' },
         { "help",    no_argument, NULL, 'h' },
-        { "version", no_argument, NULL, 'q' },
+        { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 
 
-    bool verbose = false;
+    quiet = 0;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "vhq", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qhv", long_options, &idx)) != -1) {
 
         switch(c) {
-            case 'v':
-                verbose = 1;
-                break;
             case 'q':
+                quiet = 1;
+                break;
+            case 'v':
                 show_version(argc, argv);
                 break;
             case 'h':
@@ -112,8 +115,15 @@ int main(int argc, char** argv) {
     }
 
 
+#ifndef DEBUG
+
     if(optind >= argc)
         show_usage(argc, argv);
+
+#else
+
+    qasp::parser::Parser parser({ "../../test/source01.asp" });
+    parser.parse();
 
 #endif
 
