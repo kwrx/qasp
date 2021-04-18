@@ -24,8 +24,12 @@
  */
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include <cstdlib>
 #include <getopt.h>
+
+#include "qasp/parser/Parser.hpp"
 
 
 static void show_usage(int argc, char** argv) {
@@ -65,6 +69,14 @@ static void show_version(int argc, char** argv) {
 
 
 int main(int argc, char** argv) {
+
+
+#ifdef DEBUG
+
+    qasp::parser::Parser parser({ "../../test/source01.asp" });
+    parser.parse();
+
+#else
     
     if(argc < 2)
         show_usage(argc, argv);
@@ -103,8 +115,9 @@ int main(int argc, char** argv) {
     if(optind >= argc)
         show_usage(argc, argv);
 
+#endif
 
-    std::cout << "Hello World!" << std::endl;
+
     return 0;
 
 }

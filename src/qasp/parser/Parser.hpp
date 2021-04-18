@@ -25,26 +25,35 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
-
-#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
-#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
-#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
-
-#cmakedefine DEBUG              @DEBUG@
-#cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
+#include <string>
+#include <vector>
+#include "Program.hpp"
 
 
-#ifdef DEBUG
+#define ANNOTATION_EXISTS           "exists"
+#define ANNOTATION_FOREACH          "foreach"
+#define ANNOTATION_CONSTRAINTS      "constraints"
 
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+#define TK_ANNOTATION               '@'
+#define TK_SOURCE                   '.'
 
-#define ALL     0
-#define TRACE   1
-#define INFO    2
-#define WARN    3
-#define ERROR   4
 
-#endif
+namespace qasp::parser {
+
+    class Parser {
+        public:
+            Parser(const std::vector<std::string>& sources)
+                : __sources(std::move(sources)) {}
+
+            const auto& sources() const {
+                return this->__sources;
+            }
+
+            std::vector<Program> parse() const;
+
+        private:
+            std::vector<std::string> __sources;
+
+    };
+
+}

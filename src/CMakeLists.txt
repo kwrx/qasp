@@ -1,1 +1,4 @@
-add_executable(qasp main.cpp)
+file(GLOB_RECURSE SOURCES "*.cpp")
+file(GLOB_RECURSE HEADERS "*.hpp")
+
+add_executable(qasp ${SOURCES} ${HEADERS})

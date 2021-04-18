@@ -1,5 +1,3 @@
-#pragma once
-
 /*                                                                      
  * GPL3 License 
  *
@@ -24,27 +22,3 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
-
-#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
-#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
-#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
-
-#cmakedefine DEBUG              @DEBUG@
-#cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
-
-
-#ifdef DEBUG
-
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
-
-#define ALL     0
-#define TRACE   1
-#define INFO    2
-#define WARN    3
-#define ERROR   4
-
-#endif

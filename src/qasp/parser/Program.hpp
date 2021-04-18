@@ -25,26 +25,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <string>
 
-#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
+namespace qasp::parser {
 
-#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
-#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
-#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
+    enum ProgramType {
+        TYPE_EXISTS,
+        TYPE_FOREACH,
+        TYPE_CONSTRAINTS
+    };
 
-#cmakedefine DEBUG              @DEBUG@
-#cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
+    class Program {
+        public:
+            Program(const std::string& source, const qasp::parser::ProgramType type)
+                : __source(std::move(source))
+                , __type(type) {}
 
+            const auto& source() const {
+                return this->__source;
+            }
 
-#ifdef DEBUG
+            const auto& type() const {
+                return this->__type;
+            }
 
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+        private:
+            std::string __source;
+            ProgramType __type;
 
-#define ALL     0
-#define TRACE   1
-#define INFO    2
-#define WARN    3
-#define ERROR   4
+    };
 
-#endif
+}
