@@ -36,10 +36,11 @@
 #cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
 
 
-#ifdef DEBUG
+#ifndef DEBUG
+#define DEBUG_LEVEL 127
+#endif
 
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+
 
 #define ALL     0
 #define TRACE   1
@@ -49,4 +50,5 @@
 
 extern int quiet;
 
-#endif
+#define LOG(filename, severity)     \
+    severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")

@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <cassert>
 #include <getopt.h>
 
 #include "qasp/parser/Parser.hpp"
@@ -45,7 +46,7 @@ static void show_usage(int argc, char** argv) {
         << "        --help                  show this help\n"
         << "        --version               print version info and exit\n";
 
-    exit(0);
+    exit(1);
 
 }
 
@@ -67,7 +68,7 @@ static void show_version(int argc, char** argv) {
         << __TIMESTAMP__ << ")\n";
 
     
-    exit(0);
+    exit(1);
 
 }
 
@@ -75,14 +76,6 @@ static void show_version(int argc, char** argv) {
 
 int main(int argc, char** argv) {
 
-
-#ifndef DEBUG
-
-    if(argc < 2)
-        show_usage(argc, argv);
-
-#endif
-    
     
     static struct option long_options[] = {
         { "quiet",   no_argument, NULL, 'q' },
@@ -115,18 +108,41 @@ int main(int argc, char** argv) {
     }
 
 
-#ifndef DEBUG
+    std::vector<std::string> sources;
 
     if(optind >= argc)
-        show_usage(argc, argv);
+        sources.emplace_back("-");
 
-#else
+    else {
 
-    qasp::parser::Parser parser({ "../../test/source01.asp" });
-    parser.parse();
+        for(; optind < argc; optind++) {
 
-#endif
+            LOG(__FILE__, TRACE) << "argv(" << optind << "): " 
+                                << argv[optind] << std::endl; 
 
+            sources.emplace_back(argv[optind]);
+
+        }
+
+    }
+        
+
+    assert(sources.size() > 0);
+
+
+    try {
+
+        qasp::parser::Parser parser(sources);
+        parser.parse();
+
+        /* TODO ... */
+
+    } catch(const std::exception& e) {
+        
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+
+    }
 
     return 0;
 

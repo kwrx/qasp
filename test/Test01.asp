@@ -2,9 +2,10 @@ c(1..5).
 d(1..5).
 
 %@exists
-a(X) :- b(X), c(X).
+c(6).
+in_a(X) | out_a(X) :- b(X), c(X).
 b(X) :- d(X).
 %@foreach
 d(X) :- c(X).
 %@constraints
-:- c(X), X > 3.
+:- in_a(X), X > 3.

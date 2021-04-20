@@ -24,12 +24,14 @@
  */
 
 #include "Parser.hpp"
+#include "ParserException.hpp"
 #include <iostream>
 #include <fstream>
 #include <tuple>
 #include <iterator>
 #include <string>
 #include <sstream>
+#include <filesystem>
 
 using namespace qasp::parser;
 
@@ -58,22 +60,12 @@ std::vector<Program> Parser::parse() const {
     std::vector<Token> tokens;
     std::vector<Program> programs;
 
-    for(const auto source : this->sources()) {
 
-#ifdef DEBUG
+    auto tokenize = [&](std::istream& fd, const std::string& source) {
+
         LOG(__FILE__, INFO) << "Reading source from " << source << std::endl;
-#endif
 
-        std::ifstream fd(source, std::ifstream::in);
-
-        if(fd.fail()) {
-#ifdef DEBUG
-            LOG(__FILE__, ERROR) << "Error reading " << source << std::endl;
-#endif
-            continue;
-        }
-
-
+        
         tokens.emplace_back(TK_ANNOTATION, 0, 0, 0, source);
         tokens.emplace_back(TK_SOURCE, 'c', 0, 0, source);
         tokens.emplace_back(TK_SOURCE, 'o', 0, 0, source);
@@ -102,11 +94,9 @@ std::vector<Program> Parser::parse() const {
                      
                         tokens.emplace_back(TK_ANNOTATION, 0, line, column++, source);
 
-#ifdef DEBUG
                         LOG(__FILE__, TRACE) << "<LEXER> Found annotation"
                                              << " in " << source
                                              << " at " << line << ":" << column << std::endl;
-#endif
 
                     } else {
 
@@ -134,10 +124,30 @@ std::vector<Program> Parser::parse() const {
                 
         }
 
-        fd.close();
+    };
+
+
+    for(const auto source : this->sources()) {
+
+        if(source != "-") {
+
+            std::ifstream fd(source, std::ifstream::in);
+        
+            if(fd.fail()) {
+
+                LOG(__FILE__, ERROR) << "Error reading " << source << std::endl;
+
+                throw std::invalid_argument(source);
+
+            }
+
+            tokenize(fd, source);
+
+        } else {
+            tokenize(std::cin, "<STDIN>");
+        }
 
     }
-
 
 
 
@@ -213,14 +223,14 @@ std::vector<Program> Parser::parse() const {
 
 #ifdef DEBUG
                     LOG(__FILE__, ERROR) << "Unexpected annotation: " << identifier.str()
-                            << " in " << (*begin).tk_source
-                            << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
+                                         << " in " << (*begin).tk_source
+                                         << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 #endif
 
                 }
 
 
-            } continue;
+            }
 
 
             default:
@@ -228,14 +238,8 @@ std::vector<Program> Parser::parse() const {
 
         }
 
-
-#ifdef DEBUG
-        LOG(__FILE__, WARN) << "unexpected character: " << (isprint(VALUE(it)) ? VALUE(it) : '?')
-                            << " in " << (*it).tk_source
-                            << " at " << (*it).tk_line << ":" << (*it).tk_column << std::endl;
-#endif
-              
-
+        
+        throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it)); 
 
     }
 
