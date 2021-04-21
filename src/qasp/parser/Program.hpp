@@ -51,6 +51,10 @@ namespace qasp::parser {
                 return this->__type;
             }
 
+            const auto& atoms() const {
+                return this->__atoms;
+            }
+
         private:
             std::string __source;
             std::vector<Atom> __atoms;

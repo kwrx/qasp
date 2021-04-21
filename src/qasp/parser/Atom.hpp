@@ -35,6 +35,16 @@ namespace qasp::parser {
                 : __name(name)
                 , __predicate(predicate) {}
 
+
+            const auto& index() const {
+                return __index;
+            }
+
+            const auto& index(uint64_t value) {
+                __index = value;
+                return *this;
+            }
+
             const auto& name() const {
                 return __name;
             }
@@ -44,6 +54,7 @@ namespace qasp::parser {
             }
 
         private:
+            uint64_t __index;
             std::string __name;
             std::string __predicate;
     };
