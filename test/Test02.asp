@@ -1,11 +1,11 @@
-c(1..5).
-d(1..5).
-
 %@exists
-c(6).
-in_a(X) | out_a(X) :- b(X), c(X).
-b(X) :- d(X).
+a.
 %@foreach
-d(X) :- c(X).
+b.
+%@exists
+c.
 %@constraints
-:- in_a(X), X > 3.
+:-     b, not c,     a.
+:- not b,     c,     a.
+:-     b,     c, not a.
+:-     b, not c, not a.

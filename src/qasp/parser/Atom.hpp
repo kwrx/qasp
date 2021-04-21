@@ -25,37 +25,27 @@
 
 #pragma once
 
-#include "Atom.hpp"
 #include <string>
 
 namespace qasp::parser {
 
-    enum ProgramType {
-        TYPE_COMMON,
-        TYPE_EXISTS,
-        TYPE_FORALL,
-        TYPE_CONSTRAINTS
-    };
-
-    class Program {
+    class Atom {
         public:
-            Program(const std::string& source, const qasp::parser::ProgramType type)
-                : __source(std::move(source))
-                , __type(type) {}
+            Atom(const std::string& name, const std::string& predicate)
+                : __name(name)
+                , __predicate(predicate) {}
 
-            const auto& source() const {
-                return this->__source;
+            const auto& name() const {
+                return __name;
             }
 
-            const auto& type() const {
-                return this->__type;
+            const auto& predicate() const {
+                return __predicate;
             }
 
         private:
-            std::string __source;
-            std::vector<Atom> __atoms;
-            ProgramType __type;
-
+            std::string __name;
+            std::string __predicate;
     };
 
 }
