@@ -27,7 +27,7 @@
 
 #include <string>
 #include <vector>
-#include "Program.hpp"
+#include "../Program.hpp"
 
 
 #define ANNOTATION_COMMON           "common"
@@ -53,7 +53,7 @@ namespace qasp::parser {
                 return this->__sources;
             }
 
-            std::vector<Program> parse() const;
+            qasp::Program parse() const;
 
         private:
             std::vector<std::string> __sources;

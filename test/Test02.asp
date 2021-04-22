@@ -1,6 +1,6 @@
 %@exists
 a.
-%@foreach
+%@forall
 b.
 %@exists
 c.

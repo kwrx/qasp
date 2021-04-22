@@ -1,5 +1,3 @@
-#pragma once
-
 /*                                                                      
  * GPL3 License 
  *
@@ -25,32 +23,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
 
-#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
+#include "Grounder.hpp"
+#include <memory>
 
-#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
-#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
-#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
+namespace qasp::grounder {
 
-#cmakedefine DEBUG              @DEBUG@
-#cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
-#cmakedefine HAVE_GRINGO        @HAVE_GRINGO@
-#cmakedefine HAVE_IDLV          @HAVE_IDLV@
+    class GringoGrounder : public Grounder {
 
+        public:
+            virtual std::string generate(const std::string& source) const override;
 
-#ifndef DEBUG
-#define DEBUG_LEVEL 127
-#endif
+    };
 
-
-
-#define ALL     0
-#define TRACE   1
-#define INFO    2
-#define WARN    3
-#define ERROR   4
-
-extern int quiet;
-
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+}

@@ -22,3 +22,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
+#pragma once
+
+#include <memory>
+#include <string>
+
+namespace qasp::grounder {
+
+    class Grounder {
+
+        public:
+            static Grounder* instance();
+            virtual std::string generate(const std::string& source) const = 0;
+
+        protected:
+            Grounder() {}
+
+    };
+
+}

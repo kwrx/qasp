@@ -5,7 +5,7 @@ d(1..5).
 c(6).
 in_a(X) | out_a(X) :- b(X), c(X).
 b(X) :- d(X).
-%@foreach
+%@forall
 d(X) :- c(X).
 %@constraints
 :- in_a(X), X > 3.

@@ -133,14 +133,16 @@ int main(int argc, char** argv) {
     try {
 
         qasp::parser::Parser parser(sources);
-        parser.parse();
+        qasp::Program program = parser.parse();
+
+        program.generate();
 
         /* TODO ... */
 
     } catch(const std::exception& e) {
         
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+        std::cerr << QASP_PROGRAM_NAME << ": error: " << e.what() << std::endl;
+        exit(1);
 
     }
 

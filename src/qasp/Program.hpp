@@ -27,8 +27,9 @@
 
 #include "Atom.hpp"
 #include <string>
+#include <vector>
 
-namespace qasp::parser {
+namespace qasp {
 
     enum ProgramType {
         TYPE_COMMON,
@@ -39,9 +40,17 @@ namespace qasp::parser {
 
     class Program {
         public:
-            Program(const std::string& source, const qasp::parser::ProgramType type)
-                : __source(std::move(source))
-                , __type(type) {}
+            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Atom>& atoms)
+                : __type(type)
+                , __source(source)
+                , __atoms(atoms)
+                , __subprograms({}) {}
+
+            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Atom>& atoms, const std::vector<Program> subprograms)
+                : __type(type)
+                , __source(source)
+                , __atoms(atoms)
+                , __subprograms(subprograms) {}
 
             const auto& source() const {
                 return this->__source;
@@ -55,10 +64,21 @@ namespace qasp::parser {
                 return this->__atoms;
             }
 
+            auto& atoms() {
+                return this->__atoms;
+            }
+
+            const auto& subprograms() const {
+                return this->__subprograms;
+            }
+
+            void generate();
+
         private:
+            ProgramType __type;
             std::string __source;
             std::vector<Atom> __atoms;
-            ProgramType __type;
+            std::vector<Program> __subprograms;
 
     };
 

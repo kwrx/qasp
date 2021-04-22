@@ -27,36 +27,42 @@
 
 #include <string>
 
-namespace qasp::parser {
+namespace qasp {
 
     class Atom {
         public:
-            Atom(const std::string& name, const std::string& predicate)
-                : __name(name)
-                , __predicate(predicate) {}
+
+            Atom(const std::string& name, const std::string& extensions)
+                : __index(-1LL)
+                , __name(name)
+                , __extensions(extensions) {}
+
+            Atom(const int64_t index, const std::string& name, const std::string& extensions)
+                : __index(index)
+                , __name(name)
+                , __extensions(extensions) {}
 
 
             const auto& index() const {
                 return __index;
             }
 
-            const auto& index(uint64_t value) {
-                __index = value;
-                return *this;
-            }
-
             const auto& name() const {
                 return __name;
             }
 
-            const auto& predicate() const {
-                return __predicate;
+            const auto& extensions() const {
+                return __extensions;
+            }
+
+            const bool isGround() const {
+                return this->index() != -1LL;
             }
 
         private:
-            uint64_t __index;
+            int64_t __index;
             std::string __name;
-            std::string __predicate;
+            std::string __extensions;
     };
 
 }

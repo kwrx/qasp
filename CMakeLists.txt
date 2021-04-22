@@ -34,6 +34,10 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 
+set(HAVE_GRINGO 1)
+set(HAVE_IDLV 0)
+
+
 configure_file(
     ${PROJECT_SOURCE_DIR}/config.h.in
     ${PROJECT_BINARY_DIR}/config.h
