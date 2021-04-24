@@ -1,14 +1,9 @@
 /*                                                                      
- * GPL3 License 
- *
- * Author(s):                                                              
- *      Antonino Natale <antonio.natale97@hotmail.com>  
- * 
+ * GPLv3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
  *
- * This file is part of qasp.  
- * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -27,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <cassert>
 
 #ifdef __unix__
 #include <unistd.h>
@@ -42,22 +38,35 @@ std::string GringoGrounder::generate(const std::string& source) const {
 
     std::stringstream output;
 
-#ifdef __unix__
+
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 
     int fd[2];  
 
-    if(pipe2(fd, O_NONBLOCK) == -1)
-        throw std::runtime_error("pipe2() failed!");
+    if(unlikely(pipe(fd) < 0))
+        throw std::runtime_error("pipe() failed!");
+
+    if(unlikely(fcntl(fd[0], F_SETFL, fcntl(fd[0], F_GETFL) | O_NONBLOCK) < 0))
+        throw std::runtime_error("fcntl() failed!");
     
+    if(unlikely(fcntl(fd[1], F_SETFL, fcntl(fd[1], F_GETFL) | O_NONBLOCK) < 0))
+        throw std::runtime_error("fcntl() failed!");
+    
+
+    assert(fcntl(fd[0], F_GETFL) & O_NONBLOCK);
+    assert(fcntl(fd[1], F_GETFL) & O_NONBLOCK);
+
+
+
     pid_t pid;
-    if((pid = fork()) == -1)
+    if(unlikely((pid = fork()) < 0))
         throw std::runtime_error("fork() failed!");
 
     
     if(pid == 0) {
 
-        dup2(fd[0], 0);
-        dup2(fd[1], 1);
+        dup2(fd[0], STDIN_FILENO);
+        dup2(fd[1], STDOUT_FILENO);
 
         char* const argv[] = {
             (char*) "gringo", 
@@ -68,26 +77,32 @@ std::string GringoGrounder::generate(const std::string& source) const {
 
     } else {
 
-        write(fd[1], source.c_str(), source.size());
-        close(fd[1]);
+        if(unlikely(write(fd[1], source.c_str(), source.size()) < 0))
+            throw std::runtime_error("write() failed!");
 
-        if(waitpid(pid, NULL, 0) == -1)
-            throw std::runtime_error("wait() failed!");
+        if(unlikely(close(fd[1]) < 0))
+            throw std::runtime_error("close() failed!");
+
+        if(unlikely(waitpid(pid, NULL, 0) == -1))
+            throw std::runtime_error("waitpid() failed!");
 
 
         char buffer[256];
         ssize_t size;
 
-        while((size = read(fd[0], buffer, sizeof(buffer))))
+        while((size = read(fd[0], buffer, sizeof(buffer))) > 0)
             output.write(buffer, size);
 
-        close(fd[0]);
+
+        if(unlikely(close(fd[0]) < 0))
+            throw std::runtime_error("close() failed!");
 
     }
 
 #else
-#error "TODO: define non unix implementation"
+#error "missing a non POSIX compliant implementation"
 #endif
+
 
     return output.str();
 

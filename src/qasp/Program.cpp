@@ -1,14 +1,9 @@
 /*                                                                      
- * GPL3 License 
- *
- * Author(s):                                                              
- *      Antonino Natale <antonio.natale97@hotmail.com>  
- * 
+ * GPLv3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
  *
- * This file is part of qasp.  
- * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -33,6 +28,20 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
+#define SMODELS_RULE_TYPE_SEPARATOR         0
+#define SMODELS_RULE_TYPE_BASIC             1
+#define SMODELS_RULE_TYPE_CONSTRAINT        2
+#define SMODELS_RULE_TYPE_CHOICE            3
+#define SMODELS_RULE_TYPE_WEIGHT            5
+#define SMODELS_RULE_TYPE_MINIMIZE          6
+#define SMODELS_RULE_TYPE_DISJUNCTIVE       8
+
+#define SMODELS_RULE_BPLUS                  "B+"
+#define SMODELS_RULE_BMINUS                 "B-"
+
+
+
+
 void Program::generate() {
 
     LOG(__FILE__, INFO) << "Generating ground instance..." << std::endl;
@@ -43,10 +52,10 @@ void Program::generate() {
 
     while(reader.good()) {
         
-        char ch;
+        int ch;
         reader >> ch;
 
-        if(ch == '0')
+        if(unlikely(ch == SMODELS_RULE_TYPE_SEPARATOR))
             break;
 
         reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -59,8 +68,9 @@ void Program::generate() {
         uint64_t index;
         reader >> index;
 
-        if(index == 0ULL)
+        if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
             break;
+
 
         std::string argument;
         reader >> argument;
@@ -74,7 +84,7 @@ void Program::generate() {
             char ch;
             atom >> ch;
 
-            if(ch == '(')
+            if(unlikely(ch == '('))
                 break;
             
             name << ch;
@@ -86,7 +96,7 @@ void Program::generate() {
             char ch;
             atom >> ch;
 
-            if(ch == ')')
+            if(unlikely(ch == ')'))
                 break;
             
             extensions << ch;

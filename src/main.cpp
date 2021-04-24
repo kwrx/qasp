@@ -1,14 +1,9 @@
 /*                                                                      
- * GPL3 License 
- *
- * Author(s):                                                              
- *      Antonino Natale <antonio.natale97@hotmail.com>  
- * 
+ * GPLv3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
  *
- * This file is part of qasp.  
- * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -55,7 +50,7 @@ static void show_version(int argc, char** argv) {
 
     std::cout
         << QASP_PROGRAM_NAME
-        << " (asp utils) "
+        << " (asp-utils) "
         << QASP_VERSION_MAJOR << "."
         << QASP_VERSION_MINOR << "."
         << QASP_VERSION_PATCH << std::endl
@@ -64,8 +59,10 @@ static void show_version(int argc, char** argv) {
         << "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n"
         << "This is free software: you are free to change and redistribute it.\n"
         << "There is NO WARRANTY, to the extent permitted by law.\n\n"
-        << "Built with gcc " << __VERSION__ << " (" 
-        << __TIMESTAMP__ << ")\n";
+        << "Built with "
+        << QASP_COMPILER_NAME       << " "
+        << QASP_COMPILER_VERSION    << " (" 
+        << __TIMESTAMP__            << ")\n";
 
     
     exit(1);

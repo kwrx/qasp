@@ -1,0 +1,4 @@
+set(QASP_PROGRAM_NAME "qasp")
+set(QASP_VERSION_MAJOR "1")
+set(QASP_VERSION_MINOR "0")
+set(QASP_VERSION_PATCH "0-alpha.1")

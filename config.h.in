@@ -1,16 +1,9 @@
-#pragma once
-
 /*                                                                      
  * GPL3 License 
- *
- * Author(s):                                                              
- *      Antonino Natale <antonio.natale97@hotmail.com>  
- * 
  * 
  * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
  *
- * This file is part of qasp.  
- * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -25,12 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
-
-#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
-#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
-#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
+#pragma once
 
 #cmakedefine DEBUG              @DEBUG@
 #cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
@@ -38,10 +26,44 @@
 #cmakedefine HAVE_IDLV          @HAVE_IDLV@
 
 
-#ifndef DEBUG
-#define DEBUG_LEVEL 127
+
+#define QASP_PROGRAM_NAME       "@QASP_PROGRAM_NAME@"
+
+#define QASP_VERSION_MAJOR      "@QASP_VERSION_MAJOR@"
+#define QASP_VERSION_MINOR      "@QASP_VERSION_MINOR@"
+#define QASP_VERSION_PATCH      "@QASP_VERSION_PATCH@"
+
+
+#if defined(__GNUC__) || defined(__GNUG__)
+#   define QASP_COMPILER_NAME           "gcc"
+#   define QASP_COMPILER_VERSION        __VERSION__
+#elif defined(__clang__)
+#   define QASP_COMPILER_NAME           "clang"
+#   define QASP_COMPILER_VERSION        __clang_version__
+#elif defined(__MSC_VER)
+#   define QASP_COMPILER_NAME           "mvc++"
+#   define QASP_COMPILER_VERSION        _MSC_FULL_VER
+#else
+#   define QASP_COMPILER_NAME           "unknown"
+#   define QASP_COMPILER_VERSION        ""
 #endif
 
+
+
+
+
+#if defined(__GNUC__) || defined(__GNUG__)
+#   define likely(x)            __builtin_expect((x), 1)
+#   define unlikely(x)          __builtin_expect((x), 0)
+#else
+#   define likely(x)            (x)
+#   define unlikely(x)          (x)
+#endif
+
+
+#ifndef DEBUG
+#   define DEBUG_LEVEL 127
+#endif
 
 
 #define ALL     0
@@ -54,3 +76,4 @@ extern int quiet;
 
 #define LOG(filename, severity)     \
     severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+

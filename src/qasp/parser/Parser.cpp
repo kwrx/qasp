@@ -1,14 +1,9 @@
 /*                                                                      
- * GPL3 License 
- *
- * Author(s):                                                              
- *      Antonino Natale <antonio.natale97@hotmail.com>  
- * 
+ * GPLv3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
  *
- * This file is part of qasp.  
- * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -106,7 +101,7 @@ static std::string parseAtom(std::vector<Atom>& atoms, std::vector<Token>::itera
                 }
 
 
-                if(!EXPECT(it, TK_RIGHT_PAREN)) {
+                if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
 
                     LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list" << std::endl;
 
@@ -240,7 +235,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
             std::ifstream fd(source, std::ifstream::in);
         
-            if(fd.fail()) {
+            if(unlikely(fd.fail())) {
 
                 LOG(__FILE__, ERROR) << "Error reading " << source << std::endl;
 
@@ -277,7 +272,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
                     identifier << VALUE(it);
                 }
 
-                if(identifier.str().size() == 0)
+                if(unlikely(identifier.str().size() == 0))
                     break;
 
 
@@ -289,6 +284,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                     if(VALUE(it) != '\n')
                         break;
+
                 }
 
 
