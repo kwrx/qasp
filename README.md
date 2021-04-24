@@ -1,6 +1,5 @@
 # qasp
-[![CMake Debug Test](https://github.com/kwrx/qasp/actions/workflows/cmake-debug-and-test.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-debug-and-test.yml)
-[![CMake Release Test](https://github.com/kwrx/qasp/actions/workflows/cmake-release-and-test.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-release-and-test.yml)
+[![CMake Test](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml)
 [![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)](/LICENSE) 
 
 ## How to install?
