@@ -38,7 +38,7 @@ jobs:
     - name: Package
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: ctest -C Release .
+      run: cpack -C Release .
       
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
