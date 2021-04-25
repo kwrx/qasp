@@ -37,15 +37,15 @@
 #define QASP_VERSION_TWEAK      "@CMAKE_PROJECT_VERSION_TWEAK@"
 
 
-#if defined(__GNUC__) || defined(__GNUG__)
+#if defined(__GNUC__) && !defined(__clang__)
 #   define QASP_COMPILER_NAME           "gcc"
 #   define QASP_COMPILER_VERSION        __VERSION__
+#elif defined(__MSC_VER) && !defined(__clang__)
+#   define QASP_COMPILER_NAME           "mvc++"
+#   define QASP_COMPILER_VERSION        _MSC_FULL_VER
 #elif defined(__clang__)
 #   define QASP_COMPILER_NAME           "clang"
 #   define QASP_COMPILER_VERSION        __clang_version__
-#elif defined(__MSC_VER)
-#   define QASP_COMPILER_NAME           "mvc++"
-#   define QASP_COMPILER_VERSION        _MSC_FULL_VER
 #else
 #   define QASP_COMPILER_NAME           "unknown"
 #   define QASP_COMPILER_VERSION        ""
@@ -55,7 +55,7 @@
 
 
 
-#if defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 #   define likely(x)            __builtin_expect(!!(x), 1)
 #   define unlikely(x)          __builtin_expect(!!(x), 0)
 #else
@@ -82,6 +82,6 @@ extern int quiet;
 
 
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif

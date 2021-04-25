@@ -133,7 +133,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
     };
 
 
-    for(const auto source : sources) {
+    for(const auto& source : sources) {
 
         if(source != "-") {
 

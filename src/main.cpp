@@ -56,13 +56,13 @@ static void show_version(int argc, char** argv) {
         << QASP_VERSION_PATCH << "."
         << QASP_VERSION_TWEAK << "\n"
         << "Copyright (C) "
-        << (__DATE__ + 7) << " Antonino Natale\n"
+        << (&__DATE__[7]) << " Antonino Natale\n"
         << "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n"
         << "This is free software: you are free to change and redistribute it.\n"
         << "There is NO WARRANTY, to the extent permitted by law.\n\n"
         << "Built with "
         << QASP_COMPILER_NAME       << " "
-        << QASP_COMPILER_VERSION    << " (" 
+        << QASP_COMPILER_VERSION    << "(" 
         << __TIMESTAMP__            << ")\n";
 
     
