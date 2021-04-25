@@ -12,6 +12,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install Dependencies
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: sudo apt update && sudo apt install dpkg rpm libboost-dev
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -29,11 +34,6 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       run: ctest -C Release
-
-    - name: Install Dependencies
-      working-directory: ${{github.workspace}}
-      shell: bash
-      run: sudo apt update && sudo apt install dpkg rpm
 
     - name: Package
       working-directory: ${{github.workspace}}/build

@@ -11,6 +11,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install Dependencies
+      shell: bash
+      working-directory: ${{github.workspace}}
+      run: sudo apt update && sudo apt install libboost-dev
+
     - name: Create Build Environment (Debug)
       run: cmake -E make_directory ${{github.workspace}}/debug
 
