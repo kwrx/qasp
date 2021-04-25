@@ -24,18 +24,14 @@
 
 namespace qasp {
 
+    typedef int64_t atom_index_t;
+
     class Atom {
         public:
 
-            Atom(const std::string& name, const std::string& extensions)
-                : __index(-1LL)
-                , __name(name)
-                , __extensions(extensions) {}
-
-            Atom(const int64_t index, const std::string& name, const std::string& extensions)
+            Atom(const atom_index_t index, const std::string& name)
                 : __index(index)
-                , __name(name)
-                , __extensions(extensions) {}
+                , __name(name) {}
 
 
             const auto& index() const {
@@ -46,18 +42,10 @@ namespace qasp {
                 return __name;
             }
 
-            const auto& extensions() const {
-                return __extensions;
-            }
-
-            const bool isGround() const {
-                return this->index() != -1LL;
-            }
-
         private:
-            int64_t __index;
+            atom_index_t __index;
             std::string __name;
-            std::string __extensions;
+
     };
 
 }

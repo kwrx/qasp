@@ -23,6 +23,7 @@
 #include "Atom.hpp"
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace qasp {
 
@@ -33,18 +34,22 @@ namespace qasp {
         TYPE_CONSTRAINTS
     };
 
+    enum ProgramResult {
+        MODEL_UNKNOWN,
+        MODEL_COHERENT,
+        MODEL_INCOHERENT
+    };
+
     class Program {
         public:
-            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Atom>& atoms)
+            Program(const qasp::ProgramType type, const std::string& source)
                 : __type(type)
                 , __source(source)
-                , __atoms(atoms)
                 , __subprograms({}) {}
 
-            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Atom>& atoms, const std::vector<Program> subprograms)
+            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Program> subprograms)
                 : __type(type)
                 , __source(source)
-                , __atoms(atoms)
                 , __subprograms(subprograms) {}
 
             const auto& source() const {
@@ -68,12 +73,14 @@ namespace qasp {
             }
 
             void generate();
+            void solve();
 
         private:
             ProgramType __type;
             std::string __source;
-            std::vector<Atom> __atoms;
             std::vector<Program> __subprograms;
+            std::unordered_map<std::string, Atom> __atoms;
+
 
     };
 

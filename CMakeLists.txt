@@ -4,13 +4,24 @@ project(QASP CXX)
 #
 # Config options
 #
+
+## Grounder
 set(HAVE_GRINGO     1)
 set(HAVE_IDLV       0)
+
+## Solver
+set(HAVE_WASP       1)
+set(HAVE_CLASP      0)
+
+######################################
 
 
 
 include(cmake/version.cmake)
+include(cmake/package.cmake)
 include(cmake/build.cmake)
+include(cmake/wasp.cmake)
+include(CPack)
 include(GNUInstallDirs)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
@@ -27,3 +38,9 @@ enable_testing()
 
 add_subdirectory(src)
 add_subdirectory(test)
+
+install(TARGETS qasp wasp
+    RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
+    ARCHIVE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
+    LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
+)

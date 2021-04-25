@@ -29,12 +29,12 @@ static Grounder* __instance = nullptr;
 Grounder* Grounder::instance() {
 
     if(unlikely(__instance == nullptr)) {
-#ifdef HAVE_GRINGO
+#if defined(HAVE_GRINGO)
         __instance = static_cast<Grounder*>(new GringoGrounder());
-#elif HAVE_IDLV
+#elif defined(HAVE_IDLV)
         __instance = static_cast<Grounder*>(new IDLVGrounder());
 #else
-#error "undefined grounder application"
+#   error "missing grounder application"
 #endif
     }
 

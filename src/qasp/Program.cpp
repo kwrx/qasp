@@ -65,7 +65,7 @@ void Program::generate() {
 
     while(reader.good()) {
 
-        uint64_t index;
+        int64_t index;
         reader >> index;
 
         if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
@@ -77,40 +77,33 @@ void Program::generate() {
 
         std::stringstream atom(argument);
         std::stringstream name;
-        std::stringstream extensions;
+
 
         while(atom.good()) {
             
             char ch;
             atom >> ch;
 
-            if(unlikely(ch == '('))
+            if(unlikely(ch == '\n'))
                 break;
             
             name << ch;
 
         }
 
-        while(atom.good()) {
-
-            char ch;
-            atom >> ch;
-
-            if(unlikely(ch == ')'))
-                break;
-            
-            extensions << ch;
-
-        }
 
 
         LOG(__FILE__, TRACE) << "Extracted from smodels atom with index " << index
-                             << " and atom " << name.str() 
-                             << "(" << extensions.str() << ")" << std::endl;
+                             << " and predicate " << name.str() << std::endl;
 
-        this->atoms().emplace_back(index, name.str(), extensions.str());
+        this->atoms().emplace(name.str(), Atom { index, name.str() });
 
     }
 
+
+}
+
+
+void Program::solve() {
 
 }

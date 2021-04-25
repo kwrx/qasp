@@ -21,7 +21,7 @@
 #pragma once
 
 #include "Grounder.hpp"
-#include <memory>
+#include <string>
 
 namespace qasp::grounder {
 

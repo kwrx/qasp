@@ -13,7 +13,7 @@ $ cmake --install build
 
 ## Run
 ```shell script
-$ qasp [OPTIONS] [SOURCES...]
+$ qasp [OPTIONS] SOURCES...
 ```
 **NOTE:** Type ```qasp --help``` for more information.
 

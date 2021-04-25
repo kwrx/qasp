@@ -61,90 +61,6 @@ struct Token {
 
 
 
-
-
-static std::string parseAtom(std::vector<Atom>& atoms, std::vector<Token>::iterator& it, const std::vector<Token>& tokens) {
-
-
-    #define VALID_NAME(it)  \
-        (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
-
-    #define VALID_EXTENSIONS(it) \
-        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT))
-
-
-
-    std::stringstream source;
-    auto begin = it;
-
-
-    do {
-
-        if(VALID_NAME(it)) {
-
-            std::stringstream name;
-            std::stringstream extensions;
-
-
-            name << VALUE(it);
-
-            while(GOOD(++it) && VALID_NAME(it)) {
-                name << VALUE(it);
-            }
-
-
-            if(EXPECT(it, TK_LEFT_PAREN)) {
-
-
-                while(GOOD(++it) && VALID_EXTENSIONS(it)) {
-                    extensions << VALUE(it);
-                }
-
-
-                if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
-
-                    LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list" << std::endl;
-
-                    throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it)); 
-
-                }
-
-            } else if(EXPECT(it, TK_DOT)) {
-
-                // Just skip...
-
-            } else {
-
-                LOG(__FILE__, WARN) << "Expected a LEFT_PAREN or DOT after atom name" << std::endl;
-                break;
-
-            }
-
-
-
-            LOG(__FILE__, TRACE) << "<PARSER> Found Atom with name: " << name.str()
-                                        << " and extensions: (" << extensions.str() << ")"
-                                        << " in " << (*begin).tk_source
-                                        << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
-
-
-            atoms.emplace_back(name.str(), extensions.str());
-
-        }
-
-    } while(0);
-
-
-    for(; begin != it; begin++)
-        source << VALUE(begin);
-        
-    source << VALUE(it);
-
-    return source.str();
-
-} 
-
-
 static std::vector<Program> parseSources(const std::vector<std::string>& sources) {
 
     std::vector<Token> tokens;
@@ -199,18 +115,6 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                     break;
 
-                case '(':
-                    tokens.emplace_back(TK_LEFT_PAREN, ch, line, column, source);
-                    break;
-
-                case ')':
-                    tokens.emplace_back(TK_RIGHT_PAREN, ch, line, column, source);
-                    break;
-
-                case '.':
-                    tokens.emplace_back(TK_DOT, ch, line, column, source);
-                    break;
-
                 default:
                     tokens.emplace_back(TK_SOURCE, ch, line, column, source);
                     break;
@@ -262,7 +166,6 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 std::stringstream identifier;
                 std::stringstream source;
-                std::vector<Atom> atoms;
 
 #ifdef DEBUG
                 auto begin = it;
@@ -289,7 +192,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
 
                 while(GOOD(++it) && !EXPECT(it, TK_ANNOTATION)) {
-                    source << parseAtom(atoms, it, tokens);
+                    source << VALUE(it);
                 }
 
                 it--;
@@ -299,20 +202,19 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 #ifdef DEBUG
                 LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: " << identifier.str()
                                      //<< " and source: \n" << source.str() << "\n"
-                                     << " and " << atoms.size() << " atoms"
                                      << " in " << (*begin).tk_source
                                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 #endif
 
                 
                 if(identifier.str() == ANNOTATION_COMMON)
-                    programs.emplace_back(ProgramType::TYPE_COMMON, source.str(), atoms);
+                    programs.emplace_back(ProgramType::TYPE_COMMON, source.str());
                 else if(identifier.str() == ANNOTATION_EXISTS)
-                    programs.emplace_back(ProgramType::TYPE_EXISTS, source.str(), atoms);
+                    programs.emplace_back(ProgramType::TYPE_EXISTS, source.str());
                 else if(identifier.str() == ANNOTATION_FORALL)
-                    programs.emplace_back(ProgramType::TYPE_FORALL, source.str(), atoms);
+                    programs.emplace_back(ProgramType::TYPE_FORALL, source.str());
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    programs.emplace_back(ProgramType::TYPE_CONSTRAINTS, source.str(), atoms);
+                    programs.emplace_back(ProgramType::TYPE_CONSTRAINTS, source.str());
                 else {
 
 #ifdef DEBUG
@@ -346,22 +248,15 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 Program Parser::parse() const {
 
     std::vector<Program> programs = parseSources(this->sources());
-
     std::stringstream source;
-    std::vector<Atom> atoms;
-
 
     for(const auto& program : programs) {
         
         source << program.source();
         source << std::endl;
-        
-        for(const auto& atom : program.atoms())
-            atoms.emplace_back(atom);
 
     }
 
-
-    return Program(ProgramType::TYPE_COMMON, source.str(), atoms, programs);
+    return Program(ProgramType::TYPE_COMMON, source.str(), programs);
 
 }

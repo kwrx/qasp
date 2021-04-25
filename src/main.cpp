@@ -35,7 +35,7 @@ int quiet = false;
 static void show_usage(int argc, char** argv) {
 
     std::cout 
-        << "Use: " << QASP_PROGRAM_NAME << " SOURCES\n"
+        << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
         << "    -q, --quiet                 hide log information\n"
         << "        --help                  show this help\n"
@@ -53,8 +53,9 @@ static void show_version(int argc, char** argv) {
         << " (asp-utils) "
         << QASP_VERSION_MAJOR << "."
         << QASP_VERSION_MINOR << "."
-        << QASP_VERSION_PATCH << std::endl
-        << "Copyright (c) "
+        << QASP_VERSION_PATCH << "."
+        << QASP_VERSION_TWEAK << "\n"
+        << "Copyright (C) "
         << (__DATE__ + 7) << " Antonino Natale\n"
         << "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n"
         << "This is free software: you are free to change and redistribute it.\n"
@@ -133,6 +134,7 @@ int main(int argc, char** argv) {
         qasp::Program program = parser.parse();
 
         program.generate();
+        program.solve();
 
         /* TODO ... */
 

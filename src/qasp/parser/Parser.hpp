@@ -31,10 +31,7 @@
 #define ANNOTATION_CONSTRAINTS      "constraints"
 
 #define TK_ANNOTATION               '@'
-#define TK_LEFT_PAREN               '('
-#define TK_RIGHT_PAREN              ')'
-#define TK_DOT                      '.'
-#define TK_SOURCE                   '*'
+#define TK_SOURCE                   '.'
 
 
 namespace qasp::parser {

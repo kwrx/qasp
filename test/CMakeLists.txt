@@ -1,7 +1,6 @@
 file(GLOB_RECURSE SOURCES "*.asp")
 list(GET ${SOURCES} 0 FIRST_SOURCE)
 
-message("Test found: " ${SOURCES})
 
 foreach(SOURCE ${SOURCES})
 
