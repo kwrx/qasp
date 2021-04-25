@@ -41,12 +41,12 @@ jobs:
       run: ctest -C Release .
       
     - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          files: |
-            ${{github.workspace}}/build/qasp-*.deb
-            ${{github.workspace}}/build/qasp-*.rpm
-            ${{github.workspace}}/build/qasp-*.tar.gz
-            ${{github.workspace}}/build/qasp-*.tar.xz
-            ${{github.workspace}}/build/qasp-*.zip
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          ${{github.workspace}}/build/qasp-*.deb
+          ${{github.workspace}}/build/qasp-*.rpm
+          ${{github.workspace}}/build/qasp-*.tar.gz
+          ${{github.workspace}}/build/qasp-*.tar.xz
+          ${{github.workspace}}/build/qasp-*.zip
