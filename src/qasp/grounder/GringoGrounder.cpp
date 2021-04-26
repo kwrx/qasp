@@ -1,5 +1,5 @@
 /*                                                                      
- * GPLv3 License 
+ * GPL-3.0 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -94,7 +94,7 @@ std::string GringoGrounder::generate(const std::string& source) const {
             output.write(buffer, size);
 
         assert(size == 0);
-        
+
 
         if(unlikely(close(fd[0]) < 0))
             throw std::runtime_error("close() failed!");

@@ -1,5 +1,5 @@
 /*                                                                      
- * GPLv3 License 
+ * GPL-3.0 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
