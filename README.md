@@ -10,7 +10,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Release -B build
 $ cmake --build build
 $ cmake --install build
 ```
-**NOTE:** [CMake](https://cmake.org/) >= 3.11 required.
+**NOTE:** [CMake](https://cmake.org/) >= 3.11 and [Boost C++ Libraries] >= 1.72.0 are required.
 
 ## Usage
 ```shell script
@@ -18,7 +18,7 @@ $ qasp [OPTIONS] SOURCES...
 ```
 Or read from *stdin*
 ```shell script
-$ cat $sources | qasp
+$ cat SOURCES | qasp
 ```
 **NOTE:** Type ```qasp --help``` for more information.
 
@@ -26,6 +26,6 @@ $ cat $sources | qasp
 Blabla...
 
 ## License
-Copyright (c) 2021 Antonino Natale. All rights reserved.  
+Copyright (C) 2021 Antonino Natale. All rights reserved.  
 
 Licensed under the [GPLv3](/LICENSE) license.
