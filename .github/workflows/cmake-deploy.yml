@@ -15,7 +15,7 @@ jobs:
     - name: Install Dependencies
       working-directory: ${{github.workspace}}
       shell: bash
-      run: sudo apt update && sudo apt install dpkg rpm libboost-dev
+      run: sudo apt update && sudo apt install dpkg rpm libboost-dev ninja-build
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
@@ -23,12 +23,12 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -G Ninja
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --build . --config Release
+      run: cmake --build . --config Release -j 8
 
     - name: Test
       working-directory: ${{github.workspace}}/build
