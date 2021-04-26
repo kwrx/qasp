@@ -10,7 +10,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Release -B build
 $ cmake --build build
 $ cmake --install build
 ```
-**NOTE:** [CMake](https://cmake.org/) >= 3.11 and [Boost C++ Libraries] >= 1.72.0 are required.
+**NOTE:** [CMake](https://cmake.org/) >= 3.11 and [Boost C++ Libraries](https://www.boost.org/) >= 1.72.0 are required.
 
 ## Usage
 ```shell script
@@ -28,4 +28,4 @@ Blabla...
 ## License
 Copyright (C) 2021 Antonino Natale. All rights reserved.  
 
-Licensed under the [GPLv3](/LICENSE) license.
+Licensed under the [GPL-3.0](/LICENSE) license.
