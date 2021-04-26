@@ -1,5 +1,5 @@
 # qasp
-[![CMake Test](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml)
+[![build](https://github.com/kwrx/qasp/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-build.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/kwrx/qasp)](https://github.com/kwrx/qasp/releases/latest)
 [![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)](/LICENSE) 
 
