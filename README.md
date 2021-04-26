@@ -11,9 +11,13 @@ $ cmake --install build
 ```
 **NOTE:** [CMake](https://cmake.org/) >= 3.11 required.
 
-## Run
+## Usage
 ```shell script
 $ qasp [OPTIONS] SOURCES...
+```
+Or read from *stdin*
+```shell script
+$ cat $SOURCES | qasp
 ```
 **NOTE:** Type ```qasp --help``` for more information.
 
