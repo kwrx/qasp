@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
 
     try {
 
-        qasp::parser::Parser parser(sources);
+        qasp::parser::Parser parser(std::move(sources));
         qasp::Program program = parser.parse();
 
         program.generate();

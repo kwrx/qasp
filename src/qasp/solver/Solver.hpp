@@ -31,11 +31,14 @@ namespace qasp::solver {
     class Solver {
 
         public:
-            static Solver* instance();
-            virtual ProgramResult solve(const Program& program) const = 0;
+
+            virtual ~Solver() = default;
+            virtual ProgramResult solve(const Program& program, const std::vector<Atom>& assumptions) const = 0;
+
+            static std::shared_ptr<Solver> instance();
 
         protected:
-            Solver() {}
+            Solver() = default;
 
     };
 

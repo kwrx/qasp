@@ -29,16 +29,16 @@ namespace qasp {
     class Atom {
         public:
 
-            Atom(const atom_index_t index, const std::string& predicate)
+            Atom(const atom_index_t index, const std::string predicate)
                 : __index(index)
-                , __predicate(predicate) {}
+                , __predicate(std::move(predicate)) {}
 
 
-            const auto& index() const {
+            inline const auto& index() const {
                 return __index;
             }
 
-            const auto& predicate() const {
+            inline const auto& predicate() const {
                 return __predicate;
             }
 

@@ -28,8 +28,8 @@
 class ParserException : public std::exception {
 
     public:
-        ParserException(const std::string& source, const uint32_t line, const uint32_t column, const char value)
-            : __source(source)
+        ParserException(const std::string source, const uint32_t line, const uint32_t column, const char value)
+            : __source(std::move(source))
             , __line(line)
             , __column(column)
             , __value(value) {

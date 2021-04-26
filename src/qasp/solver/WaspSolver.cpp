@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <exception>
+#include <mutex>
 
 using namespace qasp;
 using namespace qasp::solver;
@@ -39,12 +40,23 @@ int EXIT_CODE;
 #endif
 
 
-ProgramResult WaspSolver::solve(const Program& program) const {
+
+
+ProgramResult WaspSolver::solve(const Program& program, const std::vector<Atom>& assumptions) const {
 
 #if defined(HAVE_WASP)
 
+    static std::mutex wasp_options_lock;
+
+
     WaspFacade wasp;
-    wasp::Options::setOptions(wasp);
+
+    {
+
+        std::scoped_lock<std::mutex> __(wasp_options_lock);
+        wasp::Options::setOptions(wasp);
+   
+    }
 
     {
 
@@ -54,10 +66,20 @@ ProgramResult WaspSolver::solve(const Program& program) const {
     }
 
 
-    std::vector<Literal> assumptions;
+    std::vector<Literal> literals;
     std::vector<Literal> conflicts;
 
-    unsigned res = wasp.solve(assumptions, conflicts);
+    for(const auto& i : assumptions) {
+
+        const auto& e = program.atoms().find(i.predicate());
+    
+        if(likely(e != program.atoms().end()))
+            literals.emplace_back(Literal::createLiteralFromInt(e->second.index()));
+    
+    }
+
+
+    unsigned res = wasp.solve(literals, conflicts);
 
     switch(res) {
 
@@ -71,7 +93,7 @@ ProgramResult WaspSolver::solve(const Program& program) const {
     }
 
 #else
-    throw std::runtime_error("missing wasp dependency")
+    throw std::runtime_error("wasp was not enabled in this build")
 #endif
 
 

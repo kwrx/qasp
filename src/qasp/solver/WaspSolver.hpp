@@ -30,7 +30,7 @@ namespace qasp::solver {
     class WaspSolver : public Solver {
 
         public:
-            virtual ProgramResult solve(const Program& program) const override;
+            ProgramResult solve(const Program& program, const std::vector<Atom>& assumptions) const override;
 
     };
 

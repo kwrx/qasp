@@ -28,8 +28,12 @@ namespace qasp::grounder {
     class Grounder {
 
         public:
-            static Grounder* instance();
+
+            virtual ~Grounder() = default;
             virtual std::string generate(const std::string& source) const = 0;
+
+            static std::shared_ptr<Grounder> instance();
+
 
         protected:
             Grounder() {}

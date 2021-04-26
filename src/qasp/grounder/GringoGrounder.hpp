@@ -28,7 +28,7 @@ namespace qasp::grounder {
     class GringoGrounder : public Grounder {
 
         public:
-            virtual std::string generate(const std::string& source) const override;
+            std::string generate(const std::string& source) const override;
 
     };
 

@@ -38,10 +38,10 @@ namespace qasp::parser {
 
     class Parser {
         public:
-            Parser(const std::vector<std::string>& sources)
+            Parser(const std::vector<std::string> sources)
                 : __sources(std::move(sources)) {}
 
-            const auto& sources() const {
+            inline const auto& sources() const {
                 return this->__sources;
             }
 

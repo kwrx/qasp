@@ -42,33 +42,30 @@ namespace qasp {
 
     class Program {
         public:
-            Program(const qasp::ProgramType type, const std::string& source)
-                : __type(type)
-                , __source(source)
-                , __subprograms({}) {}
 
-            Program(const qasp::ProgramType type, const std::string& source, const std::vector<Program> subprograms)
+            Program(const qasp::ProgramType type, const std::string source, const std::vector<Program> subprograms = {})
                 : __type(type)
-                , __source(source)
-                , __subprograms(subprograms) {}
+                , __source(std::move(source))
+                , __subprograms(std::move(subprograms)) {}
 
-            const auto& source() const {
+
+            inline const auto& source() const {
                 return this->__source;
             }
 
-            const auto& type() const {
+            inline const auto& type() const {
                 return this->__type;
             }
 
-            const auto& atoms() const {
+            inline const auto& atoms() const {
                 return this->__atoms;
             }
 
-            auto& atoms() {
+            inline auto& atoms() {
                 return this->__atoms;
             }
 
-            const auto& subprograms() const {
+            inline const auto& subprograms() const {
                 return this->__subprograms;
             }
 

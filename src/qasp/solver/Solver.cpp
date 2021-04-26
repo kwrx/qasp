@@ -24,15 +24,15 @@
 using namespace qasp::solver;
 
 
-static Solver* __instance = nullptr;
+static std::shared_ptr<Solver> __instance;
 
-Solver* Solver::instance() {
+std::shared_ptr<Solver> Solver::instance() {
 
-    if(unlikely(__instance == nullptr)) {
+    if(unlikely(!__instance)) {
 #if defined(HAVE_WASP)
-        __instance = static_cast<Solver*>(new WaspSolver());
+        __instance = std::make_shared<WaspSolver>();
 #elif defined(HAVE_CLASP)
-        __instance = static_cast<Solver*>(new ClaspSolver());
+        __instance = std::make_shared<ClaspSolver>();
 #else
 #   error "missing solver application"
 #endif

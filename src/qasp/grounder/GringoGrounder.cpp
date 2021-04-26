@@ -83,7 +83,7 @@ std::string GringoGrounder::generate(const std::string& source) const {
         if(unlikely(close(fd[1]) < 0))
             throw std::runtime_error("close() failed!");
 
-        if(unlikely(waitpid(pid, NULL, 0) == -1))
+        if(unlikely(waitpid(pid, NULL, 0) < 0))
             throw std::runtime_error("waitpid() failed!");
 
 
@@ -93,6 +93,8 @@ std::string GringoGrounder::generate(const std::string& source) const {
         while((size = read(fd[0], buffer, sizeof(buffer))) > 0)
             output.write(buffer, size);
 
+        assert(size == 0);
+        
 
         if(unlikely(close(fd[0]) < 0))
             throw std::runtime_error("close() failed!");

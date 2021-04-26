@@ -21,18 +21,20 @@
 #include "Grounder.hpp"
 #include "GringoGrounder.hpp"
 
+#include <memory>
+
 using namespace qasp::grounder;
 
 
-static Grounder* __instance = nullptr;
+static std::shared_ptr<Grounder> __instance;
 
-Grounder* Grounder::instance() {
+std::shared_ptr<Grounder> Grounder::instance() {
 
-    if(unlikely(__instance == nullptr)) {
+    if(unlikely(!__instance)) {
 #if defined(HAVE_GRINGO)
-        __instance = static_cast<Grounder*>(new GringoGrounder());
+        __instance = std::make_shared<GringoGrounder>();
 #elif defined(HAVE_IDLV)
-        __instance = static_cast<Grounder*>(new IDLVGrounder());
+        __instance = std::make_shared<IDLVGrounder>();
 #else
 #   error "missing grounder application"
 #endif
