@@ -3,7 +3,7 @@
 [![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)](/LICENSE) 
 
 ## How to install?
-To install *QASP* from sources, execute the following commands:
+To install **qasp** from sources, execute the following commands:
 ```shell script
 $ cmake -DCMAKE_BUILD_TYPE=Release -B build
 $ cmake --build build
