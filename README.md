@@ -1,5 +1,6 @@
 # qasp
 [![CMake Test](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-test.yml)
+[![GitHub release (latest by date)](https://img.shields.io/github/downloads/kwrx/qasp/latest/total)](https://github.com/kwrx/qasp/releases/latest)
 [![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)](/LICENSE) 
 
 ## How to install?
@@ -17,7 +18,7 @@ $ qasp [OPTIONS] SOURCES...
 ```
 Or read from *stdin*
 ```shell script
-$ cat $SOURCES | qasp
+$ cat $sources | qasp
 ```
 **NOTE:** Type ```qasp --help``` for more information.
 
