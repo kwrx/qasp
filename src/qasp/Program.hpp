@@ -76,6 +76,7 @@ namespace qasp {
             ProgramType __type;
             std::string __source;
             std::vector<Program> __subprograms;
+            std::string __answer_sets;
             std::unordered_map<std::string, Atom> __atoms;
 
 

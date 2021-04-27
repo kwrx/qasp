@@ -13,6 +13,7 @@ $ cmake --install build
 **NOTE:** [CMake](https://cmake.org/) >= 3.11 and [Boost C++ Libraries](https://www.boost.org/) >= 1.72.0 are required.
 
 ## Usage
+Open your terminal and type:
 ```shell script
 $ qasp [OPTIONS] SOURCES...
 ```
@@ -20,8 +21,23 @@ Or read from *stdin*
 ```shell script
 $ cat SOURCES | qasp
 ```
-**NOTE:** Type ```qasp --help``` for more information.
+**NOTE:** type ```qasp --help``` for more information.
 
+## Example
+Given a logic *asp with quantifiers program* ```program.asp```:
+```asp
+%@exists
+a | b.
+%@forall
+c | d :- a.
+d :- b.  
+%@constraints
+:- c, not d.
+```
+Calculate if exists an *answer set* of **@exists fragment** such that for each *answer set* of **@forall fragmemt** is a *coherent* solution.
+```shell script
+$ qasp program.asp
+```
 ## Description
 Blabla...
 

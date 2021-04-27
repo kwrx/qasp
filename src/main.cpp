@@ -23,6 +23,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cassert>
+#include <algorithm>
 #include <getopt.h>
 
 #include "qasp/parser/Parser.hpp"
@@ -57,9 +58,8 @@ static void show_version(int argc, char** argv) {
         << QASP_VERSION_TWEAK << "\n"
         << "Copyright (C) "
         << (&__DATE__[7]) << " Antonino Natale\n"
-        << "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n"
-        << "This is free software: you are free to change and redistribute it.\n"
-        << "There is NO WARRANTY, to the extent permitted by law.\n\n"
+        << "This is free software; see the source for copying conditions.  There is NO\n"
+        << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
         << "Built with "
         << QASP_COMPILER_NAME       << " "
         << QASP_COMPILER_VERSION    << "(" 
@@ -133,8 +133,20 @@ int main(int argc, char** argv) {
         qasp::parser::Parser parser(std::move(sources));
         qasp::Program program = parser.parse();
 
-        program.generate();
-        program.solve();
+
+        auto p1 = *std::find_if(program.subprograms().begin(), program.subprograms().end(), [] (const auto& i) { 
+            return i.type() == qasp::ProgramType::TYPE_EXISTS;
+        });
+
+        auto p2 = *std::find_if(program.subprograms().begin(), program.subprograms().end(), [] (const auto& i) { 
+            return i.type() == qasp::ProgramType::TYPE_FORALL;
+        });
+
+        p1.generate();
+        p2.generate();
+
+        LOG(__FILE__, TRACE) << "Done" << std::endl;
+        
 
         /* TODO ... */
 

@@ -68,13 +68,17 @@ std::string GringoGrounder::generate(const std::string& source) const {
         dup2(fd[0], STDIN_FILENO);
         dup2(fd[1], STDOUT_FILENO);
 
+#if !defined(DEBUG) 
+        close(STDERR_FILENO);
+#endif
+
         char* const argv[] = {
             (char*) "gringo", 
             (char*) "--output=smodels", NULL
         };
 
         exit(execvp(argv[0], argv));
-
+        
     } else {
 
         if(unlikely(write(fd[1], source.c_str(), source.size()) < 0))
