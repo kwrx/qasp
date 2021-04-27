@@ -13,6 +13,9 @@ set(HAVE_IDLV       0)
 set(HAVE_WASP       1)
 set(HAVE_CLASP      0)
 
+## Multithreading
+set(HAVE_THREADS    1)
+
 ######################################
 
 

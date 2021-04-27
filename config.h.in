@@ -26,6 +26,7 @@
 #cmakedefine HAVE_WASP          @HAVE_WASP@
 #cmakedefine HAVE_GRINGO        @HAVE_GRINGO@
 #cmakedefine HAVE_CLASP         @HAVE_CLASP@
+#cmakedefine HAVE_THREADS       @HAVE_THREADS@
 
 
 

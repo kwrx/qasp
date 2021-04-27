@@ -27,7 +27,7 @@
 #include <getopt.h>
 
 #include "qasp/parser/Parser.hpp"
-
+#include "qasp/pipeline/PipelineExecutor.hpp"
 
 
 int quiet = false;
@@ -76,21 +76,26 @@ int main(int argc, char** argv) {
 
     
     static struct option long_options[] = {
-        { "quiet",   no_argument, NULL, 'q' },
-        { "help",    no_argument, NULL, 'h' },
-        { "version", no_argument, NULL, 'v' },
+        { "quiet",      no_argument, NULL, 'q' },
+        { "parallel",   required_argument, NULL, 'j' },
+        { "help",       no_argument, NULL, 'h' },
+        { "version",    no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 
 
     quiet = 0;
+    int parallel = 8;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qhv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:hv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
                 quiet = 1;
+                break;
+            case 'j':
+                parallel = atoi(optarg);
                 break;
             case 'v':
                 show_version(argc, argv);
@@ -106,6 +111,16 @@ int main(int argc, char** argv) {
     }
 
 
+    if(unlikely(parallel < 1)) {
+        std::cerr << QASP_PROGRAM_NAME << ": error: invalid parallel value" << std::endl;
+        abort();
+    }
+
+
+    {
+        qasp::pipeline::PipelineExecutor executor(parallel);
+    }
+
     std::vector<std::string> sources;
 
     if(optind >= argc)
@@ -116,7 +131,7 @@ int main(int argc, char** argv) {
         for(; optind < argc; optind++) {
 
             LOG(__FILE__, TRACE) << "argv(" << optind << "): " 
-                                << argv[optind] << std::endl; 
+                                 << argv[optind] << std::endl; 
 
             sources.emplace_back(argv[optind]);
 
@@ -153,7 +168,7 @@ int main(int argc, char** argv) {
     } catch(const std::exception& e) {
         
         std::cerr << QASP_PROGRAM_NAME << ": error: " << e.what() << std::endl;
-        exit(1);
+        abort();
 
     }
 
