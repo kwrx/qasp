@@ -1,5 +1,5 @@
 /*                                                                      
- * GPL-3.0 License 
+ * GPL3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -18,36 +18,39 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Grounder.hpp"
+#pragma once
 
-#if defined(HAVE_GRINGO)
-#include "GringoGrounder.hpp"
-#endif
+#include "Atom.hpp"
 
-#if defined(HAVE_IDLV)
-#include "IDLVGrounder.hpp"
-#endif
-
-
-#include <memory>
-
-using namespace qasp::grounder;
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iterator>
+#include <algorithm>
 
 
-static std::shared_ptr<Grounder> __instance;
+namespace qasp {
 
-std::shared_ptr<Grounder> Grounder::instance() {
+    class AnswerSet : public std::vector<Atom> {
+        public:
 
-    if(unlikely(!__instance)) {
-#if defined(HAVE_GRINGO)
-        __instance = std::make_shared<GringoGrounder>();
-#elif defined(HAVE_IDLV)
-        __instance = std::make_shared<IDLVGrounder>();
-#else
-#   error "missing grounder application"
-#endif
-    }
+            inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) {
 
-    return __instance;
+                os << "{";
+                
+                if(!a.empty()) {
+
+                    for(auto i = a.begin(); i != std::prev(a.end()); i++)
+                        os << (*i) << ",";
+
+                    os << *std::prev(a.end());
+
+                }
+
+                return os << "}", os;
+
+            }
+
+    };
 
 }

@@ -71,16 +71,6 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
         LOG(__FILE__, INFO) << "Reading source from " << source << std::endl;
 
-        
-        tokens.emplace_back(TK_ANNOTATION, 0, 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'c', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'o', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'm', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'm', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'o', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, 'n', 0, 0, source);
-        tokens.emplace_back(TK_SOURCE, '\n', 0, 0, source);
-
 
         uint32_t line = 1;
         uint32_t column = 1;
@@ -164,8 +154,8 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
             
             case TK_ANNOTATION: {
 
-                std::stringstream identifier;
-                std::stringstream source;
+                std::ostringstream identifier;
+                std::ostringstream source;
 
 #ifdef DEBUG
                 auto begin = it;
@@ -200,21 +190,19 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
 
 #ifdef DEBUG
-                LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: " << identifier.str()
+                LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: (" << programs.size() << ") @" << identifier.str()
                                      //<< " and source: \n" << source.str() << "\n"
                                      << " in " << (*begin).tk_source
                                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 #endif
 
                 
-                if(identifier.str() == ANNOTATION_COMMON)
-                    programs.emplace_back(ProgramType::TYPE_COMMON, source.str());
-                else if(identifier.str() == ANNOTATION_EXISTS)
-                    programs.emplace_back(ProgramType::TYPE_EXISTS, source.str());
+                if(identifier.str() == ANNOTATION_EXISTS)
+                    programs.emplace_back(programs.size(), ProgramType::TYPE_EXISTS, source.str());
                 else if(identifier.str() == ANNOTATION_FORALL)
-                    programs.emplace_back(ProgramType::TYPE_FORALL, source.str());
+                    programs.emplace_back(programs.size(), ProgramType::TYPE_FORALL, source.str());
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    programs.emplace_back(ProgramType::TYPE_CONSTRAINTS, source.str());
+                    programs.emplace_back(programs.size(), ProgramType::TYPE_CONSTRAINTS, source.str());
                 else {
 
 #ifdef DEBUG
@@ -248,7 +236,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 Program Parser::parse() const {
 
     std::vector<Program> programs = parseSources(this->sources());
-    std::stringstream source;
+    std::ostringstream source;
 
     for(const auto& program : programs) {
         
@@ -257,6 +245,6 @@ Program Parser::parse() const {
 
     }
 
-    return Program(ProgramType::TYPE_COMMON, source.str(), programs);
+    return Program(-1, ProgramType::TYPE_COMMON, source.str(), programs);
 
 }

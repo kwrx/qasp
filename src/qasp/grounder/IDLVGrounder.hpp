@@ -1,5 +1,5 @@
 /*                                                                      
- * GPL-3.0 License 
+ * GPL3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -18,36 +18,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include "Grounder.hpp"
+#include <string>
 
-#if defined(HAVE_GRINGO)
-#include "GringoGrounder.hpp"
-#endif
+namespace qasp::grounder {
 
-#if defined(HAVE_IDLV)
-#include "IDLVGrounder.hpp"
-#endif
+    class IDLVGrounder : public Grounder {
 
+        public:
+            std::string generate(const std::string& source) const override;
 
-#include <memory>
-
-using namespace qasp::grounder;
-
-
-static std::shared_ptr<Grounder> __instance;
-
-std::shared_ptr<Grounder> Grounder::instance() {
-
-    if(unlikely(!__instance)) {
-#if defined(HAVE_GRINGO)
-        __instance = std::make_shared<GringoGrounder>();
-#elif defined(HAVE_IDLV)
-        __instance = std::make_shared<IDLVGrounder>();
-#else
-#   error "missing grounder application"
-#endif
-    }
-
-    return __instance;
+    };
 
 }

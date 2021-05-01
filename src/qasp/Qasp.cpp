@@ -1,5 +1,5 @@
 /*                                                                      
- * GPL-3.0 License 
+ * GPL3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -18,36 +18,50 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Grounder.hpp"
 
-#if defined(HAVE_GRINGO)
-#include "GringoGrounder.hpp"
-#endif
+#include "Program.hpp"
+#include "Atom.hpp"
+#include "QaspSolver.hpp"
+#include "parser/Parser.hpp"
 
-#if defined(HAVE_IDLV)
-#include "IDLVGrounder.hpp"
-#endif
-
-
-#include <memory>
-
-using namespace qasp::grounder;
+#include <qasp/qasp.h>
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <cassert>
 
 
-static std::shared_ptr<Grounder> __instance;
+using namespace qasp;
+using namespace qasp::parser;
 
-std::shared_ptr<Grounder> Grounder::instance() {
 
-    if(unlikely(!__instance)) {
-#if defined(HAVE_GRINGO)
-        __instance = std::make_shared<GringoGrounder>();
-#elif defined(HAVE_IDLV)
-        __instance = std::make_shared<IDLVGrounder>();
-#else
-#   error "missing grounder application"
-#endif
-    }
+std::string Qasp::run() {
 
-    return __instance;
+    Parser parser(sources());
+    Program program = parser.parse();
 
+    if(program.subprograms().empty())
+        return {};
+        
+
+    QaspSolver qasp(program);
+    
+    if(!qasp.run())
+        return "INCOHERENT\n";
+
+
+    std::ostringstream output;
+
+    for(const auto& answer : qasp.solution())
+        output << answer << std::endl;
+
+    return output.str();
+    
 }
+
+
+
+__weak
+bool __qasp_quiet__ = false;
+
+

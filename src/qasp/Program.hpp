@@ -21,8 +21,12 @@
 #pragma once
 
 #include "Atom.hpp"
+#include "Assumptions.hpp"
+#include "AnswerSet.hpp"
+
 #include <string>
 #include <vector>
+#include <tuple>
 #include <unordered_map>
 
 namespace qasp {
@@ -34,7 +38,7 @@ namespace qasp {
         TYPE_CONSTRAINTS
     };
 
-    enum ProgramResult {
+    enum ProgramModel {
         MODEL_UNKNOWN,
         MODEL_COHERENT,
         MODEL_INCOHERENT
@@ -43,11 +47,16 @@ namespace qasp {
     class Program {
         public:
 
-            Program(const qasp::ProgramType type, const std::string source, const std::vector<Program> subprograms = {})
-                : __type(type)
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::vector<Program> subprograms = {})
+                : __id(id)
+                , __type(type)
                 , __source(std::move(source))
                 , __subprograms(std::move(subprograms)) {}
 
+
+            inline const auto& id() const {
+                return this->__id;
+            }
 
             inline const auto& source() const {
                 return this->__source;
@@ -61,23 +70,52 @@ namespace qasp {
                 return this->__atoms;
             }
 
-            inline auto& atoms() {
-                return this->__atoms;
-            }
-
             inline const auto& subprograms() const {
                 return this->__subprograms;
             }
 
-            void generate();
-            void solve();
+            inline auto& subprograms() {
+                return this->__subprograms;
+            }
+
+            inline const auto& ground() const {
+                return this->__ground;
+            }
+
+            inline const auto& assumptions() const {
+                return this->__assumptions;
+            }
+
+            inline void assumptions(Assumptions assumptions) {
+                this->__assumptions = std::move(assumptions);
+            }
+
+            const Program& groundize(Assumptions assumptions = {});
+            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}) const;
+
 
         private:
+
+            pid_t __id;
             ProgramType __type;
             std::string __source;
+            std::string __ground;
+            Assumptions __assumptions;
             std::vector<Program> __subprograms;
-            std::string __answer_sets;
             std::unordered_map<std::string, Atom> __atoms;
+            atom_index_t __atoms_index_offset;
+
+
+            inline const atom_index_t map_index(const Atom& atom) const {
+                
+                const auto& found = atoms().find(atom.predicate());
+
+                if(unlikely(found == atoms().end()))
+                    return __atoms_index_offset + atom.index();
+                
+                return found->second.index();
+
+            }
 
 
     };

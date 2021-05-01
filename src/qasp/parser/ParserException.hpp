@@ -34,7 +34,7 @@ class ParserException : public std::exception {
             , __column(column)
             , __value(value) {
 
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << "unexpected character: " << (isprint(value) ? value : '?')
                    << " in " << source
                    << " at " << line << ":" << column << std::endl;
