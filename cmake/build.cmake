@@ -34,3 +34,5 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+add_compile_definitions(__qasp__)
