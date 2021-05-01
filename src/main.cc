@@ -26,11 +26,8 @@
 #include <algorithm>
 #include <getopt.h>
 
-#include "qasp/parser/Parser.hpp"
-#include "qasp/pipeline/PipelineExecutor.hpp"
+#include <qasp/qasp.h>
 
-
-int quiet = false;
 
 
 static void show_usage(int argc, char** argv) {
@@ -71,7 +68,6 @@ static void show_version(int argc, char** argv) {
 }
 
 
-
 int main(int argc, char** argv) {
 
     
@@ -84,18 +80,17 @@ int main(int argc, char** argv) {
     };
 
 
-    quiet = 0;
-    int parallel = 8;
+    qasp::Options options;
 
     int c, idx;
     while((c = getopt_long(argc, argv, "qj:hv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
-                quiet = 1;
+                options.quiet = 1;
                 break;
             case 'j':
-                parallel = atoi(optarg);
+                options.cpus = atoi(optarg);
                 break;
             case 'v':
                 show_version(argc, argv);
@@ -111,15 +106,11 @@ int main(int argc, char** argv) {
     }
 
 
-    if(unlikely(parallel < 1)) {
+    if(unlikely(options.cpus < 1)) {
         std::cerr << QASP_PROGRAM_NAME << ": error: invalid parallel value" << std::endl;
         abort();
     }
 
-
-    {
-        qasp::pipeline::PipelineExecutor executor(parallel);
-    }
 
     std::vector<std::string> sources;
 
@@ -130,8 +121,8 @@ int main(int argc, char** argv) {
 
         for(; optind < argc; optind++) {
 
-            LOG(__FILE__, TRACE) << "argv(" << optind << "): " 
-                                 << argv[optind] << std::endl; 
+            LOG(__FILE__, INFO) << "argv(" << optind << "): " 
+                                << argv[optind] << std::endl; 
 
             sources.emplace_back(argv[optind]);
 
@@ -145,25 +136,15 @@ int main(int argc, char** argv) {
 
     try {
 
-        qasp::parser::Parser parser(std::move(sources));
-        qasp::Program program = parser.parse();
 
-
-        auto p1 = *std::find_if(program.subprograms().begin(), program.subprograms().end(), [] (const auto& i) { 
-            return i.type() == qasp::ProgramType::TYPE_EXISTS;
-        });
-
-        auto p2 = *std::find_if(program.subprograms().begin(), program.subprograms().end(), [] (const auto& i) { 
-            return i.type() == qasp::ProgramType::TYPE_FORALL;
-        });
-
-        p1.generate();
-        p2.generate();
-
-        LOG(__FILE__, TRACE) << "Done" << std::endl;
+        qasp::Qasp qasp(sources);
+        qasp.options(std::move(options));
         
+        if(!qasp.options().quiet)
+            std::cout << QASP_PROGRAM_GREETINGS << "\n\n";
+        
+        std::cout << qasp.run();
 
-        /* TODO ... */
 
     } catch(const std::exception& e) {
         

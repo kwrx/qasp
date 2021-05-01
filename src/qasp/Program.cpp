@@ -19,13 +19,20 @@
  */
 
 #include "Program.hpp"
+#include "Assumptions.hpp"
+#include "AnswerSet.hpp"
 #include "grounder/Grounder.hpp"
+#include "solver/Solver.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <limits>
+#include <cassert>
+
 
 using namespace qasp;
 using namespace qasp::grounder;
+using namespace qasp::solver;
 
 
 #define SMODELS_RULE_TYPE_SEPARATOR         0
@@ -42,51 +49,129 @@ using namespace qasp::grounder;
 
 
 
-void Program::generate() {
+const Program& Program::groundize(Assumptions assumptions) {
 
-    LOG(__FILE__, INFO) << "Generating ground instance..." << std::endl;
+    LOG(__FILE__, INFO) << "Generating ground for program #" << id() << " with:"
+                        << " assumptions(" << assumptions << ")" << std::endl;
 
-    std::string output = Grounder::instance()->generate(this->source());
-    std::stringstream reader(output);
+    assert(!source().empty());
+    assert(ground().empty());
+    assert(atoms().empty());
 
 
-    while(reader.good()) {
-        
-        int ch;
-        reader >> ch;
+    std::ostringstream input;
 
-        if(unlikely(ch == SMODELS_RULE_TYPE_SEPARATOR))
-            break;
+    input << source()
+          << std::endl
+          << assumptions;
 
+
+    std::string output = Grounder::instance()->generate(input.str());
+    std::istringstream reader(output);
+
+
+    auto read = [&] (std::function<void(const atom_index_t& index)> parse) {
+
+        while(reader.good()) {
+
+            atom_index_t index;
+            reader >> index;
+
+            if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
+                break;
+
+            parse(index);
+
+        }
+
+    };
+
+
+    // Ignore first declarations
+    read([&] (const auto& index) { 
         reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    });
 
-    }
-
-
-    while(reader.good()) {
-
-        atom_index_t index;
-        reader >> index;
-
-        if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
-            break;
-
+    // Parse predicate index map
+    read([&] (const auto& index) {
 
         std::string predicate;
         reader >> predicate;
 
-
         LOG(__FILE__, TRACE) << "Extracted from smodels atom with index " << index
                              << " and predicate " << predicate << std::endl;
 
-        this->atoms().emplace(predicate, Atom { index, predicate });
+        this->__atoms.emplace(predicate, Atom { index, predicate });
+        this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);
 
-    }
+    });
+   
 
+    this->__ground = std::move(output);
+    this->__assumptions = std::move(assumptions);
+
+    return *this;
 
 }
 
 
-void Program::solve() {
+std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer) const {
+    
+    assert(!ground().empty());
+
+
+    std::vector<AnswerSet> output;
+
+    Assumptions positive;
+    Assumptions negative;
+
+
+    for(const auto& i : answer) {
+
+        auto found = std::find(assumptions().begin(), assumptions().end(), i);
+
+        if(unlikely(found != assumptions().end()))
+            continue;
+            
+            
+        if(unlikely(atoms().find(i.predicate()) == atoms().end())) {
+
+            LOG(__FILE__, WARN) << "Program #" << id() 
+                                << " does not contains {" << i << "}"
+                                << " (ignored) " << std::endl;
+
+            continue;
+
+        }
+
+        positive.emplace_back(map_index(i), i.predicate());
+
+    }
+
+    for(const auto& i : assumptions()) {
+
+        auto found = std::find(answer.begin(), answer.end(), i);
+
+        if(found != answer.end())
+            positive.emplace_back(map_index(i), i.predicate());
+        else
+            negative.emplace_back(map_index(i), i.predicate());
+
+    }
+
+
+    LOG(__FILE__, INFO) << "Generating answer sets for program #" << id() << " with:"
+                        << " answer(" << answer << "),"
+                        << " positive(" << positive << "),"
+                        << " negative(" << negative << ")" << std::endl;
+    
+    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output);
+
+    
+    LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " is " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
+
+
+
+    return { model, output };
 
 }

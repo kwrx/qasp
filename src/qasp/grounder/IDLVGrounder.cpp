@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "GringoGrounder.hpp"
+#include "IDLVGrounder.hpp"
 #include <iostream>
 #include <sstream>
 #include <exception>
@@ -34,11 +34,11 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
-std::string GringoGrounder::generate(const std::string& source) const {
+std::string IDLVGrounder::generate(const std::string& source) const {
 
     std::ostringstream output;
 
-    LOG(__FILE__, TRACE) << "Passing source to GRINGO: " << std::endl
+    LOG(__FILE__, TRACE) << "Passing source to IDLV: " << std::endl
                              << source << std::endl;
 
 
@@ -76,7 +76,8 @@ std::string GringoGrounder::generate(const std::string& source) const {
 #endif
 
         char* const argv[] = {
-            (char*) "gringo", 
+            (char*) "idlv",
+            (char*) "--stdin", 
             (char*) "--output=smodels", NULL
         };
 

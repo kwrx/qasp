@@ -16,6 +16,12 @@ set(HAVE_CLASP      0)
 ## Multithreading
 set(HAVE_THREADS    1)
 
+## Wasp
+set(HAVE_WASP_ASSUMPTIONS   0)
+
+## Logger
+set(HAVE_PRETTY_LOGGER      1)
+
 ######################################
 
 

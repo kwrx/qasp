@@ -38,8 +38,20 @@ namespace qasp {
                 return __index;
             }
 
+            inline const auto& index(atom_index_t value) {
+                return __index = value, *this;
+            }
+
             inline const auto& predicate() const {
                 return __predicate;
+            }
+
+            inline bool operator ==(const Atom& b) const {
+                return this->predicate() == b.predicate();
+            }
+
+            inline friend std::ostream& operator <<(std::ostream& os, const Atom& a) {
+                return os << a.predicate(), os;
             }
 
         private:

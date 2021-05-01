@@ -22,6 +22,8 @@
 
 #include "Solver.hpp"
 #include "../Program.hpp"
+#include "../Assumptions.hpp"
+
 #include <string>
 
 
@@ -30,7 +32,7 @@ namespace qasp::solver {
     class WaspSolver : public Solver {
 
         public:
-            ProgramResult solve(const Program& program, const std::vector<Atom>& assumptions) const override;
+            ProgramModel solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output) const override;
 
     };
 

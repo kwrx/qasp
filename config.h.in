@@ -20,17 +20,19 @@
 
 #pragma once
 
-#cmakedefine DEBUG              @DEBUG@
-#cmakedefine DEBUG_LEVEL        @DEBUG_LEVEL@
-#cmakedefine HAVE_IDLV          @HAVE_IDLV@
-#cmakedefine HAVE_WASP          @HAVE_WASP@
-#cmakedefine HAVE_GRINGO        @HAVE_GRINGO@
-#cmakedefine HAVE_CLASP         @HAVE_CLASP@
-#cmakedefine HAVE_THREADS       @HAVE_THREADS@
-
+#cmakedefine DEBUG                  @DEBUG@
+#cmakedefine DEBUG_LEVEL            @DEBUG_LEVEL@
+#cmakedefine HAVE_IDLV              @HAVE_IDLV@
+#cmakedefine HAVE_WASP              @HAVE_WASP@
+#cmakedefine HAVE_GRINGO            @HAVE_GRINGO@
+#cmakedefine HAVE_CLASP             @HAVE_CLASP@
+#cmakedefine HAVE_THREADS           @HAVE_THREADS@
+#cmakedefine HAVE_WASP_ASSUMPTIONS  @HAVE_WASP_ASSUMPTIONS@
+#cmakedefine HAVE_PRETTY_LOGGER     @HAVE_PRETTY_LOGGER@
 
 
 #define QASP_PROGRAM_NAME       "@CMAKE_PROJECT_NAME@"
+#define QASP_PROGRAM_GREETINGS  "@CMAKE_PROJECT_GREETINGS@"
 
 #define QASP_VERSION_MAJOR      "@CMAKE_PROJECT_VERSION_MAJOR@"
 #define QASP_VERSION_MINOR      "@CMAKE_PROJECT_VERSION_MINOR@"
@@ -59,9 +61,13 @@
 #if defined(__GNUC__) || defined(__clang__)
 #   define likely(x)            __builtin_expect(!!(x), 1)
 #   define unlikely(x)          __builtin_expect(!!(x), 0)
+#   define __weak               __attribute__((weak))
+#   define __unused             __attribute__((unused))
 #else
 #   define likely(x)            (x)
 #   define unlikely(x)          (x)
+#   define __weak
+#   define __unused
 #endif
 
 
@@ -76,11 +82,29 @@
 #define WARN    3
 #define ERROR   4
 
-extern int quiet;
 
-#define LOG(filename, severity)     \
-    severity >= DEBUG_LEVEL && !quiet && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+extern bool __qasp_quiet__;
 
+#if defined(HAVE_PRETTY_LOGGER)
+
+__unused
+static const char* __logger_colors[] = {
+    "39m", 
+    "32m",
+    "34m",
+    "33m",
+    "31m",
+};
+
+#   define LOG(filename, severity)     \
+        severity >= DEBUG_LEVEL && !__qasp_quiet__ && (std::clog << "\e[0;" << __logger_colors[severity] << "[" << #severity << "]\t"    \
+                                                                 << "\e[0;" << __logger_colors[severity] << " (" << filename << "): "    \
+                                                                 << "\e[0;" << __logger_colors[0])
+        
+#else
+#   define LOG(filename, severity)     \
+        severity >= DEBUG_LEVEL && !__qasp_quiet__ && (std::clog << "[" << #severity << "]\t (" << filename << "): ")
+#endif
 
 
 #if defined(__GNUC__) && !defined(__clang__)
