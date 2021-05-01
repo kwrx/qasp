@@ -1,3 +1,23 @@
+/*                                                                      
+ * GPL-3.0 License 
+ * 
+ * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "QaspSolver.hpp"
 #include "grounder/Grounder.hpp"
 #include "solver/Solver.hpp"
@@ -49,7 +69,7 @@ void QaspSolver::init() {
 
 }
 
-bool QaspSolver::check(const AnswerSet& answer) {
+bool QaspSolver::check(const AnswerSet& answer) const {
 
     LOG(__FILE__, INFO) << "Checking coherency for answerset(" << answer << ")" << std::endl;
 
@@ -62,7 +82,7 @@ bool QaspSolver::check(const AnswerSet& answer) {
 
 
 
-bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, std::vector<AnswerSet>& coherencies) {
+bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, std::vector<AnswerSet>& coherencies) const {
 
     size_t incoherencies = 0;
     size_t max = 0;
@@ -130,7 +150,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
     if(!get_coherent_answer(program, solution, coherencies)) {
      
         LOG(__FILE__, ERROR) << "No sufficient coherent solution found for program #" 
-                            << program.id() << std::endl;
+                             << program.id() << std::endl;
      
         return false;
     }
@@ -138,7 +158,6 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
 
     size_t success = 0;
-    assumptions.clear();
 
     for(const auto& i : coherencies)
         assumptions.insert(assumptions.end(), i.begin(), i.end());

@@ -27,12 +27,20 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include <unordered_set>
 
 
 namespace qasp {
 
-    class Assumptions : public std::vector<Atom> {
+    class Assumptions : private std::unordered_set<std::string>
+                      , private std::vector<Atom> {
+
         public:
+
+            using std::vector<Atom>::begin;
+            using std::vector<Atom>::end;
+            using std::vector<Atom>::empty;
+
 
             inline friend std::ostream& operator <<(std::ostream& os, const Assumptions& a) {
                 
@@ -51,6 +59,45 @@ namespace qasp {
                 return os;
 
             }
+
+            template <typename ...T>
+            inline void emplace_back(T&&... args) {
+                
+                const Atom a(args...);
+
+                if(unlikely(this->std::unordered_set<std::string>::find(a.predicate()) != this->std::unordered_set<std::string>::end()))
+                    return;
+
+                this->std::unordered_set<std::string>::emplace(a.predicate());
+                this->std::vector<Atom>::emplace_back(std::move(a));
+
+            }
+
+            template <typename T>
+            inline void insert(std::vector<Atom>::iterator it, T first, T last) {
+
+                for(; first != last; first++) {
+
+                    auto a = *first;
+
+                    if(unlikely(this->std::unordered_set<std::string>::find(a.predicate()) != this->std::unordered_set<std::string>::end()))
+                        continue;
+
+                    this->std::unordered_set<std::string>::emplace(a.predicate());
+                    this->std::vector<Atom>::emplace_back(std::move(a));
+
+                }
+
+            }
+
+
+            inline void clear() noexcept {
+
+                this->std::unordered_set<std::string>::clear();
+                this->std::vector<Atom>::clear();
+
+            }
+
 
     };
 

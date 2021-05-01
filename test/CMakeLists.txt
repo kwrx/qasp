@@ -1,24 +1,25 @@
 file(GLOB_RECURSE SOURCES "*.asp")
-list(GET ${SOURCES} 0 FIRST_SOURCE)
-
 
 foreach(SOURCE ${SOURCES})
 
-    get_filename_component(TEST ${SOURCE} NAME_WE)
+    cmake_path(GET SOURCE STEM TEST_NAME)
+    cmake_path(GET SOURCE PARENT_PATH TEST_PATH)
 
     add_test(
-        NAME ${TEST}
-        COMMAND ${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE}
+        NAME "[FILE]  ${TEST_NAME}"
+        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} | grep -f ${TEST_PATH}/${TEST_NAME}.expected"
+        WORKING_DIRECTORY .
+    )
+
+
+    add_test(
+        NAME "[STDIN] ${TEST_NAME}"
+        COMMAND /bin/sh -c "cat ${SOURCE} | ${PROJECT_BINARY_DIR}/bin/qasp | grep -f ${TEST_PATH}/${TEST_NAME}.expected"
         WORKING_DIRECTORY .
     )
 
 endforeach()
 
 
-add_test(
-    NAME "ReadingFromStdin"
-    COMMAND /bin/sh -c "cat ${FIRST_SOURCE} | ${PROJECT_BINARY_DIR}/bin/qasp"
-    WORKING_DIRECTORY .
-)
 
 

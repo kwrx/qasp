@@ -46,16 +46,22 @@ std::string Qasp::run() {
 
     QaspSolver qasp(program);
     
-    if(!qasp.run())
-        return "INCOHERENT\n";
+    if(qasp.run()) {
+        
+        std::ostringstream output;
+
+        for(const auto& answer : qasp.solution())
+            output << answer << std::endl;
+
+        return output.str();
+
+    }
 
 
-    std::ostringstream output;
+    LOG(__FILE__, ERROR) << "Program is not a valid qasp model: " 
+                         << &"UNKNOWN  \0COHERENT \0INCOHERENT"[qasp.model() * 10] << std::endl;
 
-    for(const auto& answer : qasp.solution())
-        output << answer << std::endl;
-
-    return output.str();
+    return "INCOHERENT\n";
     
 }
 

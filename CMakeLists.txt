@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.20)
 project(QASP CXX)
 
 #
@@ -17,7 +17,7 @@ set(HAVE_CLASP      0)
 set(HAVE_THREADS    1)
 
 ## Wasp
-set(HAVE_WASP_ASSUMPTIONS   0)
+set(HAVE_WASP_ASSUMPTIONS   1)
 
 ## Logger
 set(HAVE_PRETTY_LOGGER      1)
