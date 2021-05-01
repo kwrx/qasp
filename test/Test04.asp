@@ -9,6 +9,7 @@ x_5 | nx_5.
 x_6 | nx_6.
 x_7 | nx_7.
 %@constraints
+{x_3;x_4;x_5}.
 :- not x_3, not x_4, x_5.
 :- x_3, not x_5.
 :- x_4, not x_5.
