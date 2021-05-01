@@ -246,6 +246,7 @@ class WaspFacade
         inline void disableVariableElimination() { disableVE_ = true; }
         
         inline const Solver& getSolver() const { return solver; }
+        inline Solver& getSolver() { return solver; }
         
         inline unsigned int numberOfCalls() const { return nbCalls; }
     private:

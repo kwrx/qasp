@@ -150,7 +150,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
     if(!get_coherent_answer(program, solution, coherencies)) {
      
         LOG(__FILE__, ERROR) << "No sufficient coherent solution found for program #" 
-                            << program.id() << std::endl;
+                             << program.id() << std::endl;
      
         return false;
     }
@@ -158,7 +158,6 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
 
     size_t success = 0;
-    assumptions.clear();
 
     for(const auto& i : coherencies)
         assumptions.insert(assumptions.end(), i.begin(), i.end());

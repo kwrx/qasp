@@ -128,7 +128,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
     for(const auto& i : answer) {
 
-        auto found = std::find(assumptions().begin(), assumptions().end(), i);
+        auto found = std::find(assumptions().begin(), assumptions().end(), i); // FIXME: Da rivedere...
 
         if(unlikely(found != assumptions().end()))
             continue;
@@ -162,6 +162,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
     LOG(__FILE__, INFO) << "Generating answer sets for program #" << id() << " with:"
                         << " answer(" << answer << "),"
+                        << " assumptions(" << assumptions() << "),"
                         << " positive(" << positive << "),"
                         << " negative(" << negative << ")" << std::endl;
     

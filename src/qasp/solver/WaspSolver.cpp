@@ -87,6 +87,141 @@ class WaspAnswerSetListener : public AnswerSetListener {
 
 
 
+#if defined(HAVE_WASP_ASSUMPTIONS)
+
+static inline void wasp_flip_choices(const std::vector<Literal>& assumptions, std::vector<bool>& checked, std::vector<Literal>& choices) {
+
+    assert(choices.size() >= assumptions.size());
+    assert(checked.size() >= assumptions.size());
+    assert(checked.size() == choices.size());
+
+    while(choices.size() > assumptions.size()) {
+
+        if(checked[choices.size() - 1]) {
+
+            choices.pop_back();
+            checked.pop_back();
+
+        } else
+            break;
+
+    }
+
+    if(unlikely(choices.size() == assumptions.size()))
+        return;
+
+
+    choices[choices.size() - 1] = choices[choices.size() - 1].getOppositeLiteral();
+    checked[choices.size() - 1] = true;
+
+}
+
+
+static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& assumptions) {
+
+    auto& s = wasp.getSolver();
+
+
+    s.disableVariableElimination();
+    
+    if(unlikely(!s.preprocessing()))
+        return INCOHERENT;
+
+
+    std::vector<Literal> choices(assumptions);
+    std::vector<bool> checked;
+
+
+    s.onStartingSolver();
+
+    if(s.solve(choices) == INCOHERENT)
+        return INCOHERENT;
+
+
+
+    s.getChoicesWithoutAssumptions(choices);
+
+    if(unlikely(choices.size() == assumptions.size()))
+        return COHERENT;
+
+
+
+    while(checked.size() < choices.size())
+        checked.emplace_back(false);
+
+    wasp_flip_choices(assumptions, checked, choices);
+
+    
+
+
+
+    s.setComputeUnsatCores(true);
+
+    for(;;) {
+
+        s.unrollToZero();
+        s.clearConflictStatus();
+
+
+        if(s.solve(choices) == INCOHERENT) {
+
+            const auto* clause = s.getUnsatCore();
+
+            if(unlikely(clause->size() == 0))
+                return INCOHERENT;
+
+            
+            assert(choices.empty() > assumptions.size());
+            assert(checked.empty() > assumptions.size());
+
+            if(s.getCurrentDecisionLevel() == 0 || clause->size() == 1) {
+
+                assert(choices.size() == checked.size());
+
+                size_t i, k;
+                for(i = k = 0; i < choices.size(); i++) {
+
+                    choices[k] = choices[i];
+                    checked[k] = checked[i];
+
+                    if(s.getDecisionLevel(choices[i]) != 0)
+                        k++;
+
+                }
+
+                assert(choices.size() == checked.size());
+
+                choices.resize(k);
+                checked.resize(k);
+
+            }
+
+
+        } else {
+
+            s.getChoicesWithoutAssumptions(choices);
+
+            while(checked.size() < choices.size())
+                checked.emplace_back(false);
+
+        }
+
+
+        wasp_flip_choices(assumptions, checked, choices);
+
+        if(unlikely(choices.size() == assumptions.size()))
+            return COHERENT;
+        
+
+    }
+
+}
+
+
+#endif
+
+
+
 ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output) const {
 
     assert(!ground.empty());
@@ -100,7 +235,7 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
 
     WaspFacade wasp;
 
-    auto listener = make_unique<WaspAnswerSetListener>(wasp, output);
+    auto listener = std::make_unique<WaspAnswerSetListener>(wasp, output);
 
     {
 
@@ -117,27 +252,28 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
 
     {
 
+        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
+                             << ground << std::endl;
+
         std::istringstream source(ground);
         wasp.readInput(source);
 
     }
 
     std::vector<Literal> literals;
-    std::vector<Literal> conflicts;
+
 
     for(const auto& i : positive)
-        literals.emplace_back(Literal(i.index(), POSITIVE));
+        literals.emplace_back(i.index(), POSITIVE);
     
     for(const auto& i : negative)
-        literals.emplace_back(Literal(i.index(), NEGATIVE));
+        literals.emplace_back(i.index(), NEGATIVE);
 
     for(const auto& i : literals)
         wasp.freeze(i.getVariable());
 
 
-    // TODO: Add enumeration backtracking for assumptions
-
-    unsigned res = wasp.solve(literals, conflicts);
+    unsigned res = wasp_enumeration(wasp, literals);
 
 #else
 
@@ -154,7 +290,7 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
         source << ground;
 
 
-        LOG(__FILE__, TRACE) << "Passing source to WASP: " << std::endl
+        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
                              << source.str() << std::endl;
 
         wasp.readInput(source);

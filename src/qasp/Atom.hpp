@@ -54,6 +54,7 @@ namespace qasp {
                 return os << a.predicate(), os;
             }
 
+
         private:
             atom_index_t __index;
             std::string __predicate;

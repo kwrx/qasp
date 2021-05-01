@@ -38,8 +38,8 @@ std::string GringoGrounder::generate(const std::string& source) const {
 
     std::ostringstream output;
 
-    LOG(__FILE__, TRACE) << "Passing source to GRINGO: " << std::endl
-                             << source << std::endl;
+    LOG(__FILE__, TRACE) << "Passing sources to GRINGO: " << std::endl
+                         << source << std::endl;
 
 
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
