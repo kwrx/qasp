@@ -45,10 +45,10 @@ jobs:
     - name: Test (Debug)
       working-directory: ${{github.workspace}}/debug
       shell: bash
-      run: ctest -C Debug
+      run: ctest -C Debug --rerun-failed --output-on-failure
 
     - name: Test (Release)
       working-directory: ${{github.workspace}}/release
       shell: bash
-      run: ctest -C Release
+      run: ctest -C Release --rerun-failed --output-on-failure
       
