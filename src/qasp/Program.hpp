@@ -86,8 +86,8 @@ namespace qasp {
                 return this->__assumptions;
             }
 
-            inline void assumptions(Assumptions assumptions) {
-                this->__assumptions = std::move(assumptions);
+            inline const auto& assumptions(Assumptions assumptions) {
+                return this->__assumptions = std::move(assumptions), *this;
             }
 
             const Program& groundize(Assumptions assumptions = {});

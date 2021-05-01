@@ -1,3 +1,23 @@
+/*                                                                      
+ * GPL-3.0 License 
+ * 
+ * Copyright (C) 2021 Antonino Natale
+ * This file is part of QASP.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
 #include <iostream>
@@ -20,16 +40,16 @@ namespace qasp::parallel {
                 , __alive(true) { init(); }
 
             inline const auto& size() const {
-                return __size;
+                return this->__size;
             }
 
-            inline const auto alive() const {
-                return __alive.load(std::memory_order_seq_cst);
+            inline const auto& alive() const {
+                return this->__alive.load(std::memory_order_seq_cst);
             }
 
-            void submit(std::function<void()> job) {
+            inline auto& submit(std::function<void()> job) {
                 std::scoped_lock<std::mutex> guard(mx_pending);
-                pending.emplace_back(std::move(job));
+                return this->pending.emplace_back(std::move(job)), *this;
             }
 
             void shutdown() {
@@ -58,7 +78,7 @@ namespace qasp::parallel {
             std::mutex mx_pending;
 
 
-            void init() {
+            inline void init() {
 
                 for(pid_t id = 0; id < size(); id++) {
                     units.emplace_back(execution_unit, *this, id);
@@ -67,7 +87,7 @@ namespace qasp::parallel {
             }
 
 
-            static void execution_unit(Executor& e, const pid_t id) {
+            static inline void execution_unit(Executor& e, const pid_t id) {
 
                 do {
                     
