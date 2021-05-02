@@ -67,6 +67,9 @@ namespace qasp {
                 : __sources({ "-" }) {}
 
         
+            /**
+             * @brief Set options to current qasp instance
+             */
             inline void options(qasp::Options&& options) {
                 __options = std::move(options);
             }
