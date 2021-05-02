@@ -35,11 +35,12 @@ static void show_usage(int argc, char** argv) {
     std::cout 
         << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
-        << "    -q, --quiet                 hide log information\n"
-        << "        --help                  show this help\n"
-        << "        --version               print version info and exit\n";
+        << "    -j N, --parallel=N          allow N jobs at once.\n"
+        << "    -q, --quiet                 hide log information.\n"
+        << "        --help                  print this message and exit.\n"
+        << "        --version               print version info and exit.\n";
 
-    exit(1);
+    exit(EXIT_FAILURE);
 
 }
 
@@ -63,7 +64,7 @@ static void show_version(int argc, char** argv) {
         << __TIMESTAMP__            << ")\n";
 
     
-    exit(1);
+    exit(EXIT_FAILURE);
 
 }
 
@@ -153,6 +154,6 @@ int main(int argc, char** argv) {
 
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 
 }

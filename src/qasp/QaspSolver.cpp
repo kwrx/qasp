@@ -165,9 +165,10 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
         assumptions.insert(assumptions.end(), i.begin(), i.end());
 
     for(const auto& i : coherencies)
-        fail += execute(chain + 1, assumptions, i) ? 0 : 1;
+        if((fail += !execute(chain + 1, assumptions, i)) >= max)
+            return false;
 
-    return fail < max;
+    return true;
 
 }
 

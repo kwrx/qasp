@@ -85,14 +85,19 @@ std::string IDLVGrounder::generate(const std::string& source) const {
         
     } else {
 
+        int status;
+
         if(unlikely(write(fd[1], source.c_str(), source.size()) < 0))
             throw std::runtime_error("write() failed!");
 
         if(unlikely(close(fd[1]) < 0))
             throw std::runtime_error("close() failed!");
 
-        if(unlikely(waitpid(pid, NULL, 0) < 0))
+        if(unlikely(waitpid(pid, &status, 0) < 0))
             throw std::runtime_error("waitpid() failed!");
+
+         if(unlikely(status != EXIT_SUCCESS))
+            throw std::runtime_error("an error occurred while running idlv");
 
 
         char buffer[256];
