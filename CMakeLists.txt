@@ -28,8 +28,8 @@ set(HAVE_PRETTY_LOGGER      1)
 
 include(cmake/version.cmake)
 include(cmake/package.cmake)
+include(cmake/deps.cmake)
 include(cmake/build.cmake)
-include(cmake/wasp.cmake)
 include(CPack)
 include(GNUInstallDirs)
 

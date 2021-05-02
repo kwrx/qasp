@@ -191,7 +191,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
 
 #ifdef DEBUG
-                LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: (" << programs.size() << ") @" << identifier.str()
+                LOG(__FILE__, TRACE) << "<PARSER> Found annotation with identifier: #" << programs.size() + 1 << " @" << identifier.str()
                                      //<< " and source: \n" << source.str() << "\n"
                                      << " in " << (*begin).tk_source
                                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
@@ -199,11 +199,11 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 
                 if(identifier.str() == ANNOTATION_EXISTS)
-                    programs.emplace_back(programs.size(), ProgramType::TYPE_EXISTS, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_EXISTS, source.str());
                 else if(identifier.str() == ANNOTATION_FORALL)
-                    programs.emplace_back(programs.size(), ProgramType::TYPE_FORALL, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str());
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    programs.emplace_back(programs.size(), ProgramType::TYPE_CONSTRAINTS, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str());
                 else {
 
 #ifdef DEBUG
