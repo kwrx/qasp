@@ -62,7 +62,8 @@ namespace qasp {
             bool check(const AnswerSet& answer) const;
             bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {});
 
-            bool get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, std::vector<AnswerSet>& coherencies) const;
+            size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
+            bool get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
 
             inline void model(const ProgramModel value) {
                 this->__model = value;

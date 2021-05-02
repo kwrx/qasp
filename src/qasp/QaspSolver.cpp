@@ -37,8 +37,8 @@ void QaspSolver::init() {
     if(unlikely(program().subprograms().empty()))
         throw std::invalid_argument("empty fragments collection");
 
-    if(unlikely(program().subprograms()[0].type() != TYPE_EXISTS))
-        throw std::invalid_argument("fragment #0 must be @exists");
+    // if(unlikely(program().subprograms()[0].type() != TYPE_EXISTS))
+    //     throw std::invalid_argument("fragment #0 must be @exists");
 
 
     const auto& found = std::find_if(program().subprograms().begin(), program().subprograms().end(), [] (const auto& i) {
@@ -82,25 +82,27 @@ bool QaspSolver::check(const AnswerSet& answer) const {
 
 
 
-bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, std::vector<AnswerSet>& coherencies) const {
-
-    size_t incoherencies = 0;
-    size_t max = 0;
+size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const {
 
     switch(program.type()) {
 
         case TYPE_EXISTS:
-            max = solution.size();
-            break;
+            return solution.size();
 
         case TYPE_FORALL:
-            max = 1;
-            break;
+            return 1;
 
         default:
-            assert(0 && "BUG! Invalid Program Type");
-            return false;
+            throw std::runtime_error("invalid Program Type");
+            
     }
+
+}
+
+
+bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
+
+    size_t incoherencies = 0;
 
     for(const auto& s : solution) {
 
@@ -144,10 +146,10 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
         return false;
 
 
-    // TODO: DUBBIO: COERENZA ALLA FINE O NEL MENTRE?
     std::vector<AnswerSet> coherencies;
+    std::size_t max = get_max_incoherencies(program, solution);
     
-    if(!get_coherent_answer(program, solution, coherencies)) {
+    if(!get_coherent_answer(program, solution, max, coherencies)) {
      
         LOG(__FILE__, ERROR) << "No sufficient coherent solution found for program #" 
                              << program.id() << std::endl;
@@ -157,16 +159,15 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
 
 
-    size_t success = 0;
+    std::size_t fail = 0;
 
     for(const auto& i : coherencies)
         assumptions.insert(assumptions.end(), i.begin(), i.end());
 
     for(const auto& i : coherencies)
-        success += execute(chain + 1, assumptions, i) ? 1 : 0;
+        fail += execute(chain + 1, assumptions, i) ? 0 : 1;
 
-
-    return success > 0;
+    return fail < max;
 
 }
 
