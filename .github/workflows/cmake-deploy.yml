@@ -11,11 +11,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: s-weigand/setup-conda@v1.0.5
 
     - name: Install Dependencies
       working-directory: ${{github.workspace}}
       shell: bash
-      run: sudo apt update && sudo apt install dpkg rpm libboost-dev ninja-build
+      run: sudo apt update && sudo apt install dpkg rpm libboost-dev ninja-build && conda install -c potassco clingo
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
