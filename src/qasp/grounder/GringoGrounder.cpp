@@ -77,7 +77,10 @@ std::string GringoGrounder::generate(const std::string& source) const {
 
         char* const argv[] = {
             (char*) "gringo", 
-            (char*) "--output=smodels", NULL
+            (char*) "--output=smodels",
+            (char*) "--warn=none",
+            (char*) "--fast-exit", 
+            NULL
         };
 
         exit(execvp(argv[0], argv));

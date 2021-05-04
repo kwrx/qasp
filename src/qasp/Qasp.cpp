@@ -44,14 +44,14 @@ std::string Qasp::run() {
         return {};
         
 
-    QaspSolver qasp(program);
+    QaspSolver qasp(*this, program);
     
     if(qasp.run()) {
         
         std::ostringstream output;
 
         for(const auto& answer : qasp.solution())
-            output << answer << std::endl;
+            output << answer.second << std::endl;
 
         return output.str();
 

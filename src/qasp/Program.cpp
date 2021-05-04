@@ -128,9 +128,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
     for(const auto& i : answer) {
 
-        auto found = std::find(assumptions().begin(), assumptions().end(), i); // FIXME: Da rivedere...
-
-        if(unlikely(found != assumptions().end()))
+        if(unlikely(assumptions().contains(i)))
             continue;
             
             
@@ -150,9 +148,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
     for(const auto& i : assumptions()) {
 
-        auto found = std::find(answer.begin(), answer.end(), i);
-
-        if(found != answer.end())
+        if(answer.contains(i))
             positive.emplace_back(map_index(i), i.predicate());
         else
             negative.emplace_back(map_index(i), i.predicate());

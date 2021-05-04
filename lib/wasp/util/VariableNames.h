@@ -19,6 +19,10 @@
 #ifndef WASP_VARIABLENAMES_H
 #define WASP_VARIABLENAMES_H
 
+#if defined(__qasp__)
+#include <thread>
+#endif
+
 #include <cassert>
 #include <iostream>
 #include <vector>
@@ -36,9 +40,23 @@ class VariableNames
         static bool hasToBePrinted( Var v );
         static void addVariable();
         static const vector< string >& getVariables();
+
+        #if defined(__qasp__)
+        static inline void reset() {
+            variables.clear();
+        }
+        #endif
         
     private:
+
+        #if defined(__qasp__)
+        thread_local
+        #endif
         static vector< string > variables;
+
+        #if defined(__qasp__)
+        thread_local
+        #endif
         static bool toBePrinted;
 };
 

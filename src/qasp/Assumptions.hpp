@@ -60,6 +60,12 @@ namespace qasp {
 
             }
 
+
+            inline const bool contains(const Atom& atom) const {
+                return this->std::unordered_set<std::string>::find(atom.predicate()) != this->std::unordered_set<std::string>::end();
+            }
+            
+
             template <typename ...T>
             inline void emplace_back(T&&... args) {
                 

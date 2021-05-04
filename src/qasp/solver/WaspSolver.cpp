@@ -58,7 +58,7 @@ class WaspAnswerSetListener : public AnswerSetListener {
             AnswerSet answer;
 
             for(size_t i = 1; i <= wasp.getSolver().numberOfAssignedLiterals(); i++) {
-
+                
                 if(wasp.isUndefined(i))
                     continue;
 
@@ -120,9 +120,6 @@ static inline void wasp_flip_choices(const std::vector<Literal>& assumptions, st
 static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& assumptions) {
 
     auto& s = wasp.getSolver();
-
-
-    s.disableVariableElimination();
     
     if(unlikely(!s.preprocessing()))
         return INCOHERENT;
@@ -232,6 +229,10 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
 
     static std::mutex wasp_options_lock;
 
+
+#if defined(HAVE_WASP_RESET)
+    VariableNames::reset();
+#endif
 
     WaspFacade wasp;
 

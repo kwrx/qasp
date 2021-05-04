@@ -24,13 +24,16 @@
 #include "AnswerSet.hpp"
 #include "Atom.hpp"
 
+#include <qasp/qasp.h>
+
 namespace qasp {
     
     class QaspSolver {
         public:
 
-            QaspSolver(Program program)
-                : __program(std::move(program))
+            QaspSolver(Qasp qasp, Program program)
+                : __qasp(std::move(qasp))
+                , __program(std::move(program))
                 , __model(MODEL_UNKNOWN) { init(); }
 
             inline const auto& program() const {
@@ -49,21 +52,33 @@ namespace qasp {
                 return this->__model;
             }
 
+            inline const auto& qasp() const {
+                return this->__qasp;
+            }
+
             bool run();
 
         private:
 
+            Qasp __qasp;
             Program __program;
             ProgramModel __model;
             std::optional<Program> __constraint;
-            std::vector<AnswerSet> __solution;
+            std::vector<std::pair<qasp_iteration_t, AnswerSet>> __solution;
+
 
             void init();
             bool check(const AnswerSet& answer) const;
-            bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {});
+            bool execute(qasp_iteration_t, std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {});
 
-            size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
+#if defined(HAVE_ITERATIONS)
+            bool prepare_next_iteration(const qasp_iteration_t& iteration, AnswerSet answer);
+            bool set_iteration_answer(const qasp_iteration_t& iteration, const AnswerSet& answer);
+#endif
+            
             bool get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
+            size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
+
 
             inline void model(const ProgramModel value) {
                 this->__model = value;

@@ -20,8 +20,18 @@
 #include "WaspAssert.h"
 #include <sstream>
 using namespace std;
+
+
+#if defined(__qasp__)
+thread_local
+#endif
 vector< string > VariableNames::variables;
+
+#if defined(__qasp__)
+thread_local
+#endif
 bool VariableNames::toBePrinted = false;
+
 
 bool
 VariableNames::isHidden(

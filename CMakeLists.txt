@@ -13,11 +13,13 @@ set(HAVE_IDLV       0)
 set(HAVE_WASP       1)
 set(HAVE_CLASP      0)
 
-## Multithreading
-set(HAVE_THREADS    1)
+## QASP
+set(HAVE_THREADS            1)
+set(HAVE_ITERATIONS         1)
 
 ## Wasp
 set(HAVE_WASP_ASSUMPTIONS   1)
+set(HAVE_WASP_RESET         1)
 
 ## Logger
 set(HAVE_PRETTY_LOGGER      1)
