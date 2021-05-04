@@ -244,6 +244,7 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
         wasp::Options::maxModels = UINT32_MAX;
         wasp::Options::setOptions(wasp);
         wasp.disableOutput();
+        wasp.disableVariableElimination();
         wasp.attachAnswerSetListener(listener.get());
    
     }

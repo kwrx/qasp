@@ -126,6 +126,8 @@ bool QaspSolver::prepare_next_iteration(const qasp_iteration_t& iteration, Answe
     if(unlikely(iteration + 1 >= qasp().options().iterations))
         return true;
 
+    if(unlikely(answer.empty()))
+        return true;
     
 
     Assumptions knownlegde;
