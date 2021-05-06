@@ -82,6 +82,10 @@ namespace qasp {
                 return this->__ground;
             }
 
+            inline void ground(std::string value) {
+                this->__ground = std::move(value);
+            }
+
             inline const auto& assumptions() const {
                 return this->__assumptions;
             }

@@ -22,6 +22,7 @@
 #include "grounder/Grounder.hpp"
 #include "solver/Solver.hpp"
 
+#include <qasp/qasp.h>
 #include <iostream>
 #include <cassert>
 #include <vector>
@@ -35,10 +36,7 @@ using namespace qasp::solver;
 void QaspSolver::init() {
 
     if(unlikely(program().subprograms().empty()))
-        throw std::invalid_argument("empty fragments collection");
-
-    // if(unlikely(program().subprograms()[0].type() != TYPE_EXISTS))
-    //     throw std::invalid_argument("fragment #0 must be @exists");
+        throw std::invalid_argument("no programs found");
 
 
     const auto& found = std::find_if(program().subprograms().begin(), program().subprograms().end(), [] (const auto& i) {
@@ -119,18 +117,89 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
 }
 
 
-bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) {
+
+#if defined(HAVE_ITERATIONS)
+
+bool QaspSolver::prepare_next_iteration(const qasp_iteration_t& iteration, AnswerSet answer) {
 
 
-    if(unlikely(chain == program().subprograms().end()))
-        return __solution.emplace_back(answer), true;
+    if(unlikely(iteration + 1 >= qasp().options().iterations))
+        return true;
 
-    if(unlikely((*chain).type() == TYPE_CONSTRAINTS))
-        return execute(chain + 1, assumptions, answer);
+    if(unlikely(answer.empty()))
+        return true;
+    
+
+    Assumptions knownlegde;
+
+    for(const auto& i : answer)
+        knownlegde.emplace_back(i);
+
+
+    LOG(__FILE__, INFO)  << "Running new iteration #" << iteration + 1
+                         << " with new knownlegde " << knownlegde << std::endl;
+
+    return execute(iteration + 1, __program.subprograms().begin(), std::move(knownlegde), std::move(answer));
+
+}
+
+
+bool QaspSolver::set_iteration_answer(const qasp_iteration_t& iteration, const AnswerSet& answer) {
+
+    if(likely(iteration > 0)) {
+
+        const auto& found = std::find_if(__solution.begin(), __solution.end(), [&] (const auto& i) {
+                
+            if(i.first >= iteration)
+                return false;
+
+            return i.second == answer;
+
+        });
+
+
+        if(unlikely(found != __solution.end()))
+            return false;
+
+    }
+    
+
+    return __solution.emplace_back(iteration, answer), true;
+
+}
+
+#endif
 
 
 
+bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) {
+
+
+    if(unlikely(chain == program().subprograms().end())) {
+
+#if defined(HAVE_ITERATIONS)
+        
+        if(unlikely(!set_iteration_answer(iteration, answer)))
+            return true;
+
+        return prepare_next_iteration(iteration, answer);
+
+#else
+        return __solution.emplace_back(iteration, answer), true;
+#endif
+
+    }
+
+
+    if(unlikely(chain->type() == TYPE_CONSTRAINTS))
+        return execute(iteration, chain + 1, assumptions, answer);
+
+
+#if defined(HAVE_ITERATIONS)
+    Program program = (*chain); // FIXME: Use reference and share with same iteration branch
+#else
     Program& program = (*chain);
+#endif
 
     if(unlikely(program.ground().empty()))
         program.groundize(assumptions);
@@ -165,16 +234,19 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
         assumptions.insert(assumptions.end(), i.begin(), i.end());
 
     for(const auto& i : coherencies)
-        fail += execute(chain + 1, assumptions, i) ? 0 : 1;
+        if((fail += !execute(iteration, chain + 1, assumptions, i)) >= max)
+            return false;
 
-    return fail < max;
+    return true;
 
 }
 
 
 bool QaspSolver::run() {
 
-    if(!execute(__program.subprograms().begin()))
+    assert(solution().empty());
+
+    if(!execute(0, __program.subprograms().begin()))
         return model(MODEL_INCOHERENT), false;
 
     return model(MODEL_COHERENT), true;

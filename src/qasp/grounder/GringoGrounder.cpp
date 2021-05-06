@@ -77,12 +77,17 @@ std::string GringoGrounder::generate(const std::string& source) const {
 
         char* const argv[] = {
             (char*) "gringo", 
-            (char*) "--output=smodels", NULL
+            (char*) "--output=smodels",
+            (char*) "--warn=none",
+            (char*) "--fast-exit", 
+            NULL
         };
 
         exit(execvp(argv[0], argv));
         
     } else {
+
+        int status;
 
         if(unlikely(write(fd[1], source.c_str(), source.size()) < 0))
             throw std::runtime_error("write() failed!");
@@ -90,8 +95,11 @@ std::string GringoGrounder::generate(const std::string& source) const {
         if(unlikely(close(fd[1]) < 0))
             throw std::runtime_error("close() failed!");
 
-        if(unlikely(waitpid(pid, NULL, 0) < 0))
+        if(unlikely(waitpid(pid, &status, 0) < 0))
             throw std::runtime_error("waitpid() failed!");
+
+        if(unlikely(status != EXIT_SUCCESS))
+            throw std::runtime_error("an error occurred while running gringo");
 
 
         char buffer[256];

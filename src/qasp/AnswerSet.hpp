@@ -34,6 +34,22 @@ namespace qasp {
     class AnswerSet : public std::vector<Atom> {
         public:
 
+            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) {
+
+                if(a.size() != b.size())
+                    return false;
+
+
+                std::vector<Atom> v1 = a;
+                std::vector<Atom> v2 = b;
+
+                std::sort(v1.begin(), v1.end(), [] (const auto& i, const auto& j) { return i.predicate() < j.predicate(); });
+                std::sort(v2.begin(), v2.end(), [] (const auto& i, const auto& j) { return i.predicate() < j.predicate(); });
+
+                return std::equal(v1.begin(), v1.end(), v2.begin());
+
+            }
+
             inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) {
 
                 os << "{";
@@ -49,6 +65,11 @@ namespace qasp {
 
                 return os << "}", os;
 
+            }
+
+
+            inline const bool contains(const Atom& atom) const {
+                return std::find(this->begin(), this->end(), atom) != this->end();
             }
 
     };

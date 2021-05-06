@@ -29,8 +29,9 @@
 #include <functional>
 
 
-namespace qasp::parallel {
+namespace qasp::utils {
 
+    template <typename R, typename... T>
     class Executor {
         
         public:
@@ -47,9 +48,9 @@ namespace qasp::parallel {
                 return this->__alive.load(std::memory_order_seq_cst);
             }
 
-            inline auto& submit(std::function<void()> job) {
+            inline auto& submit(std::function<R(T...)> action, T args...) {
                 std::scoped_lock<std::mutex> guard(mx_pending);
-                return this->pending.emplace_back(std::move(job)), *this;
+                return this->pending.emplace_back(std::move(action), std::forward(args)...), *this;
             }
 
             void shutdown() {
@@ -69,7 +70,7 @@ namespace qasp::parallel {
             std::atomic<bool> __alive;
 
 
-            std::deque<std::function<void()>> pending;
+            std::deque<std::tuple<std::function<R(T...)>, T...> pending;
             std::deque<std::thread> units;
 
             std::condition_variable cv_status;
@@ -104,7 +105,7 @@ namespace qasp::parallel {
                     }
 
 
-                    std::function<void()> job;
+                    std::function<R(T...)> job;
                     
                     {
                         std::scoped_lock<std::mutex> guard(e.mx_pending);
@@ -117,7 +118,7 @@ namespace qasp::parallel {
 
                     }
 
-                    job();
+                    std::get<0>(job)(std::forward<T...>(job)...);
                     
                 } while(e.alive());
             

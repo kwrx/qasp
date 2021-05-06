@@ -23,12 +23,17 @@
 
 #include <stdint.h>
 
-#define QASP_OPTIONS_DEFAULT_CPUS       8
 #define QASP_OPTIONS_DEFAULT_QUIET      0
+#define QASP_OPTIONS_DEFAULT_CPUS       8
+#define QASP_OPTIONS_DEFAULT_ITERATIONS 1
 
 #define QASP_RESULT_COHERENT            1
 #define QASP_RESULT_INCOHERENT          2
 #define QASP_RESULT_UNKNOWN             0
+
+
+typedef uint64_t qasp_iteration_t;
+
 
 
 #if defined(__cplusplus)
@@ -40,16 +45,19 @@ namespace qasp {
 
     struct Options {
 
-        uint16_t cpus;
         uint16_t quiet;
+        uint16_t cpus;
+        qasp_iteration_t iterations;
 
-        Options(uint16_t cpus, uint16_t quiet)
-            : cpus(cpus)
-            , quiet(quiet) {}
+        Options(uint16_t quiet, uint16_t cpus, qasp_iteration_t iterations)
+            : quiet(quiet)
+            , cpus(cpus)
+            , iterations(iterations) {}
 
         Options()
-            : cpus(QASP_OPTIONS_DEFAULT_CPUS)
-            , quiet(QASP_OPTIONS_DEFAULT_QUIET) {}
+            : quiet(QASP_OPTIONS_DEFAULT_QUIET)
+            , cpus(QASP_OPTIONS_DEFAULT_CPUS)
+            , iterations(QASP_OPTIONS_DEFAULT_ITERATIONS) {}
 
     };
 
@@ -74,11 +82,11 @@ namespace qasp {
                 __options = std::move(options);
             }
 
-            inline const auto& options() {
+            inline const auto& options() const {
                 return __options;
             }
 
-            inline const auto& sources() {
+            inline const auto& sources() const {
                 return __sources;
             }
 
