@@ -36,7 +36,7 @@ static void show_usage(int argc, char** argv) {
         << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
         << "    -j N, --parallel=N          allow N jobs at once.\n"
-        << "    -n N, --iterations=N        iterate solving N times (infinite: N <- 0).\n"
+        << "    -n N, --iterations=N        iterate solving N times (infinite: N <= 0).\n"
         << "    -q, --quiet                 hide log information.\n"
         << "        --help                  print this message and exit.\n"
         << "        --version               print version info and exit.\n";
