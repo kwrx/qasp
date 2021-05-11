@@ -21,6 +21,7 @@
 #include "QaspSolver.hpp"
 #include "grounder/Grounder.hpp"
 #include "solver/Solver.hpp"
+#include "utils/Performance.hpp"
 
 #include <qasp/qasp.h>
 #include <iostream>
@@ -67,7 +68,7 @@ void QaspSolver::init() {
 
 }
 
-bool QaspSolver::check(const AnswerSet& answer) const {
+bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings);
 
     LOG(__FILE__, INFO) << "Checking coherency for answerset(" << answer << ")" << std::endl;
 
@@ -120,7 +121,7 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
 
 #if defined(HAVE_ITERATIONS)
 
-bool QaspSolver::prepare_next_iteration(const qasp_iteration_t& iteration, AnswerSet answer) {
+bool QaspSolver::prepare_next_iteration(const qasp_iteration_t& iteration, AnswerSet answer) { __PERF_TIMING(iterations);
 
 
     if(unlikely(iteration + 1 >= qasp().options().iterations))
@@ -138,6 +139,8 @@ bool QaspSolver::prepare_next_iteration(const qasp_iteration_t& iteration, Answe
 
     LOG(__FILE__, INFO)  << "Running new iteration #" << iteration + 1
                          << " with new knownlegde " << knownlegde << std::endl;
+
+    
 
     return execute(iteration + 1, __program.subprograms().begin(), std::move(knownlegde), std::move(answer));
 
@@ -168,11 +171,12 @@ bool QaspSolver::set_iteration_answer(const qasp_iteration_t& iteration, const A
 
 }
 
+
 #endif
 
 
 
-bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) {
+bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) { __PERF_TIMING(executions);
 
 
     if(unlikely(chain == program().subprograms().end())) {
@@ -195,15 +199,22 @@ bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::itera
         return execute(iteration, chain + 1, assumptions, answer);
 
 
+
+    
+
 #if defined(HAVE_ITERATIONS)
-    Program program = (*chain); // FIXME: Use reference and share with same iteration branch
+
+    Program program = (*chain);
+    program.groundize(assumptions);
+
 #else
+
     Program& program = (*chain);
-#endif
 
     if(unlikely(program.ground().empty()))
         program.groundize(assumptions);
 
+#endif
 
     auto result = program.solve(answer);
 
@@ -220,7 +231,7 @@ bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::itera
     
     if(!get_coherent_answer(program, solution, max, coherencies)) {
      
-        LOG(__FILE__, ERROR) << "No sufficient coherent solution found for program #" 
+        LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
                              << program.id() << std::endl;
      
         return false;
@@ -242,7 +253,7 @@ bool QaspSolver::execute(qasp_iteration_t iteration, std::vector<Program>::itera
 }
 
 
-bool QaspSolver::run() {
+bool QaspSolver::run() { __PERF_TIMING(running);
 
     assert(solution().empty());
 

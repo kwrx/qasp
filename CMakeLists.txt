@@ -23,6 +23,7 @@ set(HAVE_WASP_RESET         1)
 
 ## Logger
 set(HAVE_PRETTY_LOGGER      1)
+set(HAVE_PERFORMANCE        1)
 
 ######################################
 

@@ -23,6 +23,7 @@
 #include "Atom.hpp"
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
+#include "utils/Performance.hpp"
 
 #include <string>
 #include <vector>
@@ -110,7 +111,7 @@ namespace qasp {
             atom_index_t __atoms_index_offset;
 
 
-            inline const atom_index_t map_index(const Atom& atom) const {
+            inline const atom_index_t map_index(const Atom& atom) const { __PERF_INC(mapping);
                 
                 const auto& found = atoms().find(atom.predicate());
 

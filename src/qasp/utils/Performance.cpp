@@ -1,5 +1,5 @@
 /*                                                                      
- * GPL3 License 
+ * GPL-3.0 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -18,32 +18,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "Performance.hpp"
 
-#include "../utils/Cache.hpp"
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG) && DEBUG_LEVEL <= TRACE
 
-#include <memory>
-#include <string>
+#include <vector>
+#include <cstdint>
 
-
-namespace qasp::grounder {
-
-    class Grounder {
-
-        public:
-            static std::shared_ptr<Grounder> instance();
-
-            virtual ~Grounder() = default;
-            std::string generate(const std::string& source);
-
-        protected:
-            Grounder() {}
-            virtual std::string execute(const std::string& source) const = 0;
-
-        private:
-            qasp::utils::Cache<std::size_t, std::string> cache;
+using namespace qasp::utils;
 
 
-    };
+#define PERF_VALUE_T(name)                                                  \
+    std::vector<double> __trace_performance::__timings_##name = {};         \
+    std::size_t __trace_performance::__counter_##name = {};
 
-}
+
+    PERF_VALUE_T(grounding);
+    PERF_VALUE_T(grounding_cached);
+    PERF_VALUE_T(solving);
+    PERF_VALUE_T(parsing);
+    PERF_VALUE_T(running);
+    PERF_VALUE_T(checkings);
+    PERF_VALUE_T(iterations);
+    PERF_VALUE_T(executions);
+    PERF_VALUE_T(mapping);
+    PERF_VALUE_T(answerset_comparing);
+
+#endif

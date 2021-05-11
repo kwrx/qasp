@@ -34,7 +34,7 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
-std::string IDLVGrounder::generate(const std::string& source) const {
+std::string IDLVGrounder::execute(const std::string& source) const {
 
     std::ostringstream output;
 

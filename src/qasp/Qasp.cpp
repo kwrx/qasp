@@ -45,8 +45,14 @@ std::string Qasp::run() {
         
 
     QaspSolver qasp(*this, program);
-    
-    if(qasp.run()) {
+
+    bool result = qasp.run();
+
+
+
+    __PERF_PRINT_ALL();
+
+    if(result) {
         
         std::ostringstream output;
 

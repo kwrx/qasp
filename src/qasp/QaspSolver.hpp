@@ -23,6 +23,7 @@
 #include "Program.hpp"
 #include "AnswerSet.hpp"
 #include "Atom.hpp"
+#include "utils/Cache.hpp"
 
 #include <qasp/qasp.h>
 
@@ -65,7 +66,6 @@ namespace qasp {
             ProgramModel __model;
             std::optional<Program> __constraint;
             std::vector<std::pair<qasp_iteration_t, AnswerSet>> __solution;
-
 
             void init();
             bool check(const AnswerSet& answer) const;
