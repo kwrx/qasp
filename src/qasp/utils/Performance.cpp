@@ -20,7 +20,7 @@
 
 #include "Performance.hpp"
 
-#if defined(HAVE_PERFORMANCE) && defined(DEBUG) && DEBUG_LEVEL <= TRACE
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
 
 #include <vector>
 #include <cstdint>

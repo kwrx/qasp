@@ -20,7 +20,7 @@
 
 #pragma once
 
-#if defined(HAVE_PERFORMANCE) && defined(DEBUG) && DEBUG_LEVEL <= TRACE
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
 
 #include <chrono>
 #include <vector>
@@ -74,9 +74,9 @@
         ) / qasp::utils::__trace_performance::__timings_##stats.size(); \
         LOG("Performance", INFO) << #stats << " => count: "             \
             << qasp::utils::__trace_performance::__counter_##stats      \
-            << "; min: " << std::fixed << min << "s"                   \
-            << "; max: " << std::fixed << max << "s"                   \
-            << "; avg: " << std::fixed << avg << "s" << std::endl;     \
+            << "; min: " << std::fixed << min << "s"                    \
+            << "; max: " << std::fixed << max << "s"                    \
+            << "; avg: " << std::fixed << avg << "s" << std::endl;      \
     }                                                                   \
 }
 
