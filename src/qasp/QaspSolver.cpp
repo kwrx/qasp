@@ -130,6 +130,8 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
     // FIXME: evalute if checking can be anticipated
     bool should_not_check = !program.last();
 
+    LOG(__FILE__, TRACE) << "PROGRAM LAST: " << program.last() << std::endl;
+
 
     size_t incoherencies = 0;
 

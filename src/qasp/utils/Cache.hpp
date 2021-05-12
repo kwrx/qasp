@@ -65,7 +65,7 @@ namespace qasp::utils {
 
         private:
 
-            std::mutex m_lock;
+            std::mutex m_lock {};
 
     };
 

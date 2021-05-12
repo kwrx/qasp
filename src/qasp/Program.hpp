@@ -114,11 +114,12 @@ namespace qasp {
             ProgramType __type;
             std::string __source;
             std::string __ground;
-            Assumptions __assumptions;
             std::vector<Program> __subprograms;
-            std::unordered_map<std::string, Atom> __atoms;
-            atom_index_t __atoms_index_offset;
-            bool __last;
+
+            std::unordered_map<std::string, Atom> __atoms {};
+            atom_index_t __atoms_index_offset = 0;
+            Assumptions __assumptions {};
+            bool __last = false;
 
 
             inline const atom_index_t map_index(const Atom& atom) const { __PERF_INC(mapping);

@@ -41,7 +41,7 @@ namespace qasp::grounder {
             virtual std::string execute(const std::string& source) const = 0;
 
         private:
-            qasp::utils::Cache<std::size_t, std::string> cache;
+            qasp::utils::Cache<std::size_t, std::string> cache {};
 
 
     };

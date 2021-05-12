@@ -64,8 +64,8 @@ namespace qasp {
             Qasp __qasp;
             Program __program;
             ProgramModel __model;
-            std::optional<Program> __constraint;
-            std::vector<AnswerSet> __solution;
+            std::optional<Program> __constraint {};
+            std::vector<AnswerSet> __solution {};
 
             void init();
             bool check(const AnswerSet& answer) const;
