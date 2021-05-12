@@ -50,7 +50,9 @@
     __PERF_PRINT(iterations);                                           \
     __PERF_PRINT(executions);                                           \
     __PERF_PRINT(mapping);                                              \
-    __PERF_PRINT(answerset_comparing)                                   \
+    __PERF_PRINT(answerset_comparing);                                  \
+    __PERF_PRINT(solutions_found);                                      \
+    __PERF_PRINT(checks_failed);                                        \
 }
 
 #define __PERF_PRINT(stats) {                                           \
@@ -59,11 +61,11 @@
             << qasp::utils::__trace_performance::__counter_##stats      \
             << std::endl;                                               \
     } else {                                                            \
-        auto min = *std::min(                                           \
+        auto min = *std::min_element(                                   \
             qasp::utils::__trace_performance::__timings_##stats.begin(),\
             qasp::utils::__trace_performance::__timings_##stats.end()   \
         );                                                              \
-        auto max = *std::max(                                           \
+        auto max = *std::max_element(                                   \
             qasp::utils::__trace_performance::__timings_##stats.begin(),\
             qasp::utils::__trace_performance::__timings_##stats.end()   \
         );                                                              \
@@ -72,11 +74,17 @@
             qasp::utils::__trace_performance::__timings_##stats.end(),  \
             0.0                                                         \
         ) / qasp::utils::__trace_performance::__timings_##stats.size(); \
+        auto tot = std::accumulate(                                     \
+            qasp::utils::__trace_performance::__timings_##stats.begin(),\
+            qasp::utils::__trace_performance::__timings_##stats.end(),  \
+            0.0                                                         \
+        );                                                              \
         LOG("Performance", INFO) << #stats << " => count: "             \
             << qasp::utils::__trace_performance::__counter_##stats      \
             << "; min: " << std::fixed << min << "s"                    \
             << "; max: " << std::fixed << max << "s"                    \
-            << "; avg: " << std::fixed << avg << "s" << std::endl;      \
+            << "; avg: " << std::fixed << avg << "s"                    \
+            << "; tot: " << std::fixed << tot << "s" << std::endl;      \
     }                                                                   \
 }
 
@@ -99,6 +107,8 @@ namespace qasp::utils {
             PERF_DECL_T(executions);
             PERF_DECL_T(mapping);
             PERF_DECL_T(answerset_comparing);
+            PERF_DECL_T(solutions_found);
+            PERF_DECL_T(checks_failed);
     };
 
     class __trace_performance_timing {

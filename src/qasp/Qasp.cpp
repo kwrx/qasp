@@ -57,7 +57,7 @@ std::string Qasp::run() {
         std::ostringstream output;
 
         for(const auto& answer : qasp.solution())
-            output << answer.second << std::endl;
+            output << answer << std::endl;
 
         return output.str();
 

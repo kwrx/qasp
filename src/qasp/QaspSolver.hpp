@@ -65,16 +65,11 @@ namespace qasp {
             Program __program;
             ProgramModel __model;
             std::optional<Program> __constraint;
-            std::vector<std::pair<qasp_iteration_t, AnswerSet>> __solution;
+            std::vector<AnswerSet> __solution;
 
             void init();
             bool check(const AnswerSet& answer) const;
-            bool execute(qasp_iteration_t, std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {});
-
-#if defined(HAVE_ITERATIONS)
-            bool prepare_next_iteration(const qasp_iteration_t& iteration, AnswerSet answer);
-            bool set_iteration_answer(const qasp_iteration_t& iteration, const AnswerSet& answer);
-#endif
+            bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {});
             
             bool get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
             size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;

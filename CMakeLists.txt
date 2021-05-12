@@ -15,7 +15,6 @@ set(HAVE_CLASP      0)
 
 ## QASP
 set(HAVE_THREADS            1)
-set(HAVE_ITERATIONS         1)
 
 ## Wasp
 set(HAVE_WASP_ASSUMPTIONS   1)
