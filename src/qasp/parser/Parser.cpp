@@ -247,6 +247,16 @@ Program Parser::parse() const {
 
     }
 
+    for(auto it = programs.rbegin(); it != programs.rend(); it++) {
+
+        if(it->type() == ProgramType::TYPE_CONSTRAINTS)
+            continue;
+
+        it->last(true);
+        break;
+
+    }
+
     return Program(-1, ProgramType::TYPE_COMMON, source.str(), programs);
 
 }

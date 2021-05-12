@@ -16,4 +16,4 @@ e | f | g :- b, d.          % P3 U {b,d} = {b,d,e} {b,d,f}  -> {b,d,e} U C -> IN
 :- c, not d.                % C
 :- e.
 
-% Result: { b, d, g } is COHERENT.
+% Result: {b,d,g} {b,d,f} are COHERENT.

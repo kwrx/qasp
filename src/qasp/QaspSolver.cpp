@@ -81,6 +81,31 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 
 
 
+
+void QaspSolver::promote_candidates(const std::vector<AnswerSet>& candidates) {
+
+
+    auto add = [&] (const auto& answer) { __PERF_INC(solutions_found);
+
+        LOG(__FILE__, TRACE) << "Add to solution answer: " << answer << std::endl;
+
+        if(std::find(__solution.begin(), __solution.end(), answer) == __solution.end())
+            return (void) __solution.emplace_back(answer);
+
+
+         __PERF_INC(solutions_discarded);
+
+    };
+
+    for(const auto& answer : candidates)
+        add(answer);
+
+}
+
+
+
+
+
 size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const {
 
     switch(program.type()) {
@@ -101,11 +126,16 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 
 bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
 
+
+    // FIXME: evalute if checking can be anticipated
+    bool should_not_check = !program.last();
+
+
     size_t incoherencies = 0;
 
     for(const auto& s : solution) {
 
-        if(check(s))
+        if(should_not_check || check(s))
             coherencies.emplace_back(std::move(s));
         
         else if(++incoherencies == max)
@@ -119,25 +149,21 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
 
 
 
+bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates, Assumptions assumptions, AnswerSet answer) { __PERF_TIMING(executions);
 
-bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) { __PERF_TIMING(executions);
 
-
-    if(unlikely(chain == program().subprograms().end())) { __PERF_INC(solutions_found);
-        return __solution.emplace_back(answer), true;
-    }
+    if(unlikely(chain == program().subprograms().end()))
+        return candidates.emplace_back(answer), true;
 
 
     if(unlikely(chain->type() == TYPE_CONSTRAINTS))
-        return execute(chain + 1, assumptions, answer);
+        return execute(chain + 1, std::move(candidates), assumptions, answer);
 
 
 
 
-    Program& program = (*chain);
-
-    if(unlikely(program.ground().empty()))
-        program.groundize(assumptions);
+    Program program = (*chain);
+    program.groundize(assumptions);
 
 
 
@@ -147,14 +173,19 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
     const auto& solution = std::get<1>(result);
 
 
-    if(model != MODEL_COHERENT) // FIXME
+    if(unlikely(model != MODEL_COHERENT)) {
+
+        if(program.type() == ProgramType::TYPE_FORALL)
+            return promote_candidates({ answer }), true; 
+
         return false;
+    }
 
 
     std::vector<AnswerSet> coherencies;
     std::size_t max = get_max_incoherencies(program, solution);
     
-    if(!get_coherent_answer(program, solution, max, coherencies)) {
+    if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
      
         LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
                              << program.id() << std::endl;
@@ -170,8 +201,13 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
         assumptions.insert(assumptions.end(), i.begin(), i.end());
 
     for(const auto& i : coherencies)
-        if((fail += !execute(chain + 1, assumptions, i)) >= max)
-            return false;
+        if((fail += !execute(chain + 1, std::move(candidates), assumptions, i)) >= max)
+            return candidates.clear(), false;
+
+
+
+    if(unlikely(chain == __program.subprograms().begin()))
+        promote_candidates(candidates);
 
     return true;
 

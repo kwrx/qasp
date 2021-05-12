@@ -7,14 +7,14 @@ foreach(SOURCE ${SOURCES})
 
     add_test(
         NAME "[FILE]  ${TEST_NAME}"
-        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp -n0 ${SOURCE} | grep -f ${TEST_PATH}/${TEST_NAME}.expected"
+        COMMAND /bin/sh -c "diff -u ${TEST_PATH}/${TEST_NAME}.expected <(${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE})"
         WORKING_DIRECTORY .
     )
 
 
     add_test(
         NAME "[STDIN] ${TEST_NAME}"
-        COMMAND /bin/sh -c "cat ${SOURCE} | ${PROJECT_BINARY_DIR}/bin/qasp -n0 | grep -f ${TEST_PATH}/${TEST_NAME}.expected"
+        COMMAND /bin/sh -c "diff -u ${TEST_PATH}/${TEST_NAME}.expected <(cat ${SOURCE} | ${PROJECT_BINARY_DIR}/bin/qasp)"
         WORKING_DIRECTORY .
     )
 

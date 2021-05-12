@@ -52,6 +52,7 @@
     __PERF_PRINT(mapping);                                              \
     __PERF_PRINT(answerset_comparing);                                  \
     __PERF_PRINT(solutions_found);                                      \
+    __PERF_PRINT(solutions_discarded);                                  \
     __PERF_PRINT(checks_failed);                                        \
 }
 
@@ -108,6 +109,7 @@ namespace qasp::utils {
             PERF_DECL_T(mapping);
             PERF_DECL_T(answerset_comparing);
             PERF_DECL_T(solutions_found);
+            PERF_DECL_T(solutions_discarded);
             PERF_DECL_T(checks_failed);
     };
 
