@@ -23,6 +23,7 @@
 #include "AnswerSet.hpp"
 #include "grounder/Grounder.hpp"
 #include "solver/Solver.hpp"
+#include "utils/Performance.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -49,7 +50,7 @@ using namespace qasp::solver;
 
 
 
-const Program& Program::groundize(Assumptions assumptions) {
+const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(grounding);
 
     LOG(__FILE__, INFO) << "Generating ground for program #" << id() << " with:"
                         << " assumptions(" << assumptions << ")" << std::endl;
@@ -115,7 +116,7 @@ const Program& Program::groundize(Assumptions assumptions) {
 }
 
 
-std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer) const {
+std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer) const { __PERF_TIMING(solving);
     
     assert(!ground().empty());
 

@@ -27,10 +27,10 @@
 #cmakedefine HAVE_GRINGO            @HAVE_GRINGO@
 #cmakedefine HAVE_CLASP             @HAVE_CLASP@
 #cmakedefine HAVE_THREADS           @HAVE_THREADS@
-#cmakedefine HAVE_ITERATIONS        @HAVE_ITERATIONS@
 #cmakedefine HAVE_WASP_ASSUMPTIONS  @HAVE_WASP_ASSUMPTIONS@
 #cmakedefine HAVE_WASP_RESET        @HAVE_WASP_RESET@
 #cmakedefine HAVE_PRETTY_LOGGER     @HAVE_PRETTY_LOGGER@
+#cmakedefine HAVE_PERFORMANCE       @HAVE_PERFORMANCE@
 
 
 #define QASP_PROGRAM_NAME       "@CMAKE_PROJECT_NAME@"

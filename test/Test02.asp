@@ -5,8 +5,8 @@ c | d :- a.                 % P2 U {a} = {a,c} {a,d}        -> {a,c} U C -> INCO
 d :- b.                     %                               -> {a,d} U C -> COHERENT        |   
                             % P2 U {b} = {b,d}              -> {b,d} U C -> COHERENT        |   Un AS(P1) = {b} è coerente con tutti gli AS(P2) U {b}
 %@exists
-e | f | g :- b, d.          % P3 U {b,d} = {b,d,f} {b,d,f}  -> {b,d,e} U C -> INCOHERENT    | 
-                            %                               -> {b,d,f} U C -> COHERENT      |   Tutti gli AS(P2) sono coerenti con almeno un AS(P3) U {b,d}
+e | f | g :- b, d.          % P3 U {b,d} = {b,d,e} {b,d,f}  -> {b,d,e} U C -> INCOHERENT    | 
+                            %              {b,d,g}          -> {b,d,f} U C -> COHERENT      |   Tutti gli AS(P2) sono coerenti con almeno un AS(P3) U {b,d}
                             %                               -> {b,d,g} U C -> COHERENT      |   Tutti gli AS(P2) sono coerenti con almeno un AS(P3) U {b,d}
 %@forall
 :- f.                       % P4 U {b,d,f} = INCOHERENT     -> {b,d,f} U C -> INCOHERENT    | 
@@ -16,4 +16,4 @@ e | f | g :- b, d.          % P3 U {b,d} = {b,d,f} {b,d,f}  -> {b,d,e} U C -> IN
 :- c, not d.                % C
 :- e.
 
-% Result: { b, d, g } is COHERENT.
+% Result: {b,d,g} {b,d,f} are COHERENT.

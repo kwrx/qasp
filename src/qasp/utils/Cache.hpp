@@ -25,7 +25,6 @@
 #include <mutex>
 #include <unordered_map>
 
-
 namespace qasp::utils {
 
     template <typename T, typename D>
@@ -44,7 +43,7 @@ namespace qasp::utils {
                 return this->std::unordered_map<T, D>::find(id) != this->std::unordered_map<T, D>::end();
             }
 
-            inline const D& get(const T& id) {
+            inline D& get(const T& id) {
 
                 assert(contains(id));
 
@@ -66,7 +65,7 @@ namespace qasp::utils {
 
         private:
 
-            std::mutex m_lock;
+            std::mutex m_lock {};
 
     };
 

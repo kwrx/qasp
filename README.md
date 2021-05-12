@@ -10,7 +10,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Release -B build
 $ cmake --build build
 $ cmake --install build
 ```
-**NOTE:** [CMake](https://cmake.org/) >= 3.11 and [Boost C++ Libraries](https://www.boost.org/) >= 1.72.0 are required.
+**NOTE:** [CMake](https://cmake.org/) >= 3.20 and [Boost C++ Libraries](https://www.boost.org/) >= 1.72.0 are required.
 
 ## Usage
 Open your terminal and type:
@@ -19,7 +19,7 @@ $ qasp [OPTIONS] SOURCES...
 ```
 Or read from *stdin*
 ```shell script
-$ cat SOURCES | qasp
+$ cat SOURCE | qasp
 ```
 **NOTE:** type ```qasp --help``` for more information.
 
@@ -34,7 +34,7 @@ d :- b.
 %@constraints
 :- c, not d.
 ```
-Calculate if exists an *answer set* of **@exists fragment** such that for each *answer set* of **@forall fragmemt** is a *coherent* solution.
+Calculate if exists an *answer set* of **@exists program** such that for each *answer set* of **@forall program** is a *coherent* solution.
 ```shell script
 $ qasp program.asp
 ```

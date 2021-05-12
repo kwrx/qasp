@@ -47,17 +47,14 @@ namespace qasp {
 
         uint16_t quiet;
         uint16_t cpus;
-        qasp_iteration_t iterations;
 
         Options(uint16_t quiet, uint16_t cpus, qasp_iteration_t iterations)
             : quiet(quiet)
-            , cpus(cpus)
-            , iterations(iterations) {}
+            , cpus(cpus) {}
 
         Options()
             : quiet(QASP_OPTIONS_DEFAULT_QUIET)
-            , cpus(QASP_OPTIONS_DEFAULT_CPUS)
-            , iterations(QASP_OPTIONS_DEFAULT_ITERATIONS) {}
+            , cpus(QASP_OPTIONS_DEFAULT_CPUS) {}
 
     };
 

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Atom.hpp"
+#include "utils/Performance.hpp"
 
 #include <iostream>
 #include <vector>
@@ -34,7 +35,7 @@ namespace qasp {
     class AnswerSet : public std::vector<Atom> {
         public:
 
-            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) {
+            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) { __PERF_TIMING(answerset_comparing);
 
                 if(a.size() != b.size())
                     return false;

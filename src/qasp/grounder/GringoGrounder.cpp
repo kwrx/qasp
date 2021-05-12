@@ -34,7 +34,7 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
-std::string GringoGrounder::generate(const std::string& source) const {
+std::string GringoGrounder::execute(const std::string& source) const {
 
     std::ostringstream output;
 

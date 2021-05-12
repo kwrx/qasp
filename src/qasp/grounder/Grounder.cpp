@@ -19,6 +19,7 @@
  */
 
 #include "Grounder.hpp"
+#include "../utils/Performance.hpp"
 
 #if defined(HAVE_GRINGO)
 #include "GringoGrounder.hpp"
@@ -49,5 +50,19 @@ std::shared_ptr<Grounder> Grounder::instance() {
     }
 
     return __instance;
+
+}
+
+
+std::string Grounder::generate(const std::string& source) {
+
+    std::size_t hash = std::hash<std::string>()(source);
+
+    if(cache.contains(hash)) { __PERF_INC(grounding_cached);
+        return cache.get(hash);
+    }
+
+    return cache.emplace(hash, execute(source))
+         , cache.get(hash);
 
 }

@@ -45,13 +45,19 @@ std::string Qasp::run() {
         
 
     QaspSolver qasp(*this, program);
-    
-    if(qasp.run()) {
+
+    bool result = qasp.run();
+
+
+
+    __PERF_PRINT_ALL();
+
+    if(result) {
         
         std::ostringstream output;
 
         for(const auto& answer : qasp.solution())
-            output << answer.second << std::endl;
+            output << answer << std::endl;
 
         return output.str();
 

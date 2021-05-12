@@ -70,13 +70,13 @@ namespace qasp::utils {
             std::atomic<bool> __alive;
 
 
-            std::deque<std::tuple<std::function<R(T...)>, T...> pending;
-            std::deque<std::thread> units;
+            std::deque<std::tuple<std::function<R(T...)>, T...> pending {};
+            std::deque<std::thread> units {};
 
-            std::condition_variable cv_status;
+            std::condition_variable cv_status {};
 
-            std::mutex mx_status;
-            std::mutex mx_pending;
+            std::mutex mx_status {};
+            std::mutex mx_pending {};
 
 
             inline void init() {

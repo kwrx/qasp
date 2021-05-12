@@ -18,26 +18,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Solver.hpp"
-#include "WaspSolver.hpp"
+#include "Performance.hpp"
 
-using namespace qasp::solver;
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
+
+#include <vector>
+#include <cstdint>
+
+using namespace qasp::utils;
 
 
-static std::shared_ptr<Solver> __instance;
+#define PERF_VALUE_T(name)                                                  \
+    std::vector<double> __trace_performance::__timings_##name = {};         \
+    std::size_t __trace_performance::__counter_##name = {};
 
-std::shared_ptr<Solver> Solver::instance() {
 
-    if(unlikely(!__instance)) {
-#if defined(HAVE_WASP)
-        __instance = std::make_shared<WaspSolver>();
-#elif defined(HAVE_CLASP)
-        __instance = std::make_shared<ClaspSolver>();
-#else
-#   error "missing solver application"
+    PERF_VALUE_T(grounding);
+    PERF_VALUE_T(grounding_cached);
+    PERF_VALUE_T(solving);
+    PERF_VALUE_T(parsing);
+    PERF_VALUE_T(running);
+    PERF_VALUE_T(checkings);
+    PERF_VALUE_T(iterations);
+    PERF_VALUE_T(executions);
+    PERF_VALUE_T(mapping);
+    PERF_VALUE_T(answerset_comparing);
+    PERF_VALUE_T(solutions_found);
+    PERF_VALUE_T(solutions_discarded);
+    PERF_VALUE_T(checks_failed);
+
 #endif
-    }
-
-    return __instance;
-
-}

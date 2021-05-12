@@ -20,23 +20,29 @@
 
 #pragma once
 
+#include "../utils/Cache.hpp"
+
 #include <memory>
 #include <string>
+
 
 namespace qasp::grounder {
 
     class Grounder {
 
         public:
-
-            virtual ~Grounder() = default;
-            virtual std::string generate(const std::string& source) const = 0;
-
             static std::shared_ptr<Grounder> instance();
 
+            virtual ~Grounder() = default;
+            std::string generate(const std::string& source);
 
         protected:
             Grounder() {}
+            virtual std::string execute(const std::string& source) const = 0;
+
+        private:
+            qasp::utils::Cache<std::size_t, std::string> cache {};
+
 
     };
 

@@ -23,6 +23,7 @@
 #include "Atom.hpp"
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
+#include "utils/Performance.hpp"
 
 #include <string>
 #include <vector>
@@ -94,6 +95,15 @@ namespace qasp {
                 return this->__assumptions = std::move(assumptions), *this;
             }
 
+
+            inline const auto& last() const {
+                return this->__last;
+            }
+
+            inline void last(bool last) {
+                this->__last = std::move(last);
+            }
+
             const Program& groundize(Assumptions assumptions = {});
             std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}) const;
 
@@ -104,13 +114,15 @@ namespace qasp {
             ProgramType __type;
             std::string __source;
             std::string __ground;
-            Assumptions __assumptions;
             std::vector<Program> __subprograms;
-            std::unordered_map<std::string, Atom> __atoms;
-            atom_index_t __atoms_index_offset;
+
+            std::unordered_map<std::string, Atom> __atoms {};
+            atom_index_t __atoms_index_offset = 0;
+            Assumptions __assumptions {};
+            bool __last = false;
 
 
-            inline const atom_index_t map_index(const Atom& atom) const {
+            inline const atom_index_t map_index(const Atom& atom) const { __PERF_INC(mapping);
                 
                 const auto& found = atoms().find(atom.predicate());
 

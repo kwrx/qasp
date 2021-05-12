@@ -20,6 +20,7 @@
 
 #include "Parser.hpp"
 #include "ParserException.hpp"
+#include "../utils/Performance.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -62,7 +63,7 @@ struct Token {
 
 
 
-static std::vector<Program> parseSources(const std::vector<std::string>& sources) {
+static std::vector<Program> parseSources(const std::vector<std::string>& sources) { __PERF_TIMING(parsing);
 
     std::vector<Token> tokens;
     std::vector<Program> programs;
@@ -243,6 +244,16 @@ Program Parser::parse() const {
         
         source << program.source();
         source << std::endl;
+
+    }
+
+    for(auto it = programs.rbegin(); it != programs.rend(); it++) {
+
+        if(it->type() == ProgramType::TYPE_CONSTRAINTS)
+            continue;
+
+        it->last(true);
+        break;
 
     }
 
