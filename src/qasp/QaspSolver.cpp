@@ -130,8 +130,6 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
     // FIXME: evalute if checking can be anticipated
     bool should_not_check = !program.last();
 
-    LOG(__FILE__, TRACE) << "PROGRAM LAST: " << program.last() << std::endl;
-
 
     size_t incoherencies = 0;
 
@@ -159,7 +157,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
 
 
     if(unlikely(chain->type() == TYPE_CONSTRAINTS))
-        return execute(chain + 1, std::move(candidates), assumptions, answer);
+        return execute(chain + 1, std::move(candidates), std::move(assumptions), std::move(answer));
 
 
 
@@ -175,36 +173,41 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
     const auto& solution = std::get<1>(result);
 
 
-    if(unlikely(model != MODEL_COHERENT)) {
 
-        if(program.type() == ProgramType::TYPE_FORALL)
-            return promote_candidates({ answer }), true; 
-
-        return false;
-    }
+    if(likely(model == MODEL_COHERENT)) {
 
 
-    std::vector<AnswerSet> coherencies;
-    std::size_t max = get_max_incoherencies(program, solution);
+        std::vector<AnswerSet> coherencies;
+        std::size_t max = get_max_incoherencies(program, solution);
+        
+        if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
+        
+            LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
+                                << program.id() << std::endl;
+        
+            return false;
+        }
+
+
+
+        std::size_t fail = 0;
+
+        for(const auto& i : coherencies)
+            assumptions.insert(assumptions.end(), i.begin(), i.end());
+
+        for(const auto& i : coherencies)
+            if((fail += !execute(chain + 1, std::move(candidates), assumptions, i)) >= max)
+                return candidates.clear(), false;
+
     
-    if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
-     
-        LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
-                             << program.id() << std::endl;
-     
-        return false;
+    } else {
+
+        if(program.type() != ProgramType::TYPE_FORALL)
+            return false;       
+            
+        candidates.emplace_back(answer);
+
     }
-
-
-
-    std::size_t fail = 0;
-
-    for(const auto& i : coherencies)
-        assumptions.insert(assumptions.end(), i.begin(), i.end());
-
-    for(const auto& i : coherencies)
-        if((fail += !execute(chain + 1, std::move(candidates), assumptions, i)) >= max)
-            return candidates.clear(), false;
 
 
 

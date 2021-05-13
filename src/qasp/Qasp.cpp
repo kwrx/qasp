@@ -29,13 +29,26 @@
 #include <algorithm>
 #include <sstream>
 #include <cassert>
+#include <cstring>
 
 
 using namespace qasp;
 using namespace qasp::parser;
 
 
+__weak
+qasp::Options __qasp_c_options_instance {};
+
+__weak
+bool __qasp_quiet__ = false;
+
+
+
+
 std::string Qasp::run() {
+
+    __qasp_quiet__ = !!options().quiet;
+
 
     Parser parser(sources());
     Program program = parser.parse();
@@ -46,13 +59,15 @@ std::string Qasp::run() {
 
     QaspSolver qasp(*this, program);
 
-    bool result = qasp.run();
+    bool coherent = qasp.run();
+
+    __result = qasp.model();
 
 
 
     __PERF_PRINT_ALL();
 
-    if(result) {
+    if(coherent) {
         
         std::ostringstream output;
 
@@ -73,7 +88,42 @@ std::string Qasp::run() {
 
 
 
-__weak
-bool __qasp_quiet__ = false;
+
+extern "C" int qasp_set_options(qasp_options_t* c_options) {
+
+    static_assert(sizeof(qasp_options_t) == sizeof(qasp::Options));
+    assert(c_options);
+
+    return std::memcpy(&__qasp_c_options_instance, c_options, sizeof(__qasp_c_options_instance)), 0;
+
+}
+
+extern "C" int qasp_run(size_t size_of_sources, const char* c_sources[], const char** c_output) {
+
+    assert(c_sources);
+    assert(c_output);
+
+    std::vector<std::string> sources;
+
+    size_t i;
+    for(i = 0; i < size_of_sources; i++) {
+
+        assert(c_sources[i]);
+
+        sources.emplace_back(c_sources[i]);
+
+    }
+
+
+    Qasp qasp { sources };
+    qasp.options(std::move(__qasp_c_options_instance));
+
+    (*c_output) = strdup(qasp.run().c_str());
+
+    return qasp.result();
+
+}
+
+
 
 

@@ -165,10 +165,11 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
     
     ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output);
 
-    
-    LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " is " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
+    LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " are " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
 
 
+
+    assert(model != ProgramModel::MODEL_UNKNOWN);
 
     return { model, output };
 

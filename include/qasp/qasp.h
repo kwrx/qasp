@@ -25,14 +25,10 @@
 
 #define QASP_OPTIONS_DEFAULT_QUIET      0
 #define QASP_OPTIONS_DEFAULT_CPUS       8
-#define QASP_OPTIONS_DEFAULT_ITERATIONS 1
 
 #define QASP_RESULT_COHERENT            1
 #define QASP_RESULT_INCOHERENT          2
 #define QASP_RESULT_UNKNOWN             0
-
-
-typedef uint64_t qasp_iteration_t;
 
 
 
@@ -48,7 +44,7 @@ namespace qasp {
         uint16_t quiet;
         uint16_t cpus;
 
-        Options(uint16_t quiet, uint16_t cpus, qasp_iteration_t iterations)
+        Options(uint16_t quiet, uint16_t cpus)
             : quiet(quiet)
             , cpus(cpus) {}
 
@@ -79,12 +75,16 @@ namespace qasp {
                 __options = std::move(options);
             }
 
-            inline const auto& options() const {
+            inline const qasp::Options& options() const {
                 return __options;
             }
 
-            inline const auto& sources() const {
+            inline const std::vector<std::string>& sources() const {
                 return __sources;
+            }
+
+            inline const int& result() const {
+                return __result;
             }
 
             std::string run();
@@ -92,6 +92,7 @@ namespace qasp {
         private:
             std::vector<std::string> __sources;
             qasp::Options __options;
+            int __result;
         
     };
 
@@ -110,7 +111,7 @@ typedef struct {
 } qasp_options_t;
 
 extern int qasp_set_options(qasp_options_t* options);
-extern int qasp_run(const char* sources[], const char** output);
+extern int qasp_run(size_t size_of_sources, const char* c_sources[], const char** c_output);
 
 #if defined(__cplusplus)
 }
