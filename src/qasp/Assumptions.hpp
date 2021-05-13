@@ -69,7 +69,7 @@ namespace qasp {
             template <typename ...T>
             inline void emplace_back(T&&... args) {
                 
-                const Atom a(args...);
+                const Atom a(std::forward<T>(args)...);
 
                 if(unlikely(this->std::unordered_set<std::string>::find(a.predicate()) != this->std::unordered_set<std::string>::end()))
                     return;
