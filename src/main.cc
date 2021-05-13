@@ -21,9 +21,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <cstdlib>
 #include <cassert>
-#include <algorithm>
+#include <csignal>
 #include <getopt.h>
 
 #include <qasp/qasp.h>
@@ -69,9 +70,50 @@ static void show_version(int argc, char** argv) {
 }
 
 
+static void sighandler(int sig) {
+
+    switch(sig) {
+
+        case SIGINT:
+        case SIGTERM:
+#if defined(__unix__)
+        case SIGPWR:
+        case SIGQUIT:
+#endif
+            std::cerr << "Killed: Bye!" << std::endl;
+            break;
+
+#if defined(__unix__)
+        case SIGXCPU:
+            std::cerr << "Killed: CPU time limit exceeded" << std::endl;
+            break;
+#endif
+
+        default:
+            return;
+
+    }
+
+
+    exit(sig);
+
+}
+
+
 int main(int argc, char** argv) {
 
-    
+
+    std::signal(SIGINT,  sighandler);
+    std::signal(SIGTERM, sighandler);
+
+#if defined(__unix__)
+    std::signal(SIGPWR,  sighandler);
+    std::signal(SIGQUIT, sighandler);
+    std::signal(SIGXCPU, sighandler);
+#endif    
+
+
+
     static struct option long_options[] = {
         { "quiet",      no_argument, NULL, 'q' },
         { "parallel",   required_argument, NULL, 'j' },
@@ -101,7 +143,7 @@ int main(int argc, char** argv) {
                 show_usage(argc, argv);
                 break;
             default:
-                abort();
+                return EXIT_FAILURE;
         }
 
     }
@@ -150,7 +192,7 @@ int main(int argc, char** argv) {
     } catch(const std::exception& e) {
         
         std::cerr << QASP_PROGRAM_NAME << ": error: " << e.what() << std::endl;
-        abort();
+        return EXIT_FAILURE;
 
     }
 

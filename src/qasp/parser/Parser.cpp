@@ -135,7 +135,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 LOG(__FILE__, ERROR) << "Error reading " << source << std::endl;
 
-                throw std::invalid_argument(source);
+                throw std::invalid_argument("no such file or directory: " + source);
 
             }
 
