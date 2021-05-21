@@ -37,6 +37,7 @@ static void show_usage(int argc, char** argv) {
         << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
         << "    -j N, --parallel=N          allow N jobs at once.\n"
+        << "    -c, --counter-example       proving satisfiability by counter example\n"
         << "    -q, --quiet                 hide log information.\n"
         << "        --help                  print this message and exit.\n"
         << "        --version               print version info and exit.\n";
@@ -115,10 +116,11 @@ int main(int argc, char** argv) {
 
 
     static struct option long_options[] = {
-        { "quiet",      no_argument, NULL, 'q' },
-        { "parallel",   required_argument, NULL, 'j' },
-        { "help",       no_argument, NULL, 'h' },
-        { "version",    no_argument, NULL, 'v' },
+        { "quiet",           no_argument,       NULL, 'q' },
+        { "parallel",        required_argument, NULL, 'j' },
+        { "counter-example", no_argument,       NULL, 'c' },
+        { "help",            no_argument,       NULL, 'h' },
+        { "version",         no_argument,       NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 
@@ -126,7 +128,7 @@ int main(int argc, char** argv) {
     qasp::Options options;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qj:hv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:chv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
@@ -134,6 +136,9 @@ int main(int argc, char** argv) {
                 break;
             case 'j':
                 options.cpus = atoi(optarg);
+                break;
+            case 'c':
+                options.mode = QASP_SOLVING_MODE_COUNTER_EXAMPLE;
                 break;
             case 'v':
                 show_version(argc, argv);

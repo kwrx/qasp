@@ -48,7 +48,8 @@ configure_file(
 enable_testing()
 
 add_subdirectory(src)
-add_subdirectory(test)
+add_subdirectory(test/regular)
+add_subdirectory(test/counterexample)
 
 install(TARGETS qaspcli qasp wasp
     RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE

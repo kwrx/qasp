@@ -72,7 +72,9 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
     Program program = constraint().value();
     program.groundize(assumptions);
     
-    return std::get<0>(program.solve(answer)) == MODEL_COHERENT;
+    return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? std::get<0>(program.solve(answer)) == MODEL_INCOHERENT
+                : std::get<0>(program.solve(answer)) == MODEL_COHERENT;
 
 }
 
@@ -108,10 +110,16 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
     switch(program.type()) {
 
         case TYPE_EXISTS:
-            return solution.size();
+
+            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? 1
+                : solution.size();
 
         case TYPE_FORALL:
-            return 1;
+            
+            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? solution.size()
+                : 1;
 
         default:
             throw std::runtime_error("invalid Program Type");
@@ -180,7 +188,12 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
         if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
         
             LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
-                                << program.id() << std::endl;
+                                 << program.id() << std::endl;
+
+#if defined(DEBUG) && DEBUG_LEVEL <= TRACE
+            for(auto i : coherencies)
+                LOG(__FILE__, ERROR) << "Candidate rejected: " << i << std::endl;
+#endif
         
             return false;
         }
@@ -199,9 +212,18 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
     
     } else {
 
-        if(program.type() != ProgramType::TYPE_FORALL)
-            return false;       
+        if(qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE) {
             
+            if(program.type() == ProgramType::TYPE_FORALL)
+                return false;
+
+        } else {
+
+            if(program.type() != ProgramType::TYPE_FORALL)
+                return false;       
+
+        }
+
         candidates.emplace_back(answer);
 
     }
