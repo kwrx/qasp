@@ -105,7 +105,7 @@ namespace qasp {
             }
 
             const Program& groundize(Assumptions assumptions = {});
-            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}) const;
+            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const;
 
 
         private:

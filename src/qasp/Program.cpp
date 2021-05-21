@@ -116,7 +116,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 }
 
 
-std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer) const { __PERF_TIMING(solving);
+std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer, const size_t max_models) const { __PERF_TIMING(solving);
     
     assert(!ground().empty());
 
@@ -163,7 +163,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
                         << " positive(" << positive << "),"
                         << " negative(" << negative << ")" << std::endl;
     
-    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output);
+    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output, max_models);
 
     LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " are " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
 

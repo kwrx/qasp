@@ -73,8 +73,8 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
     program.groundize(assumptions);
     
     return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
-                ? std::get<0>(program.solve(answer)) == MODEL_INCOHERENT
-                : std::get<0>(program.solve(answer)) == MODEL_COHERENT;
+                ? std::get<0>(program.solve(answer, 1)) == MODEL_INCOHERENT
+                : std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
 
 }
 
