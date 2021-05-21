@@ -51,17 +51,7 @@ void QaspSolver::init() {
         if(ground.source().empty())
             throw std::invalid_argument("constraint program declared but empty");
 
-        ground.groundize();
-        
-
-        Assumptions assumptions;
-        for(const auto& i : ground.atoms())
-            assumptions.emplace_back(i.second);
-
-        ground.assumptions(assumptions);
-
-
-        this->__constraint.emplace(ground);
+        this->__constraint.emplace(std::move(ground));
         
     }
 
@@ -74,8 +64,15 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 
     if(unlikely(!constraint().has_value()))
         return true;
+
+
+    Assumptions assumptions;
+    assumptions.insert(assumptions.begin(), answer.begin(), answer.end());
+
+    Program program = constraint().value();
+    program.groundize(assumptions);
     
-    return std::get<0>(constraint().value().solve(answer)) == MODEL_COHERENT;
+    return std::get<0>(program.solve(answer)) == MODEL_COHERENT;
 
 }
 

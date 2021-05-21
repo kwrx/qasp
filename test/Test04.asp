@@ -8,7 +8,6 @@ y | ny.
 %@exists
 z | nz.
 %@constraints
-{x;y;z;nx;ny;nz}.
 :- nx, ny, nz.
 :- x, y, z.
 

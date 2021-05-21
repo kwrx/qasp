@@ -7,6 +7,5 @@ e | f.
 h :- b.
 a.
 %@constraints
-{b;h}.
 :- b, h.
 
