@@ -27,6 +27,8 @@
 #cmakedefine HAVE_GRINGO            @HAVE_GRINGO@
 #cmakedefine HAVE_CLASP             @HAVE_CLASP@
 #cmakedefine HAVE_THREADS           @HAVE_THREADS@
+#cmakedefine HAVE_MODE_COUNTER_EXAMPLE   @HAVE_MODE_COUNTER_EXAMPLE@
+#cmakedefine HAVE_MODE_LOOK_AHEAD        @HAVE_MODE_LOOK_AHEAD@
 #cmakedefine HAVE_WASP_ASSUMPTIONS  @HAVE_WASP_ASSUMPTIONS@
 #cmakedefine HAVE_WASP_RESET        @HAVE_WASP_RESET@
 #cmakedefine HAVE_PRETTY_LOGGER     @HAVE_PRETTY_LOGGER@

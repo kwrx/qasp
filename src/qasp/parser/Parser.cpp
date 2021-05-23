@@ -30,6 +30,9 @@
 #include <sstream>
 #include <filesystem>
 
+#include <qasp/qasp.h>
+
+
 using namespace qasp;
 using namespace qasp::parser;
 
@@ -42,12 +45,12 @@ struct Token {
     uint32_t tk_column;
     const std::string tk_source;
 
-    Token(char type, char value, uint32_t line, uint32_t column, const std::string& source)
+    Token(char type, char value, uint32_t line, uint32_t column, std::string source)
         : tk_type(type)
         , tk_value(value)
         , tk_line(line)
         , tk_column(column)
-        , tk_source(source) {}
+        , tk_source(std::move(source)) {}
 
 };
 
@@ -62,6 +65,137 @@ struct Token {
     ((it) != tokens.end())
 
 
+
+static std::string parseValue(const std::vector<Token>::iterator& it) {
+
+    switch(it->tk_type) {
+
+        case TK_ANNOTATION:
+            return "%@";
+
+        case TK_BODY:
+            return ":-";
+
+        default:
+            return { VALUE(it) };
+            
+    }
+
+}
+
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, std::vector<Predicate>& predicates) {
+
+
+    #define VALID_NAME(it)  \
+        (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
+
+    #define VALID_EXTENSIONS(it) \
+        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT))
+
+
+
+    std::ostringstream source;
+    auto begin = it;
+
+    do {
+
+        if(EXPECT(it, TK_BODY)) {
+
+            
+            do {
+
+                while(GOOD(++it) && isspace(VALUE(it)))
+                    ;
+
+                if(unlikely(!VALID_NAME(it)))
+                    break; // FIXME: parse aggregate functions
+
+
+
+                std::ostringstream name;
+                std::ostringstream extensions;
+
+
+                name << VALUE(it);
+
+                while(GOOD(++it) && VALID_NAME(it)) {
+                    name << VALUE(it);
+                }
+
+                if(EXPECT(it, TK_LEFT_PAREN)) {
+
+                    while(GOOD(++it) && VALID_EXTENSIONS(it)) {
+                        extensions << VALUE(it);
+                    }
+
+                    if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
+
+                        LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list" << std::endl;
+
+                        throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it));
+
+                    }
+
+                } else {
+
+                    if(unlikely(!EXPECT(it, TK_DOT) && !EXPECT(it, TK_COMMA))) {
+
+                        if(name.str() == "not")
+                            continue;
+
+                        LOG(__FILE__, WARN) << "Expected a LEFT_PAREN, DOT or COMMA after predicate name" << std::endl;
+                        break;
+
+                    }
+
+                }
+
+                LOG(__FILE__, TRACE) << "<PARSER> Found Predicate with name: " << name.str()
+                                    << " and extensions: (" << extensions.str() << ")"
+                                    << " in " << (*begin).tk_source
+                                    << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
+
+
+
+                predicates.emplace_back(name.str(), extensions.str());
+
+
+
+                if(EXPECT(it, TK_COMMA))
+                    continue;
+
+                else if(EXPECT(it, TK_DOT))
+                    break;
+
+                else {
+
+                    LOG(__FILE__, ERROR) << "Expected a DOT or COMMA after predicate" << std::endl;
+                    break;
+
+                }
+
+
+            } while(true);
+
+        }
+
+    } while(0);
+
+
+    for(; begin != it; begin++) {
+        source << parseValue(begin);
+    }
+        
+    source << parseValue(begin);
+
+    return source.str();
+
+}
+
+#endif
 
 static std::vector<Program> parseSources(const std::vector<std::string>& sources) { __PERF_TIMING(parsing);
 
@@ -105,6 +239,42 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                     }
 
+                    break;
+
+                case ':':
+
+                    if(fd.good() && fd.get() == '-') {
+                        
+                        tokens.emplace_back(TK_BODY, 0, line, column++, source);
+                        column++;
+
+                    } else {
+
+                        tokens.emplace_back(TK_SOURCE, ':', line, column++, source);
+                        fd.unget();
+
+                    }
+                                   
+                    break;
+
+                case '(':
+
+                    tokens.emplace_back(TK_LEFT_PAREN, '(', line, column++, source);
+                    break;
+
+                case ')':
+                    
+                    tokens.emplace_back(TK_RIGHT_PAREN, ')', line, column++, source);
+                    break;
+
+                case '.':
+                    
+                    tokens.emplace_back(TK_DOT, '.', line, column++, source);
+                    break;
+
+                case ',':
+                    
+                    tokens.emplace_back(TK_COMMA, ',', line, column++, source);
                     break;
 
                 default:
@@ -158,6 +328,8 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 std::ostringstream identifier;
                 std::ostringstream source;
+                std::vector<Predicate> predicates;
+
 
 #ifdef DEBUG
                 auto begin = it;
@@ -184,7 +356,13 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
 
                 while(GOOD(++it) && !EXPECT(it, TK_ANNOTATION)) {
-                    source << VALUE(it);
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+                    source << parsePredicates(tokens, it, predicates);
+#else
+                    source << parseValue(it);
+#endif
+
                 }
 
                 it--;
@@ -200,11 +378,11 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 
                 if(identifier.str() == ANNOTATION_EXISTS)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_EXISTS, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_EXISTS, source.str(), predicates);
                 else if(identifier.str() == ANNOTATION_FORALL)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str(), predicates);
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str());
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str(), predicates);
                 else {
 
 #ifdef DEBUG
@@ -235,7 +413,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 }
 
 
-Program Parser::parse() const {
+Program Parser::parse(const qasp::Options& options) const {
 
     std::vector<Program> programs = parseSources(this->sources());
     std::ostringstream source;
@@ -247,9 +425,14 @@ Program Parser::parse() const {
 
     }
 
+    LOG(__FILE__, TRACE) << "Source: " << std::endl 
+                         << source.str() << std::endl;
+
+
+
     for(auto it = programs.rbegin(); it != programs.rend(); it++) {
 
-        if(it->type() == ProgramType::TYPE_CONSTRAINTS)
+        if(unlikely(it->type() == ProgramType::TYPE_CONSTRAINTS))
             continue;
 
         it->last(true);
@@ -257,6 +440,7 @@ Program Parser::parse() const {
 
     }
 
-    return Program(-1, ProgramType::TYPE_COMMON, source.str(), programs);
+
+    return Program(-1, ProgramType::TYPE_COMMON, source.str(), {}, programs);
 
 }

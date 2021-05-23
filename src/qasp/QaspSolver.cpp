@@ -71,10 +71,14 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 
     Program program = constraint().value();
     program.groundize(assumptions);
-    
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)  
     return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
                 ? std::get<0>(program.solve(answer, 1)) == MODEL_INCOHERENT
                 : std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
+#else
+    return std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
+#endif
 
 }
 
@@ -111,15 +115,23 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 
         case TYPE_EXISTS:
 
+#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
             return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
                 ? 1
                 : solution.size();
+#else
+            return solution.size();
+#endif
 
         case TYPE_FORALL:
-            
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
             return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
                 ? solution.size()
                 : 1;
+#else
+            return 1;
+#endif
 
         default:
             throw std::runtime_error("invalid Program Type");
@@ -139,6 +151,16 @@ bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<A
     size_t incoherencies = 0;
 
     for(const auto& s : solution) {
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+        if(unlikely((qasp().options().mode == QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check)) {
+
+            LOG(__FILE__, TRACE) << "Checking Answer for Look ahead: " << s << std::endl;
+
+        }
+
+#endif
 
         if(should_not_check || check(s))
             coherencies.emplace_back(std::move(s));
@@ -212,17 +234,21 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
     
     } else {
 
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
         if(qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE) {
             
             if(program.type() == ProgramType::TYPE_FORALL)
                 return false;
 
         } else {
+#endif
 
             if(program.type() != ProgramType::TYPE_FORALL)
                 return false;       
 
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
         }
+#endif
 
         candidates.emplace_back(answer);
 

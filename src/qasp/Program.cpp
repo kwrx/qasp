@@ -102,6 +102,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
         LOG(__FILE__, TRACE) << "Extracted from smodels atom with index " << index
                              << " and predicate " << predicate << std::endl;
 
+
         this->__atoms.emplace(predicate, Atom { index, predicate });
         this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);
 
@@ -143,16 +144,16 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
         }
 
-        positive.emplace_back(map_index(i), i.predicate());
+        positive.emplace_back(map_index(i), i.arity(), i.predicate());
 
     }
 
     for(const auto& i : assumptions()) {
 
         if(answer.contains(i))
-            positive.emplace_back(map_index(i), i.predicate());
+            positive.emplace_back(map_index(i), i.arity(), i.predicate());
         else
-            negative.emplace_back(map_index(i), i.predicate());
+            negative.emplace_back(map_index(i), i.arity(), i.predicate());
 
     }
 

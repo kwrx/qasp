@@ -14,7 +14,9 @@ set(HAVE_WASP       1)
 set(HAVE_CLASP      0)
 
 ## QASP
-set(HAVE_THREADS            1)
+set(HAVE_THREADS                1)
+set(HAVE_MODE_COUNTER_EXAMPLE   1)
+set(HAVE_MODE_LOOK_AHEAD        1)
 
 ## Wasp
 set(HAVE_WASP_ASSUMPTIONS   1)
@@ -50,6 +52,7 @@ enable_testing()
 add_subdirectory(src)
 add_subdirectory(test/regular)
 add_subdirectory(test/counterexample)
+add_subdirectory(test/lookahead)
 
 install(TARGETS qaspcli qasp wasp
     RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE

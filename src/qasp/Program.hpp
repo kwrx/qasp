@@ -23,6 +23,7 @@
 #include "Atom.hpp"
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
+#include "Predicate.hpp"
 #include "utils/Performance.hpp"
 
 #include <string>
@@ -48,11 +49,12 @@ namespace qasp {
     class Program {
         public:
 
-            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::vector<Program> subprograms = {})
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::vector<Predicate> predicates = {}, const std::vector<Program> subprograms = {})
                 : __id(id)
                 , __type(type)
                 , __source(std::move(source))
-                , __subprograms(std::move(subprograms)) {}
+                , __subprograms(std::move(subprograms))
+                , __predicates(std::move(predicates)) {}
 
 
             inline const auto& id() const {
@@ -69,6 +71,10 @@ namespace qasp {
 
             inline const auto& atoms() const {
                 return this->__atoms;
+            }
+
+            inline const auto& predicates() const {
+                return this->__predicates;
             }
 
             inline const auto& subprograms() const {
@@ -95,7 +101,6 @@ namespace qasp {
                 return this->__assumptions = std::move(assumptions), *this;
             }
 
-
             inline const auto& last() const {
                 return this->__last;
             }
@@ -103,6 +108,7 @@ namespace qasp {
             inline void last(bool last) {
                 this->__last = std::move(last);
             }
+
 
             const Program& groundize(Assumptions assumptions = {});
             std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const;
@@ -115,6 +121,7 @@ namespace qasp {
             std::string __source;
             std::string __ground;
             std::vector<Program> __subprograms;
+            std::vector<Predicate> __predicates;
 
             std::unordered_map<std::string, Atom> __atoms {};
             atom_index_t __atoms_index_offset = 0;

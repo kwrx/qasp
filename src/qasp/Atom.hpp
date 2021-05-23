@@ -21,6 +21,7 @@
 #pragma once
 
 #include <string>
+#include <algorithm>
 
 namespace qasp {
 
@@ -29,9 +30,19 @@ namespace qasp {
     class Atom {
         public:
 
+            Atom(const atom_index_t index, const std::size_t arity, const std::string predicate)
+                : __index(index)
+                , __arity(arity)
+                , __predicate(std::move(predicate)) {}
+
             Atom(const atom_index_t index, const std::string predicate)
                 : __index(index)
-                , __predicate(std::move(predicate)) {}
+                , __arity(1)
+                , __predicate(std::move(predicate)) {
+
+                    __arity += std::count(predicate.begin(), predicate.end(), ',');
+
+                }
 
 
             inline const auto& index() const {
@@ -40,6 +51,15 @@ namespace qasp {
 
             inline const auto& index(atom_index_t value) {
                 return this->__index = value, *this;
+            }
+
+
+            inline const auto& arity() const {
+                return this->__arity;
+            }
+
+            inline const auto& arity(std::size_t value) {
+                return this->__arity = value, *this;
             }
 
             inline const auto& predicate() const {
@@ -57,6 +77,7 @@ namespace qasp {
 
         private:
             atom_index_t __index;
+            std::size_t __arity;
             std::string __predicate;
 
     };

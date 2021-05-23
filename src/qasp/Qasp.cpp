@@ -49,9 +49,19 @@ std::string Qasp::run() {
 
     __qasp_quiet__ = !!options().quiet;
 
+#if !defined(HAVE_MODE_COUNTER_EXAMPLE)
+    if(unlikely(options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE))
+        throw std::invalid_argument("missing QASP_SOLVING_MODE_COUNTER_EXAMPLE support");
+#endif
+
+#if !defined(HAVE_MODE_LOOK_AHEAD)
+    if(unlikely(options().mode == QASP_SOLVING_MODE_LOOK_AHEAD))
+        throw std::invalid_argument("missing QASP_SOLVING_MODE_LOOK_AHEAD support");
+#endif
+
 
     Parser parser(sources());
-    Program program = parser.parse();
+    Program program = parser.parse(options());
 
     if(program.subprograms().empty())
         return {};
