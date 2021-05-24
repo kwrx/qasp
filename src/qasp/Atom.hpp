@@ -21,6 +21,9 @@
 #pragma once
 
 #include <string>
+#include <algorithm>
+
+#include "Predicate.hpp"
 
 namespace qasp {
 
@@ -29,9 +32,27 @@ namespace qasp {
     class Atom {
         public:
 
+            Atom(const atom_index_t index, const std::size_t arity, const std::string predicate)
+                : __index(index)
+                , __arity(arity)
+                , __predicate(std::move(predicate)) {
+
+                    extract_name();
+
+                }
+
+
             Atom(const atom_index_t index, const std::string predicate)
                 : __index(index)
-                , __predicate(std::move(predicate)) {}
+                , __arity(0)
+                , __predicate(std::move(predicate)) {
+
+                    __arity += predicate.find('(') != std::string::npos;
+                    __arity += std::count(predicate.begin(), predicate.end(), ',');
+
+                    extract_name();
+
+                }
 
 
             inline const auto& index() const {
@@ -42,12 +63,28 @@ namespace qasp {
                 return this->__index = value, *this;
             }
 
+            inline const auto& arity() const {
+                return this->__arity;
+            }
+
+            inline const auto& arity(std::size_t value) {
+                return this->__arity = value, *this;
+            }
+
             inline const auto& predicate() const {
                 return this->__predicate;
             }
 
+            inline const auto& name() const {
+                return this->__name;
+            }
+
             inline bool operator ==(const Atom& b) const {
                 return this->predicate() == b.predicate();
+            }
+
+            inline bool operator ==(const Predicate& b) const {
+                return this->name() == b.name();
             }
 
             inline friend std::ostream& operator <<(std::ostream& os, const Atom& a) {
@@ -56,8 +93,22 @@ namespace qasp {
 
 
         private:
+
             atom_index_t __index;
+            std::size_t __arity;
             std::string __predicate;
+            std::string __name {};
+
+            inline void extract_name() {
+
+                auto found = __predicate.find('(');
+
+                if(found != std::string::npos)
+                    __name = __predicate.substr(0, found - 1);
+                else
+                    __name = __predicate;
+
+            }
 
     };
 

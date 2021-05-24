@@ -24,6 +24,8 @@
 #include <vector>
 #include "../Program.hpp"
 
+#include <qasp/qasp.h>
+
 
 #define ANNOTATION_COMMON           "common"
 #define ANNOTATION_EXISTS           "exists"
@@ -31,7 +33,12 @@
 #define ANNOTATION_CONSTRAINTS      "constraints"
 
 #define TK_ANNOTATION               '@'
-#define TK_SOURCE                   '.'
+#define TK_SOURCE                   '*'
+#define TK_LEFT_PAREN               '('
+#define TK_RIGHT_PAREN              ')'
+#define TK_DOT                      '.'
+#define TK_COMMA                    ','
+#define TK_BODY                     ':'
 
 
 namespace qasp::parser {
@@ -45,7 +52,7 @@ namespace qasp::parser {
                 return this->__sources;
             }
 
-            qasp::Program parse() const;
+            qasp::Program parse(const qasp::Options& options) const;
 
         private:
             std::vector<std::string> __sources;

@@ -33,7 +33,7 @@ namespace qasp::solver {
         public:
 
             virtual ~Solver() = default;
-            virtual ProgramModel solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output) const = 0;
+            virtual ProgramModel solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models = 0) const = 0;
 
             static std::shared_ptr<Solver> instance();
 

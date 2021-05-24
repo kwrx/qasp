@@ -36,7 +36,15 @@ static void show_usage(int argc, char** argv) {
     std::cout 
         << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
+#if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
+#endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        << "    -c, --counter-example       proving satisfiability by counter example\n"
+#endif
+#if defined(HAVE_MODE_LOOK_AHEAD)
+        << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
+#endif
         << "    -q, --quiet                 hide log information.\n"
         << "        --help                  print this message and exit.\n"
         << "        --version               print version info and exit.\n";
@@ -115,10 +123,18 @@ int main(int argc, char** argv) {
 
 
     static struct option long_options[] = {
-        { "quiet",      no_argument, NULL, 'q' },
-        { "parallel",   required_argument, NULL, 'j' },
-        { "help",       no_argument, NULL, 'h' },
-        { "version",    no_argument, NULL, 'v' },
+        { "quiet",           no_argument,       NULL, 'q' },
+#if defined(HAVE_THREADS)
+        { "parallel",        required_argument, NULL, 'j' },
+#endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        { "counter-example", no_argument,       NULL, 'c' },
+#endif
+#if defined(HAVE_MODE_LOOK_AHEAD)
+        { "look-ahead",      no_argument,       NULL, 'l' },
+#endif
+        { "help",            no_argument,       NULL, 'h' },
+        { "version",         no_argument,       NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 
@@ -126,24 +142,36 @@ int main(int argc, char** argv) {
     qasp::Options options;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qj:hv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:clhv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
                 options.quiet = 1;
                 break;
+#if defined(HAVE_THREADS)
             case 'j':
                 options.cpus = atoi(optarg);
                 break;
+#endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+            case 'c':
+                options.mode = QASP_SOLVING_MODE_COUNTER_EXAMPLE;
+                break;
+#endif
+#if defined(HAVE_MODE_LOOK_AHEAD)
+            case 'l':
+                options.mode = QASP_SOLVING_MODE_LOOK_AHEAD;
+                break;
+#endif
             case 'v':
                 show_version(argc, argv);
                 break;
             case 'h':
             case '?':
+            default:
                 show_usage(argc, argv);
                 break;
-            default:
-                return EXIT_FAILURE;
+
         }
 
     }

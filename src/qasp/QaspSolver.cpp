@@ -51,17 +51,7 @@ void QaspSolver::init() {
         if(ground.source().empty())
             throw std::invalid_argument("constraint program declared but empty");
 
-        ground.groundize();
-        
-
-        Assumptions assumptions;
-        for(const auto& i : ground.atoms())
-            assumptions.emplace_back(i.second);
-
-        ground.assumptions(assumptions);
-
-
-        this->__constraint.emplace(ground);
+        this->__constraint.emplace(std::move(ground));
         
     }
 
@@ -74,11 +64,60 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 
     if(unlikely(!constraint().has_value()))
         return true;
-    
-    return std::get<0>(constraint().value().solve(answer)) == MODEL_COHERENT;
+
+
+    Assumptions assumptions;
+    assumptions.insert(assumptions.begin(), answer.begin(), answer.end());
+
+    Program program = constraint().value();
+    program.groundize(assumptions);
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)  
+    return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? std::get<0>(program.solve(answer, 1)) == MODEL_INCOHERENT
+                : std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
+#else
+    return std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
+#endif
 
 }
 
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const {
+
+    assert(chain != __program.subprograms().end());
+    assert(!answer.empty());
+
+
+    for(auto it = chain + 1; it != __program.subprograms().end(); it++) {
+
+        if(unlikely(it->type() == TYPE_CONSTRAINTS))
+            continue;
+
+        for(const auto& i : it->predicates()) {
+
+            const auto& found = std::find(answer.begin(), answer.end(), i);
+
+            if(i.positive() && found != answer.end())
+                return true;
+
+            if(i.negative() && found == answer.end())
+                return true; 
+
+        }
+
+    }
+
+
+    LOG(__FILE__, TRACE) << "Found an answer set with no dependency: " << answer << std::endl; 
+
+    return false;
+
+}
+
+#endif
 
 
 
@@ -111,10 +150,24 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
     switch(program.type()) {
 
         case TYPE_EXISTS:
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
+            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? 1
+                : solution.size();
+#else
             return solution.size();
+#endif
 
         case TYPE_FORALL:
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
+            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+                ? solution.size()
+                : 1;
+#else
             return 1;
+#endif
 
         default:
             throw std::runtime_error("invalid Program Type");
@@ -124,16 +177,21 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 }
 
 
-bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
-
-
-    // FIXME: evalute if checking can be anticipated
-    bool should_not_check = !program.last();
-
+bool QaspSolver::get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
 
     size_t incoherencies = 0;
 
     for(const auto& s : solution) {
+
+        bool should_not_check = !program.last();
+
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+        if(unlikely((qasp().options().mode == QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check))
+            should_not_check = depends(chain, s);
+
+#endif
 
         if(should_not_check || check(s))
             coherencies.emplace_back(std::move(s));
@@ -180,10 +238,15 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
         std::vector<AnswerSet> coherencies;
         std::size_t max = get_max_incoherencies(program, solution);
         
-        if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
+        if(!get_coherent_answer(chain, program, solution, max, coherencies)) { __PERF_INC(checks_failed);
         
             LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
-                                << program.id() << std::endl;
+                                 << program.id() << std::endl;
+
+#if defined(DEBUG) && DEBUG_LEVEL <= TRACE
+            for(auto i : coherencies)
+                LOG(__FILE__, ERROR) << "Candidate rejected: " << i << std::endl;
+#endif
         
             return false;
         }
@@ -202,9 +265,22 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
     
     } else {
 
-        if(program.type() != ProgramType::TYPE_FORALL)
-            return false;       
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        if(qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE) {
             
+            if(program.type() == ProgramType::TYPE_FORALL)
+                return false;
+
+        } else {
+#endif
+
+            if(program.type() != ProgramType::TYPE_FORALL)
+                return false;       
+
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        }
+#endif
+
         candidates.emplace_back(answer);
 
     }

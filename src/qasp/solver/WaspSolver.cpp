@@ -117,7 +117,7 @@ static inline void wasp_flip_choices(const std::vector<Literal>& assumptions, st
 }
 
 
-static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& assumptions) {
+static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& assumptions, const size_t max_models) {
 
     auto& s = wasp.getSolver();
     
@@ -154,7 +154,7 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
 
     s.setComputeUnsatCores(true);
 
-    for(;;) {
+    for(size_t iterations = 1;;) {
 
         s.unrollToZero();
         s.clearConflictStatus();
@@ -196,6 +196,10 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
 
         } else {
 
+            if(++iterations > max_models)
+                return COHERENT;
+
+
             s.getChoicesWithoutAssumptions(choices);
 
             while(checked.size() < choices.size())
@@ -219,7 +223,7 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
 
 
 
-ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output) const {
+ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models) const {
 
     assert(!ground.empty());
     assert( output.empty());
@@ -275,7 +279,11 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
         wasp.freeze(i.getVariable());
 
 
-    unsigned res = wasp_enumeration(wasp, literals);
+    if(likely(max_models == 0))
+        max_models = std::numeric_limits<decltype(max_models)>().max();
+
+
+    unsigned res = wasp_enumeration(wasp, literals, max_models);
 
 #else
 

@@ -102,6 +102,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
         LOG(__FILE__, TRACE) << "Extracted from smodels atom with index " << index
                              << " and predicate " << predicate << std::endl;
 
+
         this->__atoms.emplace(predicate, Atom { index, predicate });
         this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);
 
@@ -116,7 +117,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 }
 
 
-std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer) const { __PERF_TIMING(solving);
+std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer, const size_t max_models) const { __PERF_TIMING(solving);
     
     assert(!ground().empty());
 
@@ -143,16 +144,16 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
 
         }
 
-        positive.emplace_back(map_index(i), i.predicate());
+        positive.emplace_back(map_index(i), i.arity(), i.predicate());
 
     }
 
     for(const auto& i : assumptions()) {
 
         if(answer.contains(i))
-            positive.emplace_back(map_index(i), i.predicate());
+            positive.emplace_back(map_index(i), i.arity(), i.predicate());
         else
-            negative.emplace_back(map_index(i), i.predicate());
+            negative.emplace_back(map_index(i), i.arity(), i.predicate());
 
     }
 
@@ -163,7 +164,7 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
                         << " positive(" << positive << "),"
                         << " negative(" << negative << ")" << std::endl;
     
-    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output);
+    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output, max_models);
 
     LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " are " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
 
