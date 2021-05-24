@@ -83,6 +83,42 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 }
 
 
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const {
+
+    assert(chain != __program.subprograms().end());
+    assert(!answer.empty());
+
+
+    for(auto it = chain + 1; it != __program.subprograms().end(); it++) {
+
+        if(unlikely(it->type() == TYPE_CONSTRAINTS))
+            continue;
+
+        for(const auto& i : it->predicates()) {
+
+            const auto& found = std::find(answer.begin(), answer.end(), i);
+
+            if(i.positive() && found != answer.end())
+                return true;
+
+            if(i.negative() && found == answer.end())
+                return true; 
+
+        }
+
+    }
+
+
+    LOG(__FILE__, TRACE) << "Found an answer set with no dependency: " << answer << std::endl; 
+
+    return false;
+
+}
+
+#endif
+
 
 
 void QaspSolver::promote_candidates(const std::vector<AnswerSet>& candidates) {
@@ -141,24 +177,19 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 }
 
 
-bool QaspSolver::get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
-
-
-    // FIXME: evalute if checking can be anticipated
-    bool should_not_check = !program.last();
-
+bool QaspSolver::get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
 
     size_t incoherencies = 0;
 
     for(const auto& s : solution) {
 
+        bool should_not_check = !program.last();
+
+
 #if defined(HAVE_MODE_LOOK_AHEAD)
 
-        if(unlikely((qasp().options().mode == QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check)) {
-
-            LOG(__FILE__, TRACE) << "Checking Answer for Look ahead: " << s << std::endl;
-
-        }
+        if(unlikely((qasp().options().mode == QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check))
+            should_not_check = depends(chain, s);
 
 #endif
 
@@ -207,7 +238,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
         std::vector<AnswerSet> coherencies;
         std::size_t max = get_max_incoherencies(program, solution);
         
-        if(!get_coherent_answer(program, solution, max, coherencies)) { __PERF_INC(checks_failed);
+        if(!get_coherent_answer(chain, program, solution, max, coherencies)) { __PERF_INC(checks_failed);
         
             LOG(__FILE__, ERROR) << "Not enough coherent solutions were found for program #" 
                                  << program.id() << std::endl;

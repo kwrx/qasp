@@ -73,9 +73,12 @@ namespace qasp {
 
             void promote_candidates(const std::vector<AnswerSet>& answers);
             
-            bool get_coherent_answer(const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
+            bool get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
             size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
 
+#if defined(HAVE_MODE_LOOK_AHEAD)
+            bool depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const;
+#endif
 
             inline void model(const ProgramModel value) {
                 this->__model = value;

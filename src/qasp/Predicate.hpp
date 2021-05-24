@@ -20,10 +20,16 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <algorithm>
 
 #include "Atom.hpp"
+
+
+#define PREDICATE_POSITIVE          1
+#define PREDICATE_NEGATIVE          -1
+
 
 
 namespace qasp {
@@ -31,14 +37,17 @@ namespace qasp {
     class Predicate {
         public:
 
-            Predicate(const std::string name, const std::size_t arity)
+            Predicate(const std::string name, const std::size_t arity, const int sign)
                 : __name(std::move(name))
-                , __arity(arity) {}
+                , __arity(arity)
+                , __sign(sign) {}
 
-            Predicate(const std::string name, const std::string& extensions)
+            Predicate(const std::string name, const std::string& extensions, const int sign)
                 : __name(std::move(name))
-                , __arity(1) {
+                , __arity(0)
+                , __sign(sign) {
 
+                    __arity += !extensions.empty();
                     __arity += std::count(extensions.begin(), extensions.end(), ',');
 
                 }
@@ -52,24 +61,47 @@ namespace qasp {
                 return this->__name;
             }
 
+            inline const auto& sign() const {
+                return this->__sign;
+            }
+
+            inline const bool positive() const {
+                return __sign >= 0;
+            }
+
+            inline const bool negative() const {
+                return __sign < 0;
+            }
+
             inline bool operator ==(const Predicate& b) const {
                 return this->name()  == b.name() 
                     && this->arity() == b.arity();
             }
 
-            inline bool operator ==(const Atom& b) const {
-                return this->name()  == b.predicate() && // FIXME: Calcolo nome atomo
-                       this->arity() == b.arity();
-            }
-
             inline friend std::ostream& operator <<(std::ostream& os, const Predicate& p) {
-                return os << p.name(), os;
+                
+                os << p.name();
+
+                if(p.arity() > 0) {
+
+                    os << "(";
+
+                    for(size_t i = 0; i < p.arity() - 1; i++)
+                        os << "_,";
+
+                    os << "_)";
+
+                }
+
+                return os;
+
             }
 
 
         private:
             std::string __name;
             std::size_t __arity;
+            int __sign;
 
     };
 

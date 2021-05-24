@@ -89,16 +89,20 @@ static std::string parseValue(const std::vector<Token>::iterator& it) {
 static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, std::vector<Predicate>& predicates) {
 
 
-    #define VALID_NAME(it)  \
+    #define VALID_NAME(it)          \
         (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
 
-    #define VALID_EXTENSIONS(it) \
+    #define VALID_EXTENSIONS(it)    \
         (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT))
 
 
 
     std::ostringstream source;
+
+    auto sign = PREDICATE_POSITIVE;
     auto begin = it;
+
+
 
     do {
 
@@ -143,8 +147,10 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
                     if(unlikely(!EXPECT(it, TK_DOT) && !EXPECT(it, TK_COMMA))) {
 
-                        if(name.str() == "not")
+                        if(name.str() == "not") {
+                            sign *= PREDICATE_NEGATIVE;
                             continue;
+                        }
 
                         LOG(__FILE__, WARN) << "Expected a LEFT_PAREN, DOT or COMMA after predicate name" << std::endl;
                         break;
@@ -154,14 +160,15 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
                 }
 
                 LOG(__FILE__, TRACE) << "<PARSER> Found Predicate with name: " << name.str()
-                                    << " and extensions: (" << extensions.str() << ")"
-                                    << " in " << (*begin).tk_source
-                                    << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
+                                     << " and extensions: (" << extensions.str() << ")"
+                                     << " in " << (*begin).tk_source
+                                     << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 
 
 
-                predicates.emplace_back(name.str(), extensions.str());
+                predicates.emplace_back(name.str(), extensions.str(), sign);
 
+                sign = PREDICATE_POSITIVE;
 
 
                 if(EXPECT(it, TK_COMMA))
