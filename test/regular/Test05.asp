@@ -7,7 +7,7 @@ x | nx.
 y | ny.
 %@forall
 z | nz.
-%@constraints
+%@constraint
 :- nx, ny, nz.
 :- x, y, z.
 

@@ -1,0 +1,77 @@
+%p cnf 30 17
+%@forall
+x15 | nx15.
+%@exists
+x29 | nx29.
+%@forall
+x14 | nx14.
+%@exists
+x28 | nx28.
+%@forall
+x13 | nx13.
+%@exists
+x27 | nx27.
+%@forall
+x12 | nx12.
+%@exists
+x26 | nx26.
+%@forall
+x11 | nx11.
+%@exists
+x25 | nx25.
+%@forall
+x10 | nx10.
+%@exists
+x24 | nx24.
+%@forall
+x9 | nx9.
+%@exists
+x23 | nx23.
+%@forall
+x8 | nx8.
+%@exists
+x22 | nx22.
+%@forall
+x7 | nx7.
+%@exists
+x21 | nx21.
+%@forall
+x6 | nx6.
+%@exists
+x20 | nx20.
+%@forall
+x5 | nx5.
+%@exists
+x19 | nx19.
+%@forall
+x4 | nx4.
+%@exists
+x18 | nx18.
+%@forall
+x3 | nx3.
+%@exists
+x17 | nx17.
+%@forall
+x2 | nx2.
+%@exists
+x16 | nx16.
+%@forall
+x1 | nx1.
+%@constraint
+ :- x15.
+ :- x14, x28, x13, nx15, nx29.
+ :- x13, x27, x12, nx14, nx28.
+ :- x12, x26, x11, nx13, nx27.
+ :- x11, x25, x10, nx12, nx26.
+ :- x10, x24, x9, nx11, nx25.
+ :- x9, x23, x8, nx10, nx24.
+ :- x8, x22, x7, nx9, nx23.
+ :- x7, x21, x6, nx8, nx22.
+ :- x6, x20, x5, nx7, nx21.
+ :- x5, x19, x4, nx6, nx20.
+ :- x4, x18, x3, nx5, nx19.
+ :- x3, x17, x2, nx4, nx18.
+ :- x2, x16, x1, nx3, nx17.
+ :- nx2, nx1.
+ :- x1, nx2.
+ :- x2, nx1.

@@ -56,6 +56,8 @@ std::shared_ptr<Grounder> Grounder::instance() {
 
 std::string Grounder::generate(const std::string& source) {
 
+#if defined(HAVE_CACHE)
+
     std::size_t hash = std::hash<std::string>()(source);
 
     if(cache.contains(hash)) { __PERF_INC(grounding_cached);
@@ -64,5 +66,9 @@ std::string Grounder::generate(const std::string& source) {
 
     return cache.emplace(hash, execute(source))
          , cache.get(hash);
+
+#else
+    return execute(source);
+#endif
 
 }

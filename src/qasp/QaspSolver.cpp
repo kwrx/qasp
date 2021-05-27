@@ -58,13 +58,14 @@ void QaspSolver::init() {
 
 }
 
-bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings);
+bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(checkings);
 
     LOG(__FILE__, INFO) << "Checking coherency for answerset(" << answer << ")" << std::endl;
 
+#if defined(HAVE_MODE_COMPLEMENTARY)  
     if(unlikely(!constraint().has_value()))
-        return true;
-
+        return qasp().options().mode != QASP_SOLVING_MODE_COMPLEMENTARY;
+#endif
 
     Assumptions assumptions;
     assumptions.insert(assumptions.begin(), answer.begin(), answer.end());
@@ -72,8 +73,8 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
     Program program = constraint().value();
     program.groundize(assumptions);
 
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)  
-    return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+#if defined(HAVE_MODE_COMPLEMENTARY)  
+    return qasp().options().mode == QASP_SOLVING_MODE_COMPLEMENTARY
                 ? std::get<0>(program.solve(answer, 1)) == MODEL_INCOHERENT
                 : std::get<0>(program.solve(answer, 1)) == MODEL_COHERENT;
 #else
@@ -85,7 +86,7 @@ bool QaspSolver::check(const AnswerSet& answer) const { __PERF_TIMING(checkings)
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
 
-bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const {
+bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept {
 
     assert(chain != __program.subprograms().end());
     assert(!answer.empty());
@@ -93,22 +94,36 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
     for(auto it = chain + 1; it != __program.subprograms().end(); it++) {
 
-        if(unlikely(it->type() == TYPE_CONSTRAINTS))
-            continue;
+        if(unlikely(it->type() == TYPE_CONSTRAINTS)) {
 
-        for(const auto& i : it->predicates()) {
+            for(const auto& i : it->predicates()) {
 
-            const auto& found = std::find(answer.begin(), answer.end(), i);
+                const auto& found = std::find(answer.begin(), answer.end(), i);
 
-            if(i.positive() && found != answer.end())
-                return true;
+                if(i.negative() && found == answer.end())
+                    return true; 
 
-            if(i.negative() && found == answer.end())
-                return true; 
+            }    
+
+        } else {
+            
+            for(const auto& i : it->predicates()) {
+
+                const auto& found = std::find(answer.begin(), answer.end(), i);
+
+                if(i.positive() && found != answer.end())
+                    return true;
+
+                if(i.negative() && found == answer.end())
+                    return true; 
+
+            }
 
         }
 
     }
+
+
 
 
     LOG(__FILE__, TRACE) << "Found an answer set with no dependency: " << answer << std::endl; 
@@ -121,7 +136,7 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
 
 
-void QaspSolver::promote_candidates(const std::vector<AnswerSet>& candidates) {
+void QaspSolver::promote_candidates(const std::vector<AnswerSet>& candidates) noexcept {
 
 
     auto add = [&] (const auto& answer) { __PERF_INC(solutions_found);
@@ -151,8 +166,8 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 
         case TYPE_EXISTS:
 
-#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
-            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+#if defined(HAVE_MODE_COMPLEMENTARY) 
+            return qasp().options().mode == QASP_SOLVING_MODE_COMPLEMENTARY
                 ? 1
                 : solution.size();
 #else
@@ -161,8 +176,8 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 
         case TYPE_FORALL:
 
-#if defined(HAVE_MODE_COUNTER_EXAMPLE) 
-            return qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE
+#if defined(HAVE_MODE_COMPLEMENTARY) 
+            return qasp().options().mode == QASP_SOLVING_MODE_COMPLEMENTARY
                 ? solution.size()
                 : 1;
 #else
@@ -177,7 +192,7 @@ size_t QaspSolver::get_max_incoherencies(const Program& program, const std::vect
 }
 
 
-bool QaspSolver::get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const {
+bool QaspSolver::get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const noexcept {
 
     size_t incoherencies = 0;
 
@@ -207,7 +222,7 @@ bool QaspSolver::get_coherent_answer(const std::vector<Program>::iterator& chain
 
 
 
-bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates, Assumptions assumptions, AnswerSet answer) { __PERF_TIMING(executions);
+bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates, Assumptions assumptions, AnswerSet answer) noexcept { __PERF_TIMING(executions);
 
 
     if(unlikely(chain == program().subprograms().end()))
@@ -233,7 +248,6 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
 
 
     if(likely(model == MODEL_COHERENT)) {
-
 
         std::vector<AnswerSet> coherencies;
         std::size_t max = get_max_incoherencies(program, solution);
@@ -265,8 +279,8 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
     
     } else {
 
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        if(qasp().options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE) {
+#if defined(HAVE_MODE_COMPLEMENTARY)
+        if(qasp().options().mode == QASP_SOLVING_MODE_COMPLEMENTARY) {
             
             if(program.type() == ProgramType::TYPE_FORALL)
                 return false;
@@ -277,7 +291,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, std::vector<Answe
             if(program.type() != ProgramType::TYPE_FORALL)
                 return false;       
 
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+#if defined(HAVE_MODE_COMPLEMENTARY)
         }
 #endif
 

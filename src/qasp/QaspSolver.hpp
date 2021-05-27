@@ -68,19 +68,19 @@ namespace qasp {
             std::vector<AnswerSet> __solution {};
 
             void init();
-            bool check(const AnswerSet& answer) const;
-            bool execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates = {}, Assumptions assumptions = {}, AnswerSet answer = {});
+            bool check(const AnswerSet& answer) const noexcept;
+            bool execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates = {}, Assumptions assumptions = {}, AnswerSet answer = {}) noexcept;
 
-            void promote_candidates(const std::vector<AnswerSet>& answers);
+            void promote_candidates(const std::vector<AnswerSet>& answers) noexcept;
             
-            bool get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const;
+            bool get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const noexcept;
             size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
-            bool depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const;
+            bool depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept;
 #endif
 
-            inline void model(const ProgramModel value) {
+            inline void model(const ProgramModel value) noexcept {
                 this->__model = value;
             }
 

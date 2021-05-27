@@ -73,7 +73,7 @@ namespace qasp {
                 return __sign < 0;
             }
 
-            inline bool operator ==(const Predicate& b) const {
+            inline bool operator ==(const Predicate& b) const noexcept {
                 return this->name()  == b.name() 
                     && this->arity() == b.arity();
             }

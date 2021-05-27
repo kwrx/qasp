@@ -223,13 +223,12 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
 
 
 
-ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models) const {
+ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models) const noexcept {
 
     assert(!ground.empty());
     assert( output.empty());
 
 
-#if defined(HAVE_WASP)
 
     static std::mutex wasp_options_lock;
 
@@ -309,7 +308,7 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
 
     wasp.solve();
 
-    unsigned res = output.size() > 0        // FIXME
+    unsigned res = output.size() > 0        // FIXME: get result from solver
         ? COHERENT
         : INCOHERENT;
 
@@ -327,10 +326,5 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
             return ProgramModel::MODEL_UNKNOWN;
 
     }
-
-#else
-    throw std::runtime_error("wasp was not enabled in this build")
-#endif
-
 
 }

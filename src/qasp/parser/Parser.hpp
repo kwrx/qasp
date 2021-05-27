@@ -30,7 +30,7 @@
 #define ANNOTATION_COMMON           "common"
 #define ANNOTATION_EXISTS           "exists"
 #define ANNOTATION_FORALL           "forall"
-#define ANNOTATION_CONSTRAINTS      "constraints"
+#define ANNOTATION_CONSTRAINTS      "constraint"
 
 #define TK_ANNOTATION               '@'
 #define TK_SOURCE                   '*'

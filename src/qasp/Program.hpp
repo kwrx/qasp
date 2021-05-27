@@ -111,7 +111,7 @@ namespace qasp {
 
 
             const Program& groundize(Assumptions assumptions = {});
-            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const;
+            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const noexcept;
 
 
         private:
@@ -129,7 +129,7 @@ namespace qasp {
             bool __last = false;
 
 
-            inline const atom_index_t map_index(const Atom& atom) const { __PERF_INC(mapping);
+            inline const atom_index_t map_index(const Atom& atom) const noexcept { __PERF_INC(mapping);
                 
                 const auto& found = atoms().find(atom.predicate());
 

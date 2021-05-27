@@ -29,6 +29,9 @@
 
 #include <qasp/qasp.h>
 
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
+#include "qasp/utils/Performance.hpp"
+#endif
 
 
 static void show_usage(int argc, char** argv) {
@@ -39,8 +42,8 @@ static void show_usage(int argc, char** argv) {
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        << "    -c, --counter-example       proving satisfiability by counter example\n"
+#if defined(HAVE_MODE_COMPLEMENTARY)
+        << "    -c, --complementary         proving satisfiability by complementary\n"
 #endif
 #if defined(HAVE_MODE_LOOK_AHEAD)
         << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
@@ -103,6 +106,10 @@ static void sighandler(int sig) {
     }
 
 
+#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
+    __PERF_PRINT_ALL();
+#endif
+
     exit(sig);
 
 }
@@ -127,8 +134,8 @@ int main(int argc, char** argv) {
 #if defined(HAVE_THREADS)
         { "parallel",        required_argument, NULL, 'j' },
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        { "counter-example", no_argument,       NULL, 'c' },
+#if defined(HAVE_MODE_COMPLEMENTARY)
+        { "complementary",   no_argument,       NULL, 'c' },
 #endif
 #if defined(HAVE_MODE_LOOK_AHEAD)
         { "look-ahead",      no_argument,       NULL, 'l' },
@@ -153,9 +160,9 @@ int main(int argc, char** argv) {
                 options.cpus = atoi(optarg);
                 break;
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+#if defined(HAVE_MODE_COMPLEMENTARY)
             case 'c':
-                options.mode = QASP_SOLVING_MODE_COUNTER_EXAMPLE;
+                options.mode = QASP_SOLVING_MODE_COMPLEMENTARY;
                 break;
 #endif
 #if defined(HAVE_MODE_LOOK_AHEAD)

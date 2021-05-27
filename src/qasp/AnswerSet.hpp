@@ -35,7 +35,7 @@ namespace qasp {
     class AnswerSet : public std::vector<Atom> {
         public:
 
-            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) { __PERF_TIMING(answerset_comparing);
+            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) noexcept { __PERF_TIMING(answerset_comparing);
 
                 if(a.size() != b.size())
                     return false;
@@ -51,7 +51,7 @@ namespace qasp {
 
             }
 
-            inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) {
+            inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) noexcept {
 
                 os << "{";
                 
@@ -69,7 +69,7 @@ namespace qasp {
             }
 
 
-            inline const bool contains(const Atom& atom) const {
+            inline const bool contains(const Atom& atom) const noexcept {
                 return std::find(this->begin(), this->end(), atom) != this->end();
             }
 

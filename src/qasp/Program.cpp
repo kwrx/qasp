@@ -117,7 +117,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 }
 
 
-std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer, const size_t max_models) const { __PERF_TIMING(solving);
+std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet& answer, const size_t max_models) const noexcept { __PERF_TIMING(solving);
     
     assert(!ground().empty());
 

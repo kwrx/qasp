@@ -5,7 +5,7 @@ b | nb.
 c | nc.
 d | nd.
 e | ne.
-%@constraints
+%@constraint
 :- c, not e.
 :- d, not e.
 :- not c, not d, e.

@@ -6,6 +6,6 @@ e | f.
 %@exists
 h :- b.
 a.
-%@constraints
+%@constraint
 :- b, h.
 

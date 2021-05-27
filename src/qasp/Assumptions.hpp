@@ -42,7 +42,7 @@ namespace qasp {
             using std::vector<Atom>::empty;
 
 
-            inline friend std::ostream& operator <<(std::ostream& os, const Assumptions& a) {
+            inline friend std::ostream& operator <<(std::ostream& os, const Assumptions& a) noexcept {
                 
                 if(!a.empty()) {
 
@@ -61,13 +61,13 @@ namespace qasp {
             }
 
 
-            inline const bool contains(const Atom& atom) const {
+            inline const bool contains(const Atom& atom) const noexcept {
                 return this->std::unordered_set<std::string>::find(atom.predicate()) != this->std::unordered_set<std::string>::end();
             }
             
 
             template <typename ...T>
-            inline void emplace_back(T&&... args) {
+            inline void emplace_back(T&&... args) noexcept {
                 
                 const Atom a(std::forward<T>(args)...);
 
@@ -80,7 +80,7 @@ namespace qasp {
             }
 
             template <typename T>
-            inline void insert(std::vector<Atom>::iterator it, T first, T last) {
+            inline void insert(std::vector<Atom>::iterator it, T first, T last) noexcept {
 
                 for(; first != last; first++) {
 
