@@ -24,20 +24,4 @@
 using namespace qasp::solver;
 
 
-static std::shared_ptr<Solver> __instance;
 
-std::shared_ptr<Solver> Solver::instance() {
-
-    if(unlikely(!__instance)) {
-#if defined(HAVE_WASP)
-        __instance = std::make_shared<WaspSolver>();
-#elif defined(HAVE_CLASP)
-        __instance = std::make_shared<ClaspSolver>();
-#else
-#   error "missing solver application"
-#endif
-    }
-
-    return __instance;
-
-}

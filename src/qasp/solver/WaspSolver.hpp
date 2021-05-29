@@ -32,8 +32,11 @@ namespace qasp::solver {
     class WaspSolver : public Solver {
 
         public:
-            ProgramModel solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models = 0) const noexcept override;
+            std::optional<AnswerSet> solve() const noexcept override;
 
+        private:
+            
+        
     };
 
 }

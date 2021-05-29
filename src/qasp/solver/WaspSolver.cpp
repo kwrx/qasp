@@ -223,11 +223,7 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
 
 
 
-ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models) const noexcept {
-
-    assert(!ground.empty());
-    assert( output.empty());
-
+std::optional<AnswerSet> WaspSolver::solve() const noexcept {
 
 
     static std::mutex wasp_options_lock;
@@ -260,7 +256,7 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
         LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
                              << ground << std::endl;
 
-        std::istringstream source(ground);
+        std::istringstream source(ground());
         wasp.readInput(source);
 
     }
@@ -268,10 +264,10 @@ ProgramModel WaspSolver::solve(const std::string& ground, const Assumptions& pos
     std::vector<Literal> literals;
 
 
-    for(const auto& i : positive)
+    for(const auto& i : positive())
         literals.emplace_back(i.index(), POSITIVE);
     
-    for(const auto& i : negative)
+    for(const auto& i : negative())
         literals.emplace_back(i.index(), NEGATIVE);
 
     for(const auto& i : literals)
