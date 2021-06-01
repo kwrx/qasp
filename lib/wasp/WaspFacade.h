@@ -249,11 +249,13 @@ class WaspFacade
 
 #if defined(__qasp__)
         inline Solver& getSolver() { return solver; }
+        inline VariableNames& getVariableNames() { return variableNames; }
 #endif
 
         inline unsigned int numberOfCalls() const { return nbCalls; }
     private:
         Solver solver;
+        VariableNames variableNames;
         bool runtime_;
         bool ok_;
         bool disableVE_;

@@ -24,18 +24,81 @@
 #include "../Program.hpp"
 #include "../Assumptions.hpp"
 
+#include <wasp/WaspFacade.h>
 #include <string>
 
 
 namespace qasp::solver {
 
+
+    class WaspAnswerSetListener : public AnswerSetListener {
+
+        public:
+
+            WaspAnswerSetListener(WaspFacade& __wasp, AnswerSet& __answer)
+                : wasp(__wasp)
+                , answer(__answer) {}
+
+            ~WaspAnswerSetListener() {
+                wasp.removeAnswerSetListener(this);
+            };
+
+
+            inline void foundAnswerSet() override {
+
+                answer.clear();
+
+                for(size_t i = 1; i <= wasp.getSolver().numberOfAssignedLiterals(); i++) {
+                    
+                    if(wasp.isUndefined(i))
+                        continue;
+
+                    if(wasp.isFalse(i))
+                        continue;
+
+                    if(VariableNames::isHidden(i))
+                        continue;
+
+                    answer.emplace_back(i, VariableNames::getName(i));
+
+                }
+
+                LOG(__FILE__, TRACE) << "<LISTENER> Found an answer set: " << answer << std::endl;
+
+            }
+
+
+        private:
+            WaspFacade& wasp;
+            AnswerSet& answer;
+
+    };
+
     class WaspSolver : public Solver {
 
         public:
-            std::optional<AnswerSet> solve() const noexcept override;
+
+            WaspSolver(const std::string& ground, const Assumptions& positive, const Assumptions& negative)
+                : Solver(ground, positive, negative)
+                , listener(wasp, answer) {}
+
+            ~WaspSolver();
+
+
+            std::optional<AnswerSet> first() noexcept override;
+            std::optional<AnswerSet> enumerate() noexcept override;
 
         private:
-            
+
+            WaspAnswerSetListener listener;
+            WaspFacade wasp {};
+
+            AnswerSet answer {};
+
+            std::vector<Literal> assumptions {};
+            std::vector<Literal> choices {};
+            std::vector<bool> checked {};
+
         
     };
 

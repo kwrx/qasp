@@ -42,54 +42,8 @@ int EXIT_CODE;
 #endif
 
 
-class WaspAnswerSetListener : public AnswerSetListener {
 
-    public:
-
-        WaspAnswerSetListener(const WaspFacade& __wasp, std::vector<AnswerSet>& __answersets)
-            : wasp(__wasp)
-            , answersets(__answersets) {}
-
-        ~WaspAnswerSetListener() = default;
-
-
-        inline void foundAnswerSet() override {
-            
-            AnswerSet answer;
-
-            for(size_t i = 1; i <= wasp.getSolver().numberOfAssignedLiterals(); i++) {
-                
-                if(wasp.isUndefined(i))
-                    continue;
-
-                if(wasp.isFalse(i))
-                    continue;
-
-                if(VariableNames::isHidden(i))
-                    continue;
-
-                answer.emplace_back(i, VariableNames::getName(i));
-
-            }
-
-            LOG(__FILE__, TRACE) << "<LISTENER> Found an answer set: " << answer << std::endl;
-
-            answersets.emplace_back(answer);
-
-        }
-
-
-    private:
-        const WaspFacade& wasp;
-        std::vector<AnswerSet>& answersets;
-
-};
-
-
-
-#if defined(HAVE_WASP_ASSUMPTIONS)
-
-static inline void wasp_flip_choices(const std::vector<Literal>& assumptions, std::vector<bool>& checked, std::vector<Literal>& choices) {
+static void wasp_flip_choices(const std::vector<Literal>& assumptions, std::vector<bool>& checked, std::vector<Literal>& choices) {
 
     assert(choices.size() >= assumptions.size());
     assert(checked.size() >= assumptions.size());
@@ -117,93 +71,125 @@ static inline void wasp_flip_choices(const std::vector<Literal>& assumptions, st
 }
 
 
-static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& assumptions, const size_t max_models) {
+
+std::optional<AnswerSet> WaspSolver::first() noexcept {
+
+    static std::mutex wasp_options_lock;
+
+
+    {
+        std::scoped_lock<std::mutex> __(wasp_options_lock);
+        wasp::Options::maxModels = UINT32_MAX;
+        wasp::Options::setOptions(wasp);
+    }
+
+    wasp.disableOutput();
+    wasp.disableVariableElimination();
+    wasp.attachAnswerSetListener(&this->listener);
+
+
+    {
+
+        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
+                             << ground() << std::endl;
+
+        std::istringstream source(ground());
+        wasp.readInput(source);
+
+    }
+
+
+    for(const auto& i : positive())
+        this->assumptions.emplace_back(i.index(), POSITIVE);
+    
+    for(const auto& i : negative())
+        this->assumptions.emplace_back(i.index(), NEGATIVE);
+
+    for(const auto& i : this->assumptions)
+        wasp.freeze(i.getVariable());
+
+
+    this->choices = std::vector<Literal>(this->assumptions);
+
+
 
     auto& s = wasp.getSolver();
-    
+
     if(unlikely(!s.preprocessing()))
-        return INCOHERENT;
-
-
-    std::vector<Literal> choices(assumptions);
-    std::vector<bool> checked;
+        return {};
 
 
     s.onStartingSolver();
 
-    if(s.solve(choices) == INCOHERENT)
-        return INCOHERENT;
+    if(s.solve(this->choices) == INCOHERENT)
+        return {};
 
+
+    return { this->answer };
+
+}
+
+std::optional<AnswerSet> WaspSolver::enumerate() noexcept {
+
+    auto& s = wasp.getSolver();
 
 
     s.getChoicesWithoutAssumptions(choices);
 
-    if(unlikely(choices.size() == assumptions.size()))
-        return COHERENT;
-
-
-
     while(checked.size() < choices.size())
         checked.emplace_back(false);
 
+
+
     wasp_flip_choices(assumptions, checked, choices);
 
-    
+    if(unlikely(choices.size() == assumptions.size()))
+        return {};
+
 
 
 
     s.setComputeUnsatCores(true);
 
-    for(size_t iterations = 1;;) {
+    do {
+
 
         s.unrollToZero();
         s.clearConflictStatus();
 
-
-        if(s.solve(choices) == INCOHERENT) {
-
-            const auto* clause = s.getUnsatCore();
-
-            if(unlikely(clause->size() == 0))
-                return INCOHERENT;
-
+        if(s.solve(choices) == COHERENT)
+            return { this->answer };
             
-            assert(choices.empty() > assumptions.size());
-            assert(checked.empty() > assumptions.size());
 
-            if(s.getCurrentDecisionLevel() == 0 || clause->size() == 1) {
 
-                assert(choices.size() == checked.size());
+        const auto* clause = s.getUnsatCore();
 
-                size_t i, k;
-                for(i = k = 0; i < choices.size(); i++) {
+        if(unlikely(clause->size() == 0))
+            return {};
 
-                    choices[k] = choices[i];
-                    checked[k] = checked[i];
+        
+        assert(choices.empty() > assumptions.size());
+        assert(checked.empty() > assumptions.size());
 
-                    if(s.getDecisionLevel(choices[i]) != 0)
-                        k++;
+        if(s.getCurrentDecisionLevel() == 0 || clause->size() == 1) {
 
-                }
+            assert(choices.size() == checked.size());
 
-                assert(choices.size() == checked.size());
+            size_t i, k;
+            for(i = k = 0; i < choices.size(); i++) {
 
-                choices.resize(k);
-                checked.resize(k);
+                choices[k] = choices[i];
+                checked[k] = checked[i];
+
+                if(s.getDecisionLevel(choices[i]) != 0)
+                    k++;
 
             }
 
+            assert(choices.size() == checked.size());
 
-        } else {
-
-            if(++iterations > max_models)
-                return COHERENT;
-
-
-            s.getChoicesWithoutAssumptions(choices);
-
-            while(checked.size() < choices.size())
-                checked.emplace_back(false);
+            choices.resize(k);
+            checked.resize(k);
 
         }
 
@@ -211,116 +197,19 @@ static unsigned wasp_enumeration(WaspFacade& wasp, const std::vector<Literal>& a
         wasp_flip_choices(assumptions, checked, choices);
 
         if(unlikely(choices.size() == assumptions.size()))
-            return COHERENT;
-        
+            return {};
 
-    }
+
+    } while(true);
+
+
+    assert(0 && "unreachable");
 
 }
 
 
-#endif
-
-
-
-std::optional<AnswerSet> WaspSolver::solve() const noexcept {
-
-
-    static std::mutex wasp_options_lock;
-
-
+WaspSolver::~WaspSolver() {
 #if defined(HAVE_WASP_RESET)
     VariableNames::reset();
 #endif
-
-    WaspFacade wasp;
-
-    auto listener = std::make_unique<WaspAnswerSetListener>(wasp, output);
-
-    {
-
-        std::scoped_lock<std::mutex> __(wasp_options_lock);
-        wasp::Options::maxModels = UINT32_MAX;
-        wasp::Options::setOptions(wasp);
-        wasp.disableOutput();
-        wasp.disableVariableElimination();
-        wasp.attachAnswerSetListener(listener.get());
-   
-    }
-
-   
-#if defined(HAVE_WASP_ASSUMPTIONS)
-
-    {
-
-        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
-                             << ground << std::endl;
-
-        std::istringstream source(ground());
-        wasp.readInput(source);
-
-    }
-
-    std::vector<Literal> literals;
-
-
-    for(const auto& i : positive())
-        literals.emplace_back(i.index(), POSITIVE);
-    
-    for(const auto& i : negative())
-        literals.emplace_back(i.index(), NEGATIVE);
-
-    for(const auto& i : literals)
-        wasp.freeze(i.getVariable());
-
-
-    if(likely(max_models == 0))
-        max_models = std::numeric_limits<decltype(max_models)>().max();
-
-
-    unsigned res = wasp_enumeration(wasp, literals, max_models);
-
-#else
-
-    {
-
-        std::stringstream source;
-
-        for(const auto& i : positive) 
-            source << "1 " << i.index() << " 0 0" << std::endl;
-        
-        for(const auto& i : negative)
-            source << "1 1 1 0 " << i.index() << std::endl;
-
-        source << ground;
-
-
-        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
-                             << source.str() << std::endl;
-
-        wasp.readInput(source);
-
-    }
-
-    wasp.solve();
-
-    unsigned res = output.size() > 0        // FIXME: get result from solver
-        ? COHERENT
-        : INCOHERENT;
-
-
-#endif
-    
-
-    switch(res) {
-
-        case COHERENT:
-            return ProgramModel::MODEL_COHERENT;
-        case INCOHERENT:
-            return ProgramModel::MODEL_INCOHERENT;
-        default:
-            return ProgramModel::MODEL_UNKNOWN;
-
-    }
-
 }

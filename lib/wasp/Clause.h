@@ -342,7 +342,7 @@ Clause::containsAnyComplementOf(
     return false;
 }
 
-inline int literalComparator( Literal l1, Literal l2 ){ return l1.getVariable() < l2.getVariable(); }
+inline int literalComparator( const Literal& l1, const Literal& l2 ){ return l1.getVariable() < l2.getVariable(); }
 
 void
 Clause::removeDuplicates()

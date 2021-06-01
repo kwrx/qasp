@@ -21,12 +21,15 @@
 #pragma once
 
 #include "../Program.hpp"
+#include "../Assumptions.hpp"
 #include "../AnswerSet.hpp"
 
 #include <memory>
 #include <string>
 #include <cassert>
 
+
+using namespace qasp;
 
 namespace qasp::solver {
 
@@ -44,60 +47,37 @@ namespace qasp::solver {
 
 
 
-                inline iterator(std::shared_ptr<Solver> solver)
-                    : __solver(std::move(solver)) { next(); }
+                inline iterator(Solver& solver, std::optional<AnswerSet> answer)
+                    : __solver(solver)
+                    , __answer(std::move(answer)) {}
 
 
                 inline const auto operator*() const {
-                    return *__ptr;
+                    return *__answer;
                 }
 
                 inline const auto operator->() const {
-                    return __ptr;
+                    return __answer;
                 }
 
                 inline const auto& operator++() {
-                    return next();
+                    return __answer = __solver.enumerate(), *this;
                 }
 
                 friend bool operator== (const iterator& a, const iterator& b) {
-                    return a.__ptr == b.__ptr;
+                    return a.__answer == b.__answer;
                 }
 
                 friend bool operator!= (const iterator& a, const iterator& b) {
-                    return a.__ptr != b.__ptr;
+                    return a.__answer != b.__answer;
                 }
-
 
 
                 private:
 
-                    std::shared_ptr<Solver> __solver;
-                    value_type __value;
-                    pointer __ptr;
-
-
-                    inline const iterator& next() {
-
-                        if(__solver) {
-
-                            const auto answer = __solver->solve();
-
-                            if(answer.has_value()) {
-                                __value = std::move(answer.value());
-                                __ptr = &__value;
-                            } else {
-                                __solver = nullptr;
-                                __ptr = nullptr;
-                            }
-
-                        } else {
-                            __ptr = nullptr;
-                        }
-
-                        return *this;
-
-                    }
+                    Solver& __solver;
+                    std::optional<AnswerSet> __answer;
+                    
 
             };
 
@@ -112,23 +92,24 @@ namespace qasp::solver {
                 }
 
             virtual ~Solver() = default;
-            virtual std::optional<AnswerSet> solve() const noexcept = 0;
+            virtual std::optional<AnswerSet> first() noexcept = 0;
+            virtual std::optional<AnswerSet> enumerate() noexcept = 0;
 
 
 
-            inline constexpr const iterator& begin() const noexcept {
-                return iterator(std::make_shared<Solver>(*this));
+            inline const iterator begin() noexcept {
+                return iterator(const_cast<Solver&>(*this), first());
             }
 
-            inline constexpr const iterator& end() const noexcept {
-                return iterator(nullptr);
+            inline const iterator end() const noexcept {
+                return iterator(const_cast<Solver&>(*this), {});
             }
 
-            inline constexpr const iterator& cbegin() const noexcept {
+            inline const iterator cbegin() noexcept {
                 return begin();
             }
 
-            inline constexpr const iterator& cend() const noexcept {
+            inline const iterator cend() const noexcept {
                 return end();
             }
 
@@ -144,6 +125,9 @@ namespace qasp::solver {
             inline const auto& negative() const {
                 return this->__negative;
             }
+
+
+            static std::unique_ptr<Solver> create(const std::string& ground, const Assumptions& positive, const Assumptions& negative) noexcept;
 
 
         private:

@@ -20,8 +20,21 @@
 
 #include "Solver.hpp"
 #include "WaspSolver.hpp"
+#include "../Assumptions.hpp"
 
-using namespace qasp::solver;
+using namespace qasp;
 
 
+std::unique_ptr<qasp::solver::Solver> qasp::solver::Solver::create(const std::string& ground, const Assumptions& positive, const Assumptions& negative) noexcept {
 
+#if defined(HAVE_WASP)
+    return std::make_unique<WaspSolver>(ground, positive, negative);
+
+#elif defined(HAVE_CLASP)
+    return std::make_unique<ClaspSolver>(ground, positive, negative);
+
+#else
+    #error "missing solver implementation"
+#endif
+
+}

@@ -163,8 +163,20 @@ std::tuple<ProgramModel, std::vector<AnswerSet>> Program::solve(const AnswerSet&
                         << " assumptions(" << assumptions() << "),"
                         << " positive(" << positive << "),"
                         << " negative(" << negative << ")" << std::endl;
+
     
-    ProgramModel model = Solver::instance()->solve(ground(), positive, negative, output, max_models);
+
+    ProgramModel model = ProgramModel::MODEL_UNKNOWN;
+
+    const auto solver = Solver::create(ground(), positive, negative);
+
+    for(const auto& answer : *solver)
+        output.emplace_back(answer);
+
+    if(output.empty())
+        model = ProgramModel::MODEL_INCOHERENT;
+    else
+        model = ProgramModel::MODEL_COHERENT;
 
     LOG(__FILE__, INFO) << "Generated answer sets for program #" << id() << " are " << &"UNKNOWN  \0COHERENT \0INCOHERENT"[model * 10] << std::endl;
 

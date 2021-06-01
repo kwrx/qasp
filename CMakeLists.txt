@@ -30,8 +30,8 @@ set(HAVE_PERFORMANCE        1)
 
 
 # Build Test Options
-set(ENABLE_COVERAGE         True)
-set(ENABLE_PROFILING        True)
+set(ENABLE_COVERAGE         False)
+set(ENABLE_PROFILING        False)
 
 ######################################
 
