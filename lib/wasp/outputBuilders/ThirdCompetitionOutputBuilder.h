@@ -20,19 +20,21 @@
 #define WASP_THIRDCOMPETITIONOUTPUTBUILDER_H
 
 #include "OutputBuilder.h"
+#include "../Solver.h"
 
 class ThirdCompetitionOutputBuilder : public OutputBuilder
 {
     public:
-        inline ThirdCompetitionOutputBuilder();
+
+        inline ThirdCompetitionOutputBuilder(Solver& solver)
+            : OutputBuilder(solver) {};
+
         virtual void startModel();
         virtual void printVariable( Var v, bool isTrue );
         virtual void endModel();
         virtual void onProgramIncoherent();
 };
 
-ThirdCompetitionOutputBuilder::ThirdCompetitionOutputBuilder()
-{
-}
+
 
 #endif

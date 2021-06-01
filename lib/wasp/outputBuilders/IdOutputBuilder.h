@@ -20,11 +20,12 @@
 #define WASP_IDOUTPUTBUILDER_H
 
 #include "OutputBuilder.h"
+#include "../Solver.h"
 
 class IdOutputBuilder : public OutputBuilder
 {
     public:
-        inline IdOutputBuilder();
+        inline IdOutputBuilder(Solver& solver);
         virtual void startModel();
         virtual void printVariable( Var, bool );
         virtual void endModel();
@@ -36,7 +37,7 @@ class IdOutputBuilder : public OutputBuilder
         unsigned int numberOfModels;
 };
 
-IdOutputBuilder::IdOutputBuilder() : OutputBuilder(), numberOfModels( 0 )
+IdOutputBuilder::IdOutputBuilder(Solver& solver) : OutputBuilder(solver), numberOfModels( 0 )
 {
 }
 

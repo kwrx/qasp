@@ -56,10 +56,10 @@ namespace qasp::solver {
                     if(wasp.isFalse(i))
                         continue;
 
-                    if(VariableNames::isHidden(i))
+                    if(wasp.getVariableNames().isHidden(i))
                         continue;
 
-                    answer.emplace_back(i, VariableNames::getName(i));
+                    answer.emplace_back(i, wasp.getVariableNames().getName(i));
 
                 }
 
@@ -81,8 +81,6 @@ namespace qasp::solver {
             WaspSolver(const std::string& ground, const Assumptions& positive, const Assumptions& negative)
                 : Solver(ground, positive, negative)
                 , listener(wasp, answer) {}
-
-            ~WaspSolver();
 
 
             std::optional<AnswerSet> first() noexcept override;

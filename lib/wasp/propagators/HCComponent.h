@@ -39,7 +39,7 @@ class HCComponent : public PostPropagator
         friend ostream& operator<<( ostream& out, const HCComponent& component );
         HCComponent( vector< GUSData* >& gusData_, Solver& s ) : PostPropagator(), id( 0 ), gusData( gusData_ ), solver( s ), numberOfCalls( 0 ), hasToTestModel( false ), isConflictual( false )
         {
-            outputBuilder = new NoopOutputBuilder();
+            outputBuilder = new NoopOutputBuilder(solver);
             checker.setOutputBuilder( outputBuilder );
         }
         virtual ~HCComponent();

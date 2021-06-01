@@ -20,11 +20,12 @@
 #define WASP_WASPOUTPUTBUILDER_H
 
 #include "OutputBuilder.h"
+#include "../Solver.h"
 
 class WaspOutputBuilder : public OutputBuilder
 {
     public:
-        inline WaspOutputBuilder();
+        inline WaspOutputBuilder(Solver& solver);
         virtual void startModel();
         virtual void printVariable( Var, bool isTrue );
         virtual void endModel();
@@ -35,7 +36,7 @@ class WaspOutputBuilder : public OutputBuilder
         bool first;
 };
 
-WaspOutputBuilder::WaspOutputBuilder() : first( true )
+WaspOutputBuilder::WaspOutputBuilder(Solver& solver) : OutputBuilder(solver), first( true )
 {
 }
 

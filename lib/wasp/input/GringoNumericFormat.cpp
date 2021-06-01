@@ -1030,7 +1030,7 @@ GringoNumericFormat::readAtomsTable(
     {
         createStructures( nextAtom );
         input.getline( name, 1024 );
-        VariableNames::setName( nextAtom, name );
+        solver.getVariableNames().setName( nextAtom, name );
         solver.addedVarName( nextAtom );
         if( wasp::Options::printAtomTable )
             cout << nextAtom << " " << name << endl;

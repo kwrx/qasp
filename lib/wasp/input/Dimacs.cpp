@@ -69,7 +69,7 @@ Dimacs::readAllClauses(
         while( solver.numberOfVariables() < numberOfVariables )
         {
             solver.addVariable();
-            VariableNames::setToBePrinted( solver.numberOfVariables() );
+            solver.getVariableNames().setToBePrinted( solver.numberOfVariables() );
         }
         
         solver.setLevels( 1 );
@@ -115,7 +115,7 @@ Dimacs::readClause(
         while( solver.numberOfVariables() < static_cast< unsigned int > ( abs( next ) ) )
         {            
             solver.addVariable();
-            VariableNames::setToBePrinted( solver.numberOfVariables() );
+            solver.getVariableNames().setToBePrinted( solver.numberOfVariables() );
         }
 
         //insert the current literal in the set

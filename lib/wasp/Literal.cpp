@@ -33,8 +33,12 @@ operator<<(
     if( !lit.isPositive() )
         out << "~";
 
+
+#if !defined(__qasp__) // HACK(kwrx): workaround for qasp
     if( !VariableNames::isHidden( lit.getVariable() ) )
         out << VariableNames::getName( lit.getVariable() );
+#endif
+
     #ifdef TRACE_ON
     else
         out << lit.getVariable();

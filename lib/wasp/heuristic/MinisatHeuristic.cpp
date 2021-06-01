@@ -234,14 +234,14 @@ void MinisatHeuristic::initMinisatPropagators( Var v, unsigned int& score )
 
 void MinisatHeuristic::initMinisatVisibleAtoms( Var v, unsigned int& score )
 {
-    if( VariableNames::isHidden( v ) ) return;
+    if( solver.getVariableNames().isHidden( v ) ) return;
     score = wasp::Options::initValue;
     if( wasp::Options::initSign == INIT_SIGN_MINISAT_MIXED ) setSign( v % 2 == 0 ? v : -v );
 }
 
 void MinisatHeuristic::initMinisatHiddenAtoms( Var v, unsigned int& score )
 {
-    if( !VariableNames::isHidden( v ) ) return;
+    if( !solver.getVariableNames().isHidden( v ) ) return;
     score = wasp::Options::initValue;
     if( wasp::Options::initSign == INIT_SIGN_MINISAT_MIXED ) setSign( v % 2 == 0 ? v : -v );
 }

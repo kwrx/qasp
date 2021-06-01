@@ -29,11 +29,11 @@ ThirdCompetitionOutputBuilder::printVariable(
     Var variable,
     bool isTrue )
 {
-    if( VariableNames::isHidden( variable ) )
+    if( solver.getVariableNames().isHidden( variable ) )
         return;
     if( isTrue )
     {
-        cout << VariableNames::getName( variable ) << ". ";
+        cout << solver.getVariableNames().getName( variable ) << ". ";
     }
 }
 

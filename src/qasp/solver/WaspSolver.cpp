@@ -206,10 +206,3 @@ std::optional<AnswerSet> WaspSolver::enumerate() noexcept {
     assert(0 && "unreachable");
 
 }
-
-
-WaspSolver::~WaspSolver() {
-#if defined(HAVE_WASP_RESET)
-    VariableNames::reset();
-#endif
-}
