@@ -24,14 +24,20 @@
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
 #include "Predicate.hpp"
+#include "solver/Solver.hpp"
 #include "utils/Performance.hpp"
 
 #include <string>
 #include <vector>
 #include <tuple>
 #include <unordered_map>
+#include <memory>
+
 
 namespace qasp {
+
+    struct iterator;
+
 
     enum ProgramType {
         TYPE_COMMON,
@@ -45,6 +51,7 @@ namespace qasp {
         MODEL_COHERENT,
         MODEL_INCOHERENT
     };
+
 
     class Program {
         public:
@@ -111,7 +118,7 @@ namespace qasp {
 
 
             const Program& groundize(Assumptions assumptions = {});
-            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const noexcept;
+            std::unique_ptr<::solver::Solver> solve(const AnswerSet& answer = {}) const noexcept;
 
 
         private:

@@ -69,12 +69,10 @@ namespace qasp {
 
             void init();
             bool check(const AnswerSet& answer) const noexcept;
-            bool execute(std::vector<Program>::iterator chain, std::vector<AnswerSet>&& candidates = {}, Assumptions assumptions = {}, AnswerSet answer = {}) noexcept;
-
-            void promote_candidates(const std::vector<AnswerSet>& answers) noexcept;
+            bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {}) noexcept;
             
-            bool get_coherent_answer(const std::vector<Program>::iterator& chain, const Program& program, const std::vector<AnswerSet>& solution, const size_t& max, std::vector<AnswerSet>& coherencies) const noexcept;
-            size_t get_max_incoherencies(const Program& program, const std::vector<AnswerSet>& solution) const;
+            bool check_answer(const std::vector<Program>::iterator& chain, const Program& program, const AnswerSet& answer) const noexcept;
+            void promote_answer(const AnswerSet& answer) noexcept;
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
             bool depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept;

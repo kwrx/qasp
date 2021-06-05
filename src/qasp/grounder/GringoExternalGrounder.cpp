@@ -18,9 +18,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(HAVE_IDLV)
+#if defined(HAVE_GRINGO_EXTERNAL)
 
-#include "IDLVGrounder.hpp"
+#include "GringoExternalGrounder.hpp"
 #include <iostream>
 #include <sstream>
 #include <exception>
@@ -36,11 +36,11 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
-std::string IDLVGrounder::execute(const std::string& source) const {
+std::string GringoExternalGrounder::execute(const std::string& source) const {
 
     std::ostringstream output;
 
-    LOG(__FILE__, TRACE) << "Passing sources to IDLV (" << source.size() << " bytes): " 
+    LOG(__FILE__, TRACE) << "Passing sources to GRINGO_EXTERNAL (" << source.size() << " bytes): " 
                          << std::endl << source << std::endl;
 
 
@@ -87,9 +87,11 @@ std::string IDLVGrounder::execute(const std::string& source) const {
 #endif
 
         char* const argv[] = {
-            (char*) "idlv",
-            (char*) "--stdin", 
-            (char*) "--output=smodels", NULL
+            (char*) "gringo", 
+            (char*) "--output=smodels",
+            (char*) "--warn=none",
+            (char*) "--fast-exit", 
+            NULL
         };
 
         exit(execvp(argv[0], argv));

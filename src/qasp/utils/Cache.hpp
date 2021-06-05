@@ -38,7 +38,7 @@ namespace qasp::utils {
 
             
 
-            inline const bool contains(const T& id) const noexcept {
+            inline const bool contains(const T& id) noexcept {
 #if defined(HAVE_THREADS)
                 std::scoped_lock<std::mutex> guard(m_lock);
 #endif
@@ -46,7 +46,7 @@ namespace qasp::utils {
             }
 
 
-            inline const D& get(const T& id) const noexcept {
+            inline const D& get(const T& id) noexcept {
 
                 assert(contains(id));
 

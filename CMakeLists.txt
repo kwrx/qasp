@@ -6,32 +6,30 @@ project(QASP CXX)
 #
 
 ## Grounder
-set(HAVE_GRINGO     1)
-set(HAVE_IDLV       0)
+set(HAVE_GRINGO                 1)
+set(HAVE_GRINGO_EXTERNAL        0)
+set(HAVE_IDLV                   0)
 
 ## Solver
-set(HAVE_WASP       1)
-set(HAVE_CLASP      0)
+set(HAVE_WASP                   1)
+set(HAVE_CLASP                  0)
 
 ## QASP
-set(HAVE_THREADS                0)
+set(HAVE_THREADS                1)
 set(HAVE_CACHE                  1)
-set(HAVE_MODE_COMPLEMENTARY     1)
 set(HAVE_MODE_LOOK_AHEAD        1)
 
 ## Wasp
-set(HAVE_WASP_ASSUMPTIONS   1)
-set(HAVE_WASP_RESET         1)
+set(HAVE_WASP_ASSUMPTIONS       1)
+set(HAVE_WASP_RESET             1)
 
 ## Logger
-set(HAVE_PRETTY_LOGGER      1)
-set(HAVE_PERFORMANCE        1)
-
-
+set(HAVE_PRETTY_LOGGER          1)
+set(HAVE_PERFORMANCE            1)
 
 # Build Test Options
-set(ENABLE_COVERAGE         False)
-set(ENABLE_PROFILING        False)
+set(ENABLE_COVERAGE             0)
+set(ENABLE_PROFILING            0)
 
 ######################################
 
@@ -58,11 +56,10 @@ enable_testing()
 
 add_subdirectory(src)
 add_subdirectory(test/regular)
-add_subdirectory(test/complementary)
 add_subdirectory(test/lookahead)
 add_subdirectory(test/other)
 
-install(TARGETS qaspcli qasp wasp
+install(TARGETS qaspcli qasp
     RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
     ARCHIVE PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
     LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE

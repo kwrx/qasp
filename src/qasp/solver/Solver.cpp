@@ -19,8 +19,14 @@
  */
 
 #include "Solver.hpp"
-#include "WaspSolver.hpp"
 #include "../Assumptions.hpp"
+
+
+#if defined(HAVE_WASP)
+#   include "WaspSolver.hpp"
+#elif defined(HAVE_CLASP)
+#   include "ClaspSolver.hpp"
+#endif
 
 using namespace qasp;
 

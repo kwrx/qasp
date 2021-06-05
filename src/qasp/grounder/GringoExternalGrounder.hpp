@@ -1,5 +1,5 @@
 /*                                                                      
- * GPL-3.0 License 
+ * GPL3 License 
  * 
  * Copyright (C) 2021 Antonino Natale
  * This file is part of QASP.
@@ -18,34 +18,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Performance.hpp"
+#pragma once
+#if defined(HAVE_GRINGO_EXTERNAL)
 
-#if defined(HAVE_PERFORMANCE)
+#include "Grounder.hpp"
+#include <string>
 
-#include <vector>
-#include <cstdint>
+namespace qasp::grounder {
 
-using namespace qasp::utils;
+    class GringoExternalGrounder : public Grounder {
 
+        public:
+            std::string execute(const std::string& source) const override;
 
-#define PERF_VALUE_T(name)                                                  \
-    std::vector<double> __trace_performance::__timings_##name = {};         \
-    std::size_t __trace_performance::__counter_##name = {};
+    };
 
-
-    PERF_VALUE_T(running);
-    PERF_VALUE_T(grounding);
-    PERF_VALUE_T(grounding_cached);
-    PERF_VALUE_T(solving);
-    PERF_VALUE_T(parsing);
-    PERF_VALUE_T(checkings);
-    PERF_VALUE_T(depends);
-    PERF_VALUE_T(iterations);
-    PERF_VALUE_T(executions);
-    PERF_VALUE_T(mapping);
-    PERF_VALUE_T(answerset_comparing);
-    PERF_VALUE_T(solutions_found);
-    PERF_VALUE_T(solutions_discarded);
-    PERF_VALUE_T(checks_failed);
+}
 
 #endif

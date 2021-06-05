@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#if defined(HAVE_IDLV)
 
 #include "Grounder.hpp"
 #include <string>
@@ -33,3 +34,6 @@ namespace qasp::grounder {
     };
 
 }
+
+
+#endif

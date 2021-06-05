@@ -34,7 +34,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(DEBUG 1)
-    set(DEBUG_LEVEL ALL)
+    set(DEBUG_LEVEL __ALL)
 endif()
 
 

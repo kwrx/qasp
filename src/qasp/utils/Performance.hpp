@@ -20,14 +20,14 @@
 
 #pragma once
 
-#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
+#if defined(HAVE_PERFORMANCE)
 
 #include <chrono>
 #include <vector>
 #include <algorithm>
 #include <numeric>
 #include <iostream>
-
+#include <iomanip>
 
 
 #define __PERF_INC(stats)                                               \
@@ -40,13 +40,24 @@
 
 
 
+#if defined(DEBUG) && defined(LOG)
+#define PERF_LOG(a, b) LOG(a, b)
+#else
+#define PERF_LOG(a, b) std::cerr
+#endif
+
+
+#define __PERF_PADDING 24
+
+
 #define __PERF_PRINT_ALL() {                                            \
+    __PERF_PRINT(running);                                              \
     __PERF_PRINT(grounding);                                            \
     __PERF_PRINT(grounding_cached);                                     \
     __PERF_PRINT(solving);                                              \
     __PERF_PRINT(parsing);                                              \
-    __PERF_PRINT(running);                                              \
     __PERF_PRINT(checkings);                                            \
+    __PERF_PRINT(depends);                                              \
     __PERF_PRINT(iterations);                                           \
     __PERF_PRINT(executions);                                           \
     __PERF_PRINT(mapping);                                              \
@@ -56,9 +67,11 @@
     __PERF_PRINT(checks_failed);                                        \
 }
 
+
 #define __PERF_PRINT(stats) {                                           \
     if(qasp::utils::__trace_performance::__timings_##stats.empty()) {   \
-        LOG("Performance", INFO) << #stats << " => count: "             \
+        PERF_LOG("Performance", INFO) << std::setw(__PERF_PADDING)      \
+            << #stats << " => count: "                                  \
             << qasp::utils::__trace_performance::__counter_##stats      \
             << std::endl;                                               \
     } else {                                                            \
@@ -80,7 +93,8 @@
             qasp::utils::__trace_performance::__timings_##stats.end(),  \
             0.0                                                         \
         );                                                              \
-        LOG("Performance", INFO) << #stats << " => count: "             \
+        PERF_LOG("Performance", INFO) << std::setw(__PERF_PADDING)      \
+            << #stats << " => count: "                                  \
             << qasp::utils::__trace_performance::__counter_##stats      \
             << "; min: " << std::fixed << min << "s"                    \
             << "; max: " << std::fixed << max << "s"                    \
@@ -98,12 +112,13 @@ namespace qasp::utils {
 
     class __trace_performance {
         public:
+            PERF_DECL_T(running);
             PERF_DECL_T(grounding);
             PERF_DECL_T(grounding_cached);
             PERF_DECL_T(solving);
             PERF_DECL_T(parsing);
-            PERF_DECL_T(running);
             PERF_DECL_T(checkings);
+            PERF_DECL_T(depends);
             PERF_DECL_T(iterations);
             PERF_DECL_T(executions);
             PERF_DECL_T(mapping);

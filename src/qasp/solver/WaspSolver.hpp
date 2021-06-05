@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#if defined(HAVE_WASP)
 
 #include "Solver.hpp"
 #include "../Program.hpp"
@@ -80,7 +81,11 @@ namespace qasp::solver {
 
             WaspSolver(const std::string& ground, const Assumptions& positive, const Assumptions& negative)
                 : Solver(ground, positive, negative)
-                , listener(wasp, answer) {}
+                , listener(wasp, answer) {
+
+                    this->__first = first();
+
+                }
 
 
             std::optional<AnswerSet> first() noexcept override;
@@ -101,3 +106,5 @@ namespace qasp::solver {
     };
 
 }
+
+#endif

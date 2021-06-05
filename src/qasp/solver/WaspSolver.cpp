@@ -18,15 +18,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(HAVE_WASP)
+
 #include "WaspSolver.hpp"
 #include "../Program.hpp"
 #include "../AnswerSet.hpp"
 
 
-#if defined(HAVE_WASP)
 #include <wasp/WaspFacade.h>
 #include <wasp/util/WaspOptions.h>
-#endif
+
 
 #include <iostream>
 #include <exception>
@@ -72,7 +73,7 @@ static void wasp_flip_choices(const std::vector<Literal>& assumptions, std::vect
 
 
 
-std::optional<AnswerSet> WaspSolver::first() noexcept {
+std::optional<AnswerSet> WaspSolver::first() noexcept { __PERF_TIMING(solving);
 
     static std::mutex wasp_options_lock;
 
@@ -90,8 +91,9 @@ std::optional<AnswerSet> WaspSolver::first() noexcept {
 
     {
 
-        LOG(__FILE__, TRACE) << "Passing sources to WASP: " << std::endl
-                             << ground() << std::endl;
+        LOG(__FILE__, TRACE) << "Passing sources to WASP (" << ground().size() << " bytes): " 
+                             << std::endl << ground() << std::endl;
+
 
         std::istringstream source(ground());
         wasp.readInput(source);
@@ -129,7 +131,7 @@ std::optional<AnswerSet> WaspSolver::first() noexcept {
 
 }
 
-std::optional<AnswerSet> WaspSolver::enumerate() noexcept {
+std::optional<AnswerSet> WaspSolver::enumerate() noexcept { __PERF_TIMING(solving);
 
     auto& s = wasp.getSolver();
 
@@ -206,3 +208,6 @@ std::optional<AnswerSet> WaspSolver::enumerate() noexcept {
     assert(0 && "unreachable");
 
 }
+
+
+#endif

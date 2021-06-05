@@ -18,7 +18,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(HAVE_GRINGO)
+
 #include "GringoGrounder.hpp"
+
+#include <gringo/ground/program.hh>
+#include <gringo/input/programbuilder.hh>
+#include <gringo/input/nongroundparser.hh>
+#include <gringo/input/program.hh>
+#include <gringo/output/output.hh>
+#include <clingo/scripts.hh>
+
 #include <iostream>
 #include <sstream>
 #include <exception>
@@ -34,93 +44,118 @@ using namespace qasp;
 using namespace qasp::grounder;
 
 
+
 std::string GringoGrounder::execute(const std::string& source) const {
 
-    std::ostringstream output;
+    std::ostringstream oss {};
 
-    LOG(__FILE__, TRACE) << "Passing sources to GRINGO: " << std::endl
-                         << source << std::endl;
-
-
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-
-    int fd[2];  
-
-    if(unlikely(pipe(fd) < 0))
-        throw std::runtime_error("pipe() failed!");
-
-    if(unlikely(fcntl(fd[0], F_SETFL, fcntl(fd[0], F_GETFL) | O_NONBLOCK) < 0))
-        throw std::runtime_error("fcntl() failed!");
-    
-    if(unlikely(fcntl(fd[1], F_SETFL, fcntl(fd[1], F_GETFL) | O_NONBLOCK) < 0))
-        throw std::runtime_error("fcntl() failed!");
-    
-
-    assert(fcntl(fd[0], F_GETFL) & O_NONBLOCK);
-    assert(fcntl(fd[1], F_GETFL) & O_NONBLOCK);
+    LOG(__FILE__, TRACE) << "Passing sources to GRINGO (" << source.size() << " bytes): " 
+                         << std::endl << source << std::endl;
 
 
 
-    pid_t pid;
-    if(unlikely((pid = fork()) < 0))
-        throw std::runtime_error("fork() failed!");
+    Gringo::Logger debug = {
+#if defined(DEBUG)
+        [](const auto warn, const auto message) {
+            LOG(__FILE__, INFO) << "[GRINGO] " << message << std::endl;
+        }
+#endif
+    };
 
-    
-    if(pid == 0) {
 
-        dup2(fd[0], STDIN_FILENO);
-        dup2(fd[1], STDOUT_FILENO);
+    try {
 
-#if !defined(DEBUG) 
-        close(STDERR_FILENO);
+
+        bool incremental = false;
+
+#if defined(DEBUG)
+        debug.enable(Gringo::Warnings::OperationUndefined,  true);
+        debug.enable(Gringo::Warnings::AtomUndefined,       true);
+        debug.enable(Gringo::Warnings::VariableUnbounded,   true);
+        debug.enable(Gringo::Warnings::FileIncluded,        true);
+        debug.enable(Gringo::Warnings::GlobalVariable,      true);
+        debug.enable(Gringo::Warnings::Other,               true);
+#else
+        debug.enable(Gringo::Warnings::OperationUndefined,  false);
+        debug.enable(Gringo::Warnings::AtomUndefined,       false);
+        debug.enable(Gringo::Warnings::VariableUnbounded,   false);
+        debug.enable(Gringo::Warnings::FileIncluded,        false);
+        debug.enable(Gringo::Warnings::GlobalVariable,      false);
+        debug.enable(Gringo::Warnings::Other,               false);
 #endif
 
-        char* const argv[] = {
-            (char*) "gringo", 
-            (char*) "--output=smodels",
-            (char*) "--warn=none",
-            (char*) "--fast-exit", 
-            NULL
-        };
 
-        exit(execvp(argv[0], argv));
+        Potassco::TheoryData theory;
+        theory.update();
         
-    } else {
 
-        int status;
-
-        if(unlikely(write(fd[1], source.c_str(), source.size()) < 0))
-            throw std::runtime_error("write() failed!");
-
-        if(unlikely(close(fd[1]) < 0))
-            throw std::runtime_error("close() failed!");
-
-        if(unlikely(waitpid(pid, &status, 0) < 0))
-            throw std::runtime_error("waitpid() failed!");
-
-        if(unlikely(status != EXIT_SUCCESS))
-            throw std::runtime_error("an error occurred while running gringo");
+        Gringo::Output::OutputBase output(theory, {}, oss, Gringo::Output::OutputFormat::SMODELS, {
+#if defined(DEBUG)
+            Gringo::Output::OutputDebug::ALL,
+#else
+            Gringo::Output::OutputDebug::NONE,
+#endif
+            false, false
+        });
 
 
-        char buffer[256];
-        ssize_t size;
+        Gringo::Defines defines {};
+        Gringo::Input::Program program {};
+        Gringo::Ground::Parameters params {};
 
-        while((size = read(fd[0], buffer, sizeof(buffer))) > 0)
-            output.write(buffer, size);
-
-        assert(size == 0);
+        Gringo::Input::NongroundProgramBuilder builder { Gringo::g_scripts(), program, output, defines, false };
+        Gringo::Input::NonGroundParser parser { builder, incremental };
 
 
-        if(unlikely(close(fd[0]) < 0))
-            throw std::runtime_error("close() failed!");
+        {
+
+            parser.pushStream("-", Gringo::gringo_make_unique<std::stringstream>(source), debug);
+            parser.parse(debug);
+
+            if(debug.hasError())
+                throw std::runtime_error("an error occurred while parsing gringo");
+
+
+        }
+
+        defines.init(debug);
+
+
+        output.init(incremental);
+        output.beginStep();
+
+        {
+
+            program.rewrite(defines, debug);
+            program.check(debug);
+
+            if(debug.hasError())
+                throw std::runtime_error("an error occurred while running gringo");
+
+
+            params.add("base", {});
+
+            program.toGround({ Gringo::Sig("base", 0, {}) }, output.data, debug)
+                .ground(params, Gringo::g_scripts(), output, debug);
+
+
+        }
+
+        output.endStep({ nullptr, 0 });
+
+
+    } catch(std::exception const& e) {
+
+        LOG(__FILE__, ERROR) << "[CLINGO] Raised exception: " 
+                             << e.what() << std::endl;
+
+        throw std::runtime_error("an error occurred while running gringo");
 
     }
 
-#else
-#error "missing a non POSIX compliant implementation"
-#endif
-
-
-    return output.str();
+    return oss.str();
 
 }
+
+
+#endif

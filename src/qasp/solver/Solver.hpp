@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "../Program.hpp"
 #include "../Assumptions.hpp"
 #include "../AnswerSet.hpp"
 
@@ -52,11 +51,11 @@ namespace qasp::solver {
                     , __answer(std::move(answer)) {}
 
 
-                inline const auto operator*() const {
+                inline const auto& operator*() const {
                     return *__answer;
                 }
 
-                inline const auto operator->() const {
+                inline const auto& operator->() const {
                     return __answer;
                 }
 
@@ -82,14 +81,19 @@ namespace qasp::solver {
             };
 
 
+        protected:
+
             inline Solver(const std::string& ground, const Assumptions& positive, const Assumptions& negative)
                 : __ground(ground)
                 , __positive(positive)
                 , __negative(negative) {
 
                     assert(!ground.empty());
-                
+
                 }
+
+
+        public:
 
             virtual ~Solver() = default;
             virtual std::optional<AnswerSet> first() noexcept = 0;
@@ -97,15 +101,15 @@ namespace qasp::solver {
 
 
 
-            inline const iterator begin() noexcept {
-                return iterator(const_cast<Solver&>(*this), first());
+            inline const iterator begin() const noexcept {
+                return iterator(const_cast<Solver&>(*this), __first);
             }
 
             inline const iterator end() const noexcept {
                 return iterator(const_cast<Solver&>(*this), {});
             }
 
-            inline const iterator cbegin() noexcept {
+            inline const iterator cbegin() const noexcept {
                 return begin();
             }
 
@@ -126,14 +130,24 @@ namespace qasp::solver {
                 return this->__negative;
             }
 
+            inline const bool coherent() const {
+                return !!__first;
+            }
+
 
             static std::unique_ptr<Solver> create(const std::string& ground, const Assumptions& positive, const Assumptions& negative) noexcept;
 
 
+
         private:
+
             const std::string& __ground;
             const Assumptions& __positive;
             const Assumptions& __negative;
+
+        protected:
+        
+            std::optional<AnswerSet> __first;
 
 
     };

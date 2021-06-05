@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#if defined(HAVE_GRINGO)
 
 #include "Grounder.hpp"
 #include <string>
@@ -33,3 +34,5 @@ namespace qasp::grounder {
     };
 
 }
+
+#endif
