@@ -47,7 +47,11 @@ ostream&
 ReasonForBinaryClauses::print(
     ostream& o ) const
 {
-    return o << VariableNames::getName( varId );
+#if defined(__qasp__)
+    return o; // HACK(kwrx): workaround for qasp
+#else
+    return o << VariableNames::getName( varId ); 
+#endif
 }
 
 void

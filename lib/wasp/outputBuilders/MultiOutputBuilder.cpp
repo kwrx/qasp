@@ -53,10 +53,10 @@ MultiOutputBuilder::printVariable(
     Var variable,
     bool isTrue )
 {
-    if( VariableNames::isHidden( variable ) )
+    if( solver.getVariableNames().isHidden( variable ) )
         return;
     if( isTrue )
-        modelStream << VariableNames::getName( variable ) << ". ";    
+        modelStream << solver.getVariableNames().getName( variable ) << ". ";    
 }
 
 void

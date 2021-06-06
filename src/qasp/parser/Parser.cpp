@@ -86,7 +86,7 @@ static std::string parseValue(const std::vector<Token>::iterator& it) {
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
 
-static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, std::vector<Predicate>& predicates) {
+static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, Predicates& predicates) {
 
 
     #define VALID_NAME(it)          \
@@ -159,14 +159,21 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
                 }
 
-                LOG(__FILE__, TRACE) << "<PARSER> Found Predicate with name: " << name.str()
-                                     << " and extensions: (" << extensions.str() << ")"
-                                     << " in " << (*begin).tk_source
-                                     << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
+                // FIXME
+                // LOG(__FILE__, TRACE) << "<PARSER> Found Predicate with name: " << name.str()
+                //                      << " and extensions: (" << extensions.str() << ")"
+                //                      << " in " << (*begin).tk_source
+                //                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
 
 
 
-                predicates.emplace_back(name.str(), extensions.str(), sign);
+                Predicate&& predicate = Predicate(name.str(), extensions.str(), sign);
+
+                if(!predicates.contains(predicate))
+                    predicates.emplace_back(predicate);
+                
+            
+
 
                 sign = PREDICATE_POSITIVE;
 
@@ -252,8 +259,8 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                     if(fd.good() && fd.get() == '-') {
                         
-                        tokens.emplace_back(TK_BODY, 0, line, column++, source);
-                        column++;
+                        tokens.emplace_back(TK_BODY, 0, line, column, source);
+                        column += 2;
 
                     } else {
 
@@ -266,22 +273,48 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 case '(':
 
-                    tokens.emplace_back(TK_LEFT_PAREN, '(', line, column++, source);
+                    tokens.emplace_back(TK_LEFT_PAREN, '(', line, column, source);
                     break;
 
                 case ')':
                     
-                    tokens.emplace_back(TK_RIGHT_PAREN, ')', line, column++, source);
+                    tokens.emplace_back(TK_RIGHT_PAREN, ')', line, column, source);
                     break;
 
                 case '.':
                     
-                    tokens.emplace_back(TK_DOT, '.', line, column++, source);
+                    tokens.emplace_back(TK_DOT, '.', line, column, source);
                     break;
 
                 case ',':
                     
-                    tokens.emplace_back(TK_COMMA, ',', line, column++, source);
+                    tokens.emplace_back(TK_COMMA, ',', line, column, source);
+                    break;
+
+                case 't': // HACK(kwrx): workaround for 'not' keyword
+
+                    if(fd.good() && fd.get() == ' ') {
+
+                        tokens.emplace_back(TK_SOURCE, 't', line, column, source);
+                        tokens.emplace_back(TK_SOURCE, ' ', line, column, source);
+
+                        column += 2;
+
+                    } else {
+
+                        tokens.emplace_back(TK_SOURCE, 't', line, column++, source);
+                        fd.unget();
+
+                    }
+
+                    break;
+
+                 case ' ':
+
+                    while(fd.good() && (ch = fd.get()) == ' ')
+                        column++;
+
+                    fd.unget();
                     break;
 
                 default:
@@ -335,7 +368,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 std::ostringstream identifier;
                 std::ostringstream source;
-                std::vector<Predicate> predicates;
+                Predicates predicates;
 
 
 #ifdef DEBUG

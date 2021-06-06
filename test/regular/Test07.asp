@@ -2,6 +2,6 @@
 a | b.
 %@forall
 :- not c.
-%@constraints
+%@constraint
 :- a.
 :- b.

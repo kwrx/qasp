@@ -38,34 +38,51 @@ namespace qasp::utils {
 
             
 
-            inline const bool contains(const T& id) {
+            inline const bool contains(const T& id) noexcept {
+#if defined(HAVE_THREADS)
                 std::scoped_lock<std::mutex> guard(m_lock);
+#endif
                 return this->std::unordered_map<T, D>::find(id) != this->std::unordered_map<T, D>::end();
             }
 
-            inline D& get(const T& id) {
+
+            inline const D& get(const T& id) noexcept {
 
                 assert(contains(id));
 
+#if defined(HAVE_THREADS)
                 std::scoped_lock<std::mutex> guard(m_lock);
+#endif
                 return this->std::unordered_map<T, D>::find(id)->second;
 
             }
 
-            inline void push(const T& id, D value) {
+
+            inline void push(const T& id, D value) noexcept {
+
+#if defined(HAVE_THREADS)
                 std::scoped_lock<std::mutex> guard(m_lock);
+#endif
+
                 this->std::unordered_map<T, D>::emplace(id, std::move(value));
             }
 
+
             template <typename... A>
-            inline void emplace(const T& id, A&&... args) {
+            inline void emplace(const T& id, A&&... args) noexcept {
+
+#if defined(HAVE_THREADS)
                 std::scoped_lock<std::mutex> guard(m_lock);
+#endif
+
                 this->std::unordered_map<T, D>::emplace(id, args...);
             }
 
         private:
 
+#if defined(HAVE_THREADS)
             std::mutex m_lock {};
+#endif
 
     };
 

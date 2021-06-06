@@ -535,7 +535,13 @@ class Solver
             return clauses.size()+binary > 0 ? (size+dimension)/(clauses.size()+binary) : 0; 
         }
         
-        inline unsigned int nbRestarts() const { return numberOfRestarts; }        
+        inline unsigned int nbRestarts() const { return numberOfRestarts; }       
+
+
+        inline VariableNames& getVariableNames() {
+            return variableNames;
+        }
+
         
     private:
         inline unsigned int solve_( vector< Literal >& assumptions );
@@ -566,6 +572,7 @@ class Solver
         
         unsigned int currentDecisionLevel;
         Variables variables;
+        VariableNames variableNames;
         
         vector< Clause* > clauses;
         vector< Clause* > learnedClauses;
@@ -791,7 +798,7 @@ Solver::Solver()
     choiceHeuristic = new MinisatHeuristic( *this );
     deletionCounters.init();
     glucoseData.init();
-    VariableNames::addVariable();
+    getVariableNames().addVariable();
     variableDataStructures.push_back( NULL );
     variableDataStructures.push_back( NULL );
     fromLevelToPropagators.push_back( 0 );
@@ -812,7 +819,7 @@ Solver::addedVarName(
     Var var )
 {
     for( unsigned int i = 0; i < externalPropagators.size(); i++ )
-        externalPropagators[ i ]->addedVarName( var, VariableNames::getName( var ) );
+        externalPropagators[ i ]->addedVarName( var, getVariableNames().getName( var ) );
 }
 
 unsigned int
@@ -891,7 +898,7 @@ Solver::setOutputBuilder(
 void
 Solver::addVariableInternal()
 {
-    VariableNames::addVariable();
+    getVariableNames().addVariable();
     variables.push_back();    
     choiceHeuristic->onNewVariable( variables.numberOfVariables() );
     learning.onNewVariable();

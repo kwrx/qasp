@@ -19,25 +19,28 @@
  */
 
 #include "Solver.hpp"
-#include "WaspSolver.hpp"
-
-using namespace qasp::solver;
+#include "../Assumptions.hpp"
 
 
-static std::shared_ptr<Solver> __instance;
-
-std::shared_ptr<Solver> Solver::instance() {
-
-    if(unlikely(!__instance)) {
 #if defined(HAVE_WASP)
-        __instance = std::make_shared<WaspSolver>();
+#   include "WaspSolver.hpp"
 #elif defined(HAVE_CLASP)
-        __instance = std::make_shared<ClaspSolver>();
-#else
-#   error "missing solver application"
+#   include "ClaspSolver.hpp"
 #endif
-    }
 
-    return __instance;
+using namespace qasp;
+
+
+std::unique_ptr<qasp::solver::Solver> qasp::solver::Solver::create(const std::string& ground, const Assumptions& positive, const Assumptions& negative) noexcept {
+
+#if defined(HAVE_WASP)
+    return std::make_unique<WaspSolver>(ground, positive, negative);
+
+#elif defined(HAVE_CLASP)
+    return std::make_unique<ClaspSolver>(ground, positive, negative);
+
+#else
+    #error "missing solver implementation"
+#endif
 
 }

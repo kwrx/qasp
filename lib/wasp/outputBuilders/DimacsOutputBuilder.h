@@ -20,11 +20,12 @@
 #define WASP_DIMACSOUTPUTBUILDER_H
 
 #include "OutputBuilder.h"
+#include "../Solver.h"
 
 class DimacsOutputBuilder : public OutputBuilder
 {
     public:
-        inline DimacsOutputBuilder();
+        inline DimacsOutputBuilder(Solver& solver);
         virtual void startModel();
         virtual void printVariable( Var, bool );
         virtual void endModel();
@@ -40,7 +41,7 @@ class DimacsOutputBuilder : public OutputBuilder
         bool maxsat;
 };
 
-DimacsOutputBuilder::DimacsOutputBuilder() : numberOfModels( 0 ), maxsat( false )
+DimacsOutputBuilder::DimacsOutputBuilder(Solver& solver) : OutputBuilder(solver), numberOfModels( 0 ), maxsat( false )
 {
 }
 

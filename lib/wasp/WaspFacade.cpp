@@ -50,7 +50,7 @@ WaspFacade::readInput(
         case COMMENT_DIMACS:
         case FORMULA_INFO_DIMACS:
         {
-            DimacsOutputBuilder* d = new DimacsOutputBuilder();            
+            DimacsOutputBuilder* d = new DimacsOutputBuilder(getSolver());            
             solver.setOutputBuilder( d );
             Dimacs dimacs( solver );
             dimacs.parse();
@@ -93,7 +93,7 @@ WaspFacade::solve()
 }
 
 void WaspFacade::handleWeakConstraints() {
-    NoopOutputBuilder* tmp = new NoopOutputBuilder();
+    NoopOutputBuilder* tmp = new NoopOutputBuilder(getSolver());
     if( wasp::Options::printOnlyOptimum && wasp::Options::maxModels > 1 )
         solver.setOutputBuilder( tmp );
     unsigned int result = solveWithWeakConstraints();
@@ -137,32 +137,32 @@ WaspFacade::setOutputPolicy(
     switch( outputPolicy )
     {
         case COMPETITION_OUTPUT:
-            outputBuilder = new CompetitionOutputBuilder();
+            outputBuilder = new CompetitionOutputBuilder(getSolver());
             break;
             
         case DIMACS_OUTPUT:
-            outputBuilder = new DimacsOutputBuilder();
+            outputBuilder = new DimacsOutputBuilder(getSolver());
             break;
             
         case SILENT_OUTPUT:
-            outputBuilder = new SilentOutputBuilder();
+            outputBuilder = new SilentOutputBuilder(getSolver());
             break;
             
         case THIRD_COMPETITION_OUTPUT:
-            outputBuilder = new ThirdCompetitionOutputBuilder();
+            outputBuilder = new ThirdCompetitionOutputBuilder(getSolver());
             break;
             
         case MULTI:
-            outputBuilder = new MultiOutputBuilder();
+            outputBuilder = new MultiOutputBuilder(getSolver());
             break;
             
         case ID_OUTPUT:
-            outputBuilder = new IdOutputBuilder();
+            outputBuilder = new IdOutputBuilder(getSolver());
             break;
             
         case WASP_OUTPUT:
         default:
-            outputBuilder = new WaspOutputBuilder();
+            outputBuilder = new WaspOutputBuilder(getSolver());
             break;
     }
     solver.setOutputBuilder( outputBuilder );

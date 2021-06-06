@@ -33,31 +33,19 @@ class VariableNames
 {
     public:
 
-        static bool isHidden( Var v );
-        static const string& getName( Var v );
-        static void setName( Var v, string name );
-        static void setToBePrinted( Var v );
-        static bool hasToBePrinted( Var v );
-        static void addVariable();
-        static const vector< string >& getVariables();
-
-        #if defined(__qasp__)
-        static inline void reset() {
-            variables.clear();
-        }
-        #endif
+        bool isHidden( Var v );
+        const string& getName( Var v );
+        void setName( Var v, string name );
+        void setToBePrinted( Var v );
+        bool hasToBePrinted( Var v );
+        void addVariable();
+        const vector< string >& getVariables();
         
     private:
 
-        #if defined(__qasp__)
-        thread_local
-        #endif
-        static vector< string > variables;
-
-        #if defined(__qasp__)
-        thread_local
-        #endif
-        static bool toBePrinted;
+        vector< string > variables;
+        bool toBePrinted;
+        
 };
 
 #endif

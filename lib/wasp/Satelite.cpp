@@ -238,7 +238,7 @@ bool
 Satelite::tryToEliminate(
     Var variable )
 {
-    trace_msg( satelite, 2, "Trying to eliminate variable " << VariableNames::getName( variable ) );
+    trace_msg( satelite, 2, "Trying to eliminate variable " << solver.getVariableNames().getName( variable ) );
     if( !solver.isUndefined( variable ) )
         return false;
     
@@ -340,7 +340,7 @@ Satelite::tryToSubstitute(
     
     Var variable = lit.getVariable();    
     Literal oppositeLit = lit.getOppositeLiteral();
-    trace_msg( satelite, 5, "Trying to substitute " << VariableNames::getName( variable ) << ( lit.getSign() == POSITIVE ? " positive" : " negative" ) << ". Its definition is " << *definition );
+    trace_msg( satelite, 5, "Trying to substitute " << solver.getVariableNames().getName( variable ) << ( lit.getSign() == POSITIVE ? " positive" : " negative" ) << ". Its definition is " << *definition );
     vector< Clause* > newClauses;  
     
     for( unsigned i = 0; i < definition->size(); ++i )
@@ -427,8 +427,8 @@ Satelite::tryToSubstitute(
     
     substitute( variable, newClauses );
     
-    assert_msg( solver.numberOfOccurrences( variable ) == 0, "Variable " << VariableNames::getName( variable ) << " has been eliminated but has still " << solver.numberOfOccurrences( variable ) << " occurrences" );    
-    trace_msg( satelite, 2, "Eliminated variable " << VariableNames::getName( variable ) );
+    assert_msg( solver.numberOfOccurrences( variable ) == 0, "Variable " << solver.getVariableNames().getName( variable ) << " has been eliminated but has still " << solver.numberOfOccurrences( variable ) << " occurrences" );    
+    trace_msg( satelite, 2, "Eliminated variable " << solver.getVariableNames().getName( variable ) );
     
     solver.onEliminatingVariable( variable, lit.getSign(), definition );
     ok = propagateTopLevel();
@@ -471,7 +471,7 @@ bool
 Satelite::tryToEliminateByDistribution( 
     Var variable )
 {
-    trace_msg( satelite, 5, "Trying to eliminate " << VariableNames::getName( variable ) << " by distribution" );
+    trace_msg( satelite, 5, "Trying to eliminate " << solver.getVariableNames().getName( variable ) << " by distribution" );
 
     vector< Clause* > newClauses;
     Literal neg( variable );
@@ -545,7 +545,7 @@ Satelite::tryToEliminateByDistribution(
         solver.addClause( c );        
     }
     
-    trace_msg( satelite, 2, "Eliminated variable " << VariableNames::getName( variable ) );   
+    trace_msg( satelite, 2, "Eliminated variable " << solver.getVariableNames().getName( variable ) );   
     
     solver.onEliminatingVariable( variable, ELIMINATED_BY_DISTRIBUTION, NULL );
     ok = propagateTopLevel();    
@@ -627,7 +627,7 @@ Satelite::backwardSubsumptionCheck()
         Var variable = solver.getVariableWithMinOccurrences( *clause );
         
         assert( variable != 0 );
-        trace_msg( satelite, 1, "Variable with the min number of occurrences is " << VariableNames::getName( variable ) );
+        trace_msg( satelite, 1, "Variable with the min number of occurrences is " << solver.getVariableNames().getName( variable ) );
         
         Literal literal( variable, POSITIVE );
         checkSubsumptionForClause( clause, literal );

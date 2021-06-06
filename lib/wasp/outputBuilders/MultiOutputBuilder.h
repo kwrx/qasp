@@ -20,13 +20,14 @@
 #define WASP_MULTIOUTPUTBUILDER_H
 
 #include "CompetitionOutputBuilder.h"
+#include "../Solver.h"
 #include <sstream>
 using namespace std;
 
 class MultiOutputBuilder : public CompetitionOutputBuilder
 {
     public:
-        MultiOutputBuilder() : lastModel(""), optimum( false ) {}
+        MultiOutputBuilder(Solver& solver) : CompetitionOutputBuilder(solver), lastModel(""), optimum( false ) {}
         virtual void foundModelOptimization( const Vector< uint64_t >& costs );
         virtual void optimumFound();
         virtual void startModel();

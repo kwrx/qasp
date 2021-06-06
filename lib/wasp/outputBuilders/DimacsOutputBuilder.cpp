@@ -40,7 +40,7 @@ DimacsOutputBuilder::printVariable(
     Var v,
     bool isTrue )
 {
-    if( !VariableNames::hasToBePrinted( v ) )
+    if( !solver.getVariableNames().hasToBePrinted( v ) )
         return;
     cout << ( isTrue ? " " : " -" ) << v;    
 }

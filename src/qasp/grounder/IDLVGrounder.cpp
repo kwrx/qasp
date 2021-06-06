@@ -18,6 +18,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(HAVE_IDLV)
+
 #include "IDLVGrounder.hpp"
 #include <iostream>
 #include <sstream>
@@ -38,15 +40,15 @@ std::string IDLVGrounder::execute(const std::string& source) const {
 
     std::ostringstream output;
 
-    LOG(__FILE__, TRACE) << "Passing source to IDLV: " << std::endl
-                             << source << std::endl;
+    LOG(__FILE__, TRACE) << "Passing sources to IDLV (" << source.size() << " bytes): " 
+                         << std::endl << source << std::endl;
 
 
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 
     int fd[2];  
 
-    if(unlikely(pipe(fd) < 0))
+   if(unlikely(pipe(fd) < 0))
         throw std::runtime_error("pipe() failed!");
 
     if(unlikely(fcntl(fd[0], F_SETFL, fcntl(fd[0], F_GETFL) | O_NONBLOCK) < 0))
@@ -54,10 +56,19 @@ std::string IDLVGrounder::execute(const std::string& source) const {
     
     if(unlikely(fcntl(fd[1], F_SETFL, fcntl(fd[1], F_GETFL) | O_NONBLOCK) < 0))
         throw std::runtime_error("fcntl() failed!");
-    
+
+    if(unlikely(fcntl(fd[0], F_SETPIPE_SZ, (1 << 20)) < 0))
+        throw std::runtime_error("fcntl() failed!");
+
+    if(unlikely(fcntl(fd[1], F_SETPIPE_SZ, (1 << 20)) < 0))
+        throw std::runtime_error("fcntl() failed!");
+
 
     assert(fcntl(fd[0], F_GETFL) & O_NONBLOCK);
     assert(fcntl(fd[1], F_GETFL) & O_NONBLOCK);
+    assert(fcntl(fd[0], F_GETPIPE_SZ) >= (1 << 20));
+    assert(fcntl(fd[1], F_GETPIPE_SZ) >= (1 << 20));
+
 
 
 
@@ -122,3 +133,6 @@ std::string IDLVGrounder::execute(const std::string& source) const {
     return output.str();
 
 }
+
+
+#endif

@@ -30,7 +30,7 @@ void CautiousReasoning::solve() {
     waspFacade.disableOutput();
     waspFacade.attachAnswerSetListener(this);
     for(unsigned int i = 1; i <= waspFacade.numberOfVariables(); i++) {
-        if(VariableNames::isHidden(i)) continue;
+        if(waspFacade.getVariableNames().isHidden(i)) continue;
         if(waspFacade.isFalse(i)) continue;
         //if(waspFacade.isTrue(i)) { assert( waspFacade.decisionLevel(i) == 0 ); addAnswer(i); continue; }
         candidates.push_back(i);
@@ -185,7 +185,7 @@ void CautiousReasoning::primeImplicate() {
             if(conflict.size() == 1) {            
                 Literal lit = conflict[0];
                 Var v = lit.getVariable();
-                if(!VariableNames::isHidden(v) && find(answers.begin(), answers.end(), v) == answers.end()) addAnswer(v);
+                if(!waspFacade.getVariableNames().isHidden(v) && find(answers.begin(), answers.end(), v) == answers.end()) addAnswer(v);
 
                 waspFacade.addClause(lit.getOppositeLiteral());            
                 for(unsigned int i = 0; i < candidates.size(); i++)
@@ -209,7 +209,7 @@ void CautiousReasoning::primeImplicate() {
                 result = waspFacade.solve(assumptions, conflict);
                 if(result == INCOHERENT) {
                     Var v = toTest.getVariable();
-                    if(!VariableNames::isHidden(v) && find(answers.begin(), answers.end(), v) == answers.end()) addAnswer(v);
+                    if(!waspFacade.getVariableNames().isHidden(v) && find(answers.begin(), answers.end(), v) == answers.end()) addAnswer(v);
                 }
                 break;
             }
@@ -455,7 +455,7 @@ unsigned int CautiousReasoning::solveAndProcessCore(vector<Literal>& assumptions
         if(conflict.size() == 1) {
             Literal lit = conflict[0];
             Var v = lit.getVariable();
-            if(!VariableNames::isHidden(v)) addAnswer(v);
+            if(!waspFacade.getVariableNames().isHidden(v)) addAnswer(v);
 
             waspFacade.addClause(lit.getOppositeLiteral());
             for(unsigned int i = 0; i < assumptions.size(); i++)

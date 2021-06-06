@@ -21,6 +21,7 @@
 
 #include "../util/WaspConstants.h"
 #include "../stl/Vector.h"
+#include "../Solver.h"
 #include "OutputBuilder.h"
 
 #include <iostream>
@@ -29,7 +30,7 @@ using namespace std;
 class NoopOutputBuilder : public OutputBuilder
 {
     public:
-        NoopOutputBuilder() : OutputBuilder() {}
+        NoopOutputBuilder(Solver& solver) : OutputBuilder(solver) {}
         virtual ~NoopOutputBuilder() {}
         virtual void startModel() {}
         virtual void printVariable( Var , bool ) {}

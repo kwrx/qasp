@@ -112,7 +112,7 @@ class HeapLiterals {
     {
         if( inHeap( lit.getVariable() ) )
             return;
-        pushNoCheck( lit );
+        pushNoCheck( std::move(lit) );
     }
 
     void pushNoCheck( Literal lit )
@@ -124,11 +124,11 @@ class HeapLiterals {
         }
         assert( !inHeap( v ) );
         indices[ v ] = heap.size();
-        heap.push_back( lit );
+        heap.push_back( std::move(lit) );
         percolateUp( indices[ v ] );
     }
 
-    void remove( Literal lit )
+    void remove( const Literal& lit )
     {
         Var v = lit.getVariable();
         assert( inHeap( v ) );

@@ -5,7 +5,7 @@ b :- a.
 e | f.
 %@exists
 h :- b.
-a.
-%@constraints
+a | d.
+%@constraint
 :- b, h.
 

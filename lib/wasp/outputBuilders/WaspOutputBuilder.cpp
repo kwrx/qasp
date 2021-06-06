@@ -34,7 +34,7 @@ WaspOutputBuilder::printVariable(
     Var variable,
     bool isTrue )
 {
-    if( VariableNames::isHidden( variable ) )
+    if( solver.getVariableNames().isHidden( variable ) )
         return;
 
     if( isTrue )
@@ -44,7 +44,7 @@ WaspOutputBuilder::printVariable(
         else
             first = false;
 
-        cout << VariableNames::getName( variable );
+        cout << solver.getVariableNames().getName( variable );
     }
 }
 

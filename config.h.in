@@ -20,19 +20,20 @@
 
 #pragma once
 
-#cmakedefine DEBUG                  @DEBUG@
-#cmakedefine DEBUG_LEVEL            @DEBUG_LEVEL@
-#cmakedefine HAVE_IDLV              @HAVE_IDLV@
-#cmakedefine HAVE_WASP              @HAVE_WASP@
-#cmakedefine HAVE_GRINGO            @HAVE_GRINGO@
-#cmakedefine HAVE_CLASP             @HAVE_CLASP@
-#cmakedefine HAVE_THREADS           @HAVE_THREADS@
-#cmakedefine HAVE_MODE_COUNTER_EXAMPLE   @HAVE_MODE_COUNTER_EXAMPLE@
-#cmakedefine HAVE_MODE_LOOK_AHEAD        @HAVE_MODE_LOOK_AHEAD@
-#cmakedefine HAVE_WASP_ASSUMPTIONS  @HAVE_WASP_ASSUMPTIONS@
-#cmakedefine HAVE_WASP_RESET        @HAVE_WASP_RESET@
-#cmakedefine HAVE_PRETTY_LOGGER     @HAVE_PRETTY_LOGGER@
-#cmakedefine HAVE_PERFORMANCE       @HAVE_PERFORMANCE@
+#cmakedefine DEBUG                      @DEBUG@
+#cmakedefine DEBUG_LEVEL                @DEBUG_LEVEL@
+#cmakedefine HAVE_WASP                  @HAVE_WASP@
+#cmakedefine HAVE_CLASP                 @HAVE_CLASP@
+#cmakedefine HAVE_IDLV                  @HAVE_IDLV@
+#cmakedefine HAVE_GRINGO                @HAVE_GRINGO@
+#cmakedefine HAVE_GRINGO_EXTERNAL       @HAVE_GRINGO_EXTERNAL@
+#cmakedefine HAVE_THREADS               @HAVE_THREADS@
+#cmakedefine HAVE_CACHE                 @HAVE_CACHE@
+#cmakedefine HAVE_MODE_LOOK_AHEAD       @HAVE_MODE_LOOK_AHEAD@
+#cmakedefine HAVE_WASP_ASSUMPTIONS      @HAVE_WASP_ASSUMPTIONS@
+#cmakedefine HAVE_WASP_RESET            @HAVE_WASP_RESET@
+#cmakedefine HAVE_PRETTY_LOGGER         @HAVE_PRETTY_LOGGER@
+#cmakedefine HAVE_PERFORMANCE           @HAVE_PERFORMANCE@
 
 
 #define QASP_PROGRAM_NAME       "@CMAKE_PROJECT_NAME@"
@@ -80,7 +81,7 @@
 #endif
 
 
-#define ALL     0
+#define __ALL   0
 #define TRACE   1
 #define INFO    2
 #define WARN    3

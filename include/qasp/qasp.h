@@ -23,17 +23,19 @@
 
 #include <stdint.h>
 
-#define QASP_OPTIONS_DEFAULT_QUIET          0
-#define QASP_OPTIONS_DEFAULT_CPUS           8
-#define QASP_OPTIONS_DEFAULT_MODE           QASP_SOLVING_MODE_REGULAR
 
 #define QASP_RESULT_COHERENT                1
 #define QASP_RESULT_INCOHERENT              2
 #define QASP_RESULT_UNKNOWN                 0
 
 #define QASP_SOLVING_MODE_REGULAR           0
-#define QASP_SOLVING_MODE_COUNTER_EXAMPLE   1
-#define QASP_SOLVING_MODE_LOOK_AHEAD        2
+#define QASP_SOLVING_MODE_LOOK_AHEAD        1
+
+
+#define QASP_OPTIONS_DEFAULT_QUIET          0
+#define QASP_OPTIONS_DEFAULT_CPUS           8
+#define QASP_OPTIONS_DEFAULT_MODE           QASP_SOLVING_MODE_REGULAR
+#define QASP_OPTIONS_DEFAULT_BUFSIZ         64
 
 
 
@@ -46,9 +48,10 @@ namespace qasp {
 
     struct Options {
 
-        uint16_t quiet = QASP_OPTIONS_DEFAULT_QUIET;
-        uint16_t cpus  = QASP_OPTIONS_DEFAULT_CPUS;
-        uint16_t mode  = QASP_OPTIONS_DEFAULT_MODE;
+        uint16_t quiet  = QASP_OPTIONS_DEFAULT_QUIET;
+        uint16_t cpus   = QASP_OPTIONS_DEFAULT_CPUS;
+        uint16_t mode   = QASP_OPTIONS_DEFAULT_MODE;
+        uint16_t bufsiz = QASP_OPTIONS_DEFAULT_BUFSIZ;
 
     };
 
@@ -107,6 +110,7 @@ typedef struct {
     uint16_t cpus;
     uint16_t quiet;
     uint16_t mode;
+    uint16_t bufsiz;
 } qasp_options_t;
 
 extern int qasp_set_options(qasp_options_t* options);

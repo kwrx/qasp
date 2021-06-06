@@ -24,14 +24,21 @@
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
 #include "Predicate.hpp"
+#include "Predicates.hpp"
+#include "solver/Solver.hpp"
 #include "utils/Performance.hpp"
 
 #include <string>
 #include <vector>
 #include <tuple>
 #include <unordered_map>
+#include <memory>
+
 
 namespace qasp {
+
+    struct iterator;
+
 
     enum ProgramType {
         TYPE_COMMON,
@@ -46,10 +53,11 @@ namespace qasp {
         MODEL_INCOHERENT
     };
 
+
     class Program {
         public:
 
-            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::vector<Predicate> predicates = {}, const std::vector<Program> subprograms = {})
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const Predicates predicates = {}, const std::vector<Program> subprograms = {})
                 : __id(id)
                 , __type(type)
                 , __source(std::move(source))
@@ -110,8 +118,10 @@ namespace qasp {
             }
 
 
+
             const Program& groundize(Assumptions assumptions = {});
-            std::tuple<ProgramModel, std::vector<AnswerSet>> solve(const AnswerSet& answer = {}, const size_t max_models = 0) const;
+
+            std::unique_ptr<::solver::Solver> solve(const AnswerSet& answer = {}) const noexcept;
 
 
         private:
@@ -121,7 +131,7 @@ namespace qasp {
             std::string __source;
             std::string __ground;
             std::vector<Program> __subprograms;
-            std::vector<Predicate> __predicates;
+            Predicates __predicates;
 
             std::unordered_map<std::string, Atom> __atoms {};
             atom_index_t __atoms_index_offset = 0;
@@ -129,7 +139,7 @@ namespace qasp {
             bool __last = false;
 
 
-            inline const atom_index_t map_index(const Atom& atom) const { __PERF_INC(mapping);
+            inline const atom_index_t map_index(const Atom& atom) const noexcept { __PERF_INC(mapping);
                 
                 const auto& found = atoms().find(atom.predicate());
 

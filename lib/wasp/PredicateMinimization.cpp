@@ -35,8 +35,8 @@ void PredicateMinimization::solve() {
     assert( wasp::Options::predMinimizationAlgorithm != NO_PREDMINIMIZATION );
     waspFacade.attachAnswerSetListener(this);    
     for(unsigned int j = 1; j <= waspFacade.numberOfVariables(); j++) {
-        if(VariableNames::isHidden(j)) continue;
-        const string& name = VariableNames::getName(j);
+        if(waspFacade.getVariableNames().isHidden(j)) continue;
+        const string& name = waspFacade.getVariableNames().getName(j);
         for( unsigned int i = 0; i < wasp::Options::predicatesToMinimize.size(); i++ ) {
             if(startsWith(name, wasp::Options::predicatesToMinimize[i])) { waspFacade.freeze(j); candidates.push_back(j); originalCandidates.push_back(j); break; }
         }

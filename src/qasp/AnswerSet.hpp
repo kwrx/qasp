@@ -28,6 +28,7 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include <cassert>
 
 
 namespace qasp {
@@ -35,23 +36,25 @@ namespace qasp {
     class AnswerSet : public std::vector<Atom> {
         public:
 
-            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) { __PERF_TIMING(answerset_comparing);
+            inline friend bool operator==(const AnswerSet& a, const AnswerSet& b) noexcept { __PERF_TIMING(answerset_comparing);
 
                 if(a.size() != b.size())
                     return false;
 
 
-                std::vector<Atom> v1 = a;
-                std::vector<Atom> v2 = b;
+                const std::vector<Atom>& v1 = a;
+                const std::vector<Atom>& v2 = b;
 
-                std::sort(v1.begin(), v1.end(), [] (const auto& i, const auto& j) { return i.predicate() < j.predicate(); });
-                std::sort(v2.begin(), v2.end(), [] (const auto& i, const auto& j) { return i.predicate() < j.predicate(); });
+#if defined(DEBUG)
+                assert(std::is_sorted(v1.begin(), v1.end()));
+                assert(std::is_sorted(v2.begin(), v2.end()));
+#endif
 
                 return std::equal(v1.begin(), v1.end(), v2.begin());
 
             }
 
-            inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) {
+            inline friend std::ostream& operator <<(std::ostream& os, const AnswerSet& a) noexcept {
 
                 os << "{";
                 
@@ -69,9 +72,45 @@ namespace qasp {
             }
 
 
-            inline const bool contains(const Atom& atom) const {
+            inline const bool contains(const Atom& atom) const noexcept {
                 return std::find(this->begin(), this->end(), atom) != this->end();
             }
+
+
+
+            template <typename ...T>
+            inline void emplace_back(T&&... args) noexcept {
+                
+                const Atom p(std::forward<T>(args)...);
+
+                this->std::vector<Atom>::emplace_back(std::move(p));
+            
+            }
+
+            template <typename T>
+            inline void insert(std::vector<Atom>::iterator it, T first, T last) noexcept {
+
+                for(; first != last; first++) {
+
+                    auto p = *first;
+
+                    this->std::vector<Atom>::emplace_back(std::move(p));
+
+                }
+
+            }
+
+
+            inline const auto& sort() {
+
+                return std::sort(std::begin(*this), std::end(*this), 
+                    [] (const auto& i, const auto& j) { 
+                        return i.predicate() < j.predicate(); 
+                    }
+                ), *this;
+
+            }
+
 
     };
 

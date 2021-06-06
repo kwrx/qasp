@@ -11,7 +11,7 @@ e | f | g :- b, d.          % P3 U {b,d} = {b,d,e} {b,d,f}  -> {b,d,e} U C -> IN
 %@forall
 :- f.                       % P4 U {b,d,f} = INCOHERENT     -> {b,d,f} U C -> INCOHERENT    | 
                             % P4 U {b,d,g} = {b,d,g}        -> {b,d,g} U C -> COHERENT      |   Almeno un AS(P3) è coerente con tutti gli AS(P4) U {b,d,g}
-%@constraints
+%@constraint
 :- c, not d.                % C
 :- e.
 

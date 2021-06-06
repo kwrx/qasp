@@ -25,6 +25,10 @@
 #include "GringoGrounder.hpp"
 #endif
 
+#if defined(HAVE_GRINGO_EXTERNAL)
+#include "GringoExternalGrounder.hpp"
+#endif
+
 #if defined(HAVE_IDLV)
 #include "IDLVGrounder.hpp"
 #endif
@@ -42,6 +46,8 @@ std::shared_ptr<Grounder> Grounder::instance() {
     if(unlikely(!__instance)) {
 #if defined(HAVE_GRINGO)
         __instance = std::make_shared<GringoGrounder>();
+#elif defined(HAVE_GRINGO_EXTERNAL)
+        __instance = std::make_shared<GringoExternalGrounder>();
 #elif defined(HAVE_IDLV)
         __instance = std::make_shared<IDLVGrounder>();
 #else
@@ -56,6 +62,8 @@ std::shared_ptr<Grounder> Grounder::instance() {
 
 std::string Grounder::generate(const std::string& source) {
 
+#if defined(HAVE_CACHE)
+
     std::size_t hash = std::hash<std::string>()(source);
 
     if(cache.contains(hash)) { __PERF_INC(grounding_cached);
@@ -64,5 +72,9 @@ std::string Grounder::generate(const std::string& source) {
 
     return cache.emplace(hash, execute(source))
          , cache.get(hash);
+
+#else
+    return execute(source);
+#endif
 
 }

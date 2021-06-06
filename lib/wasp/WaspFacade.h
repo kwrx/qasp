@@ -241,15 +241,20 @@ class WaspFacade
         
         inline OutputBuilder* getOutputBuilder() const { return outputBuilder; }
         inline void enableOutput() { if( tmpOutputBuilder != NULL ) { solver.setOutputBuilder( outputBuilder ); delete tmpOutputBuilder; tmpOutputBuilder = NULL; } }
-        inline void disableOutput() { if( tmpOutputBuilder == NULL ) { tmpOutputBuilder = new NoopOutputBuilder(); solver.setOutputBuilder( tmpOutputBuilder ); } }        
+        inline void disableOutput() { if( tmpOutputBuilder == NULL ) { tmpOutputBuilder = new NoopOutputBuilder(getSolver()); solver.setOutputBuilder( tmpOutputBuilder ); } }        
         
         inline void disableVariableElimination() { disableVE_ = true; }
         
         inline const Solver& getSolver() const { return solver; }
 
-#if defined(__qasp__)
+
+        /**
+         * QASP Extensions
+         */
         inline Solver& getSolver() { return solver; }
-#endif
+        inline VariableNames& getVariableNames() { return solver.getVariableNames(); }
+
+
 
         inline unsigned int numberOfCalls() const { return nbCalls; }
     private:
@@ -270,7 +275,7 @@ class WaspFacade
 
 WaspFacade::WaspFacade() : runtime_(false), ok_(true), disableVE_(false), nbCalls(0), tmpOutputBuilder(NULL)
 {   
-    outputBuilder = new WaspOutputBuilder();
+    outputBuilder = new WaspOutputBuilder(getSolver());
     solver.setOutputBuilder(outputBuilder);    
     if( wasp::Options::interpreter != NO_INTERPRETER && wasp::Options::heuristic_scriptname != NULL )
         solver.setChoiceHeuristic( new ExternalHeuristic( solver, wasp::Options::heuristic_scriptname, wasp::Options::interpreter, wasp::Options::scriptDirectory ) );

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include "../util/WaspConstants.h"
 using namespace std;
 
@@ -25,7 +26,7 @@ class Vector
         inline void pop_back() { assert( !empty() ); --size_; }
         inline void clear() { size_ = 0; }
         inline void clearAndDelete() { delete[] vector; size_ = capacity_ = 0; vector = NULL; }
-        inline void findAndRemove( T element );
+        inline void findAndRemove( const T& element );
                 
         const T& back() const { assert( !empty() ); return vector[ size_ - 1 ]; }
         T& back() { assert( !empty() ); return vector[ size_ - 1 ]; }
@@ -35,11 +36,11 @@ class Vector
 
         inline void swap( Vector< T >& other );
         
-        inline bool existElement( T ) const;
-        inline unsigned int findElement( T ) const;
+        inline bool existElement( const T& ) const;
+        inline unsigned int findElement( const T& ) const;
         
         void initFrom( const Vector< T >& v );
-        void sort( int (*comparator)( T a, T b ) );
+        void sort( int (*comparator)( const T& a, const T& b ) );
         
     private:
         T* vector;
@@ -67,7 +68,7 @@ Vector< T >::push_back(
         resetCapacity( size_ + 1 );
     
     assert( size_ < capacity_ );
-    vector[ size_++ ] = element;
+    vector[ size_++ ] = std::move(element);
 }
 
 template< class T >
@@ -91,7 +92,7 @@ Vector< T >::resetCapacity(
 template< class T >
 bool
 Vector< T >::existElement(
-    T elem ) const
+    const T& elem ) const
 {
     return findElement( elem ) != MAXUNSIGNEDINT;
 }
@@ -99,7 +100,7 @@ Vector< T >::existElement(
 template< class T >
 unsigned int
 Vector< T >::findElement(
-    T elem ) const
+    const T& elem ) const
 {
     for( unsigned int i = 0; i < size_; ++i )    
         if( elem == vector[ i ] )
@@ -121,7 +122,7 @@ Vector< T >::swap(
 template< class T >
 void
 Vector< T >::findAndRemove(
-    T element )
+    const T& element )
 {
 //    typename vector< T >::iterator it = find( vector< T >::begin(), vector< T >::end(), element );
 //    assert( it != vector< T >::end() );
@@ -153,7 +154,7 @@ Vector< T >::initFrom(
 template< class T >
 void
 Vector< T >::sort(
-    int (*comparator)( T a, T b ) )
+    int (*comparator)( const T& a, const T& b ) )
 {
     std::sort(vector, vector + size_, comparator );
 }

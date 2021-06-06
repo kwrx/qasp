@@ -20,7 +20,7 @@
 
 #include "Performance.hpp"
 
-#if defined(HAVE_PERFORMANCE) && defined(DEBUG)
+#if defined(HAVE_PERFORMANCE)
 
 #include <vector>
 #include <cstdint>
@@ -33,12 +33,13 @@ using namespace qasp::utils;
     std::size_t __trace_performance::__counter_##name = {};
 
 
+    PERF_VALUE_T(running);
     PERF_VALUE_T(grounding);
     PERF_VALUE_T(grounding_cached);
     PERF_VALUE_T(solving);
     PERF_VALUE_T(parsing);
-    PERF_VALUE_T(running);
     PERF_VALUE_T(checkings);
+    PERF_VALUE_T(depends);
     PERF_VALUE_T(iterations);
     PERF_VALUE_T(executions);
     PERF_VALUE_T(mapping);

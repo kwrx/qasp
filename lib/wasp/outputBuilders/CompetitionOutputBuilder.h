@@ -20,19 +20,20 @@
 #define WASP_COMPETITIONOUTPUTBUILDER_H
 
 #include "OutputBuilder.h"
+#include "../Solver.h"
 
 class CompetitionOutputBuilder : public OutputBuilder
 {
     public:
-        inline CompetitionOutputBuilder();
+
+        inline CompetitionOutputBuilder(Solver& solver)
+            : OutputBuilder(solver) {};
+
         virtual void startModel();
         virtual void printVariable( Var v, bool );
         virtual void endModel();
         virtual void onProgramIncoherent();
 };
 
-CompetitionOutputBuilder::CompetitionOutputBuilder()
-{
-}
 
 #endif

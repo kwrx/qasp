@@ -19,21 +19,94 @@
  */
 
 #pragma once
+#if defined(HAVE_WASP)
 
 #include "Solver.hpp"
 #include "../Program.hpp"
 #include "../Assumptions.hpp"
 
+#include <wasp/WaspFacade.h>
 #include <string>
 
 
 namespace qasp::solver {
 
-    class WaspSolver : public Solver {
+
+    class WaspAnswerSetListener : public AnswerSetListener {
 
         public:
-            ProgramModel solve(const std::string& ground, const Assumptions& positive, const Assumptions& negative, std::vector<AnswerSet>& output, size_t max_models = 0) const override;
+
+            WaspAnswerSetListener(WaspFacade& __wasp, AnswerSet& __answer)
+                : wasp(__wasp)
+                , answer(__answer) {}
+
+            ~WaspAnswerSetListener() {
+                wasp.removeAnswerSetListener(this);
+            };
+
+
+            inline void foundAnswerSet() override {
+
+                answer.clear();
+
+                for(size_t i = 1; i <= wasp.getSolver().numberOfAssignedLiterals(); i++) {
+                    
+                    if(wasp.isUndefined(i))
+                        continue;
+
+                    if(wasp.isFalse(i))
+                        continue;
+
+                    if(wasp.getVariableNames().isHidden(i))
+                        continue;
+
+                    answer.emplace_back(i, wasp.getVariableNames().getName(i));
+
+                }
+
+                answer.sort();
+
+                LOG(__FILE__, TRACE) << "<LISTENER> Found an answer set: " << answer << std::endl;
+
+            }
+
+
+        private:
+            WaspFacade& wasp;
+            AnswerSet& answer;
 
     };
 
+    class WaspSolver : public Solver {
+
+        public:
+
+            WaspSolver(const std::string& ground, const Assumptions& positive, const Assumptions& negative)
+                : Solver(ground, positive, negative)
+                , listener(wasp, answer) {
+
+                    this->__first = first();
+
+                }
+
+
+            std::optional<AnswerSet> first() noexcept override;
+            std::optional<AnswerSet> enumerate() noexcept override;
+
+        private:
+
+            WaspAnswerSetListener listener;
+            WaspFacade wasp {};
+
+            AnswerSet answer {};
+
+            std::vector<Literal> assumptions {};
+            std::vector<Literal> choices {};
+            std::vector<bool> checked {};
+
+        
+    };
+
 }
+
+#endif

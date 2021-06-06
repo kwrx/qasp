@@ -29,6 +29,18 @@
 
 #include <qasp/qasp.h>
 
+#if defined(__unix__)
+#include <unistd.h>
+#endif
+
+
+
+
+#if defined(HAVE_PERFORMANCE)
+#include "qasp/utils/Performance.hpp"
+#endif
+
+
 
 
 static void show_usage(int argc, char** argv) {
@@ -36,14 +48,15 @@ static void show_usage(int argc, char** argv) {
     std::cout 
         << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
         << "Process qasp SOURCES and blabla...\n\n"
+#if defined(HAVE_MODE_LOOK_AHEAD)
+        << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
+#endif
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        << "    -c, --counter-example       proving satisfiability by counter example\n"
-#endif
-#if defined(HAVE_MODE_LOOK_AHEAD)
-        << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
+        << "    -b N, --buffer-size=N       set solver buffer size of each iteration to N models.\n"
+#if defined(__unix__)
+        << "    -t N, --time-limit=N        set time limit to N seconds.\n"
 #endif
         << "    -q, --quiet                 hide log information.\n"
         << "        --help                  print this message and exit.\n"
@@ -83,8 +96,10 @@ static void sighandler(int sig) {
     switch(sig) {
 
         case SIGINT:
+        case SIGABRT:
         case SIGTERM:
 #if defined(__unix__)
+        case SIGHUP:
         case SIGPWR:
         case SIGQUIT:
 #endif
@@ -93,8 +108,16 @@ static void sighandler(int sig) {
 
 #if defined(__unix__)
         case SIGXCPU:
-            std::cerr << "Killed: CPU time limit exceeded" << std::endl;
+        case SIGALRM:
+            std::cerr << "Killed: Time limit exceeded" << std::endl;
             break;
+#endif
+
+#if defined(__unix__)
+        case SIGUSR1:
+        case SIGUSR2:
+            std::cerr << "Status: Running" << std::endl; // TODO
+            return;      
 #endif
 
         default:
@@ -102,6 +125,10 @@ static void sighandler(int sig) {
 
     }
 
+
+#if defined(HAVE_PERFORMANCE)
+    __PERF_PRINT_ALL();
+#endif
 
     exit(sig);
 
@@ -112,12 +139,17 @@ int main(int argc, char** argv) {
 
 
     std::signal(SIGINT,  sighandler);
+    std::signal(SIGABRT, sighandler);
     std::signal(SIGTERM, sighandler);
 
 #if defined(__unix__)
+    std::signal(SIGHUP,  sighandler);
     std::signal(SIGPWR,  sighandler);
     std::signal(SIGQUIT, sighandler);
     std::signal(SIGXCPU, sighandler);
+    std::signal(SIGALRM, sighandler);
+    std::signal(SIGUSR1, sighandler);
+    std::signal(SIGUSR2, sighandler);
 #endif    
 
 
@@ -127,12 +159,13 @@ int main(int argc, char** argv) {
 #if defined(HAVE_THREADS)
         { "parallel",        required_argument, NULL, 'j' },
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        { "counter-example", no_argument,       NULL, 'c' },
-#endif
 #if defined(HAVE_MODE_LOOK_AHEAD)
         { "look-ahead",      no_argument,       NULL, 'l' },
 #endif
+#if defined(__unix__)
+        { "time-limit",      required_argument, NULL, 't' },
+#endif
+        { "buffer-size",     required_argument, NULL, 'b' },
         { "help",            no_argument,       NULL, 'h' },
         { "version",         no_argument,       NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -142,7 +175,7 @@ int main(int argc, char** argv) {
     qasp::Options options;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qj:clhv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:clt:b:hv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
@@ -153,16 +186,20 @@ int main(int argc, char** argv) {
                 options.cpus = atoi(optarg);
                 break;
 #endif
-#if defined(HAVE_MODE_COUNTER_EXAMPLE)
-            case 'c':
-                options.mode = QASP_SOLVING_MODE_COUNTER_EXAMPLE;
-                break;
-#endif
 #if defined(HAVE_MODE_LOOK_AHEAD)
             case 'l':
                 options.mode = QASP_SOLVING_MODE_LOOK_AHEAD;
                 break;
 #endif
+#if defined(__unix__)
+            case 't':
+                if(atoi(optarg) > 0)
+                    alarm(atoi(optarg));
+                break;
+#endif
+            case 'b':
+                options.bufsiz = atoi(optarg);
+                break;
             case 'v':
                 show_version(argc, argv);
                 break;
@@ -180,6 +217,11 @@ int main(int argc, char** argv) {
     if(unlikely(options.cpus < 1)) {
         options.cpus = std::numeric_limits<decltype(options.cpus)>().max();
     }
+
+    if(unlikely(options.bufsiz < 1)) {
+        options.bufsiz = 1;
+    }
+
 
 
 

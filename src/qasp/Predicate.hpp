@@ -23,11 +23,12 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <sstream>
 
 #include "Atom.hpp"
 
 
-#define PREDICATE_POSITIVE          1
+#define PREDICATE_POSITIVE           1
 #define PREDICATE_NEGATIVE          -1
 
 
@@ -37,10 +38,6 @@ namespace qasp {
     class Predicate {
         public:
 
-            Predicate(const std::string name, const std::size_t arity, const int sign)
-                : __name(std::move(name))
-                , __arity(arity)
-                , __sign(sign) {}
 
             Predicate(const std::string name, const std::string& extensions, const int sign)
                 : __name(std::move(name))
@@ -49,6 +46,13 @@ namespace qasp {
 
                     __arity += !extensions.empty();
                     __arity += std::count(extensions.begin(), extensions.end(), ',');
+                    __ground = std::find_if(extensions.begin(), extensions.end(), [] (const auto& i) { return isupper(i); }) == extensions.end();
+                    
+                    __hash = std::hash<std::string>() (
+                        __name
+                        + std::to_string(__arity)
+                        + std::to_string(__sign)
+                    );
 
                 }
 
@@ -65,18 +69,42 @@ namespace qasp {
                 return this->__sign;
             }
 
+            inline const auto& ground() const {
+                return this->__ground;
+            }
+
+            inline const auto& hash() const {
+                return this->__hash;
+            }
+
             inline const bool positive() const {
-                return __sign >= 0;
+                return this->__sign >= 0;
             }
 
             inline const bool negative() const {
-                return __sign < 0;
+                return this->__sign < 0;
             }
 
-            inline bool operator ==(const Predicate& b) const {
+
+
+
+
+            inline bool operator ==(const Predicate& b) const noexcept {
                 return this->name()  == b.name() 
-                    && this->arity() == b.arity();
+                    && this->arity() == b.arity()
+                    && this->sign()  == b.sign();
             }
+
+            inline operator std::string() const {
+                std::ostringstream ss;
+                ss << *this;
+                return ss.str();
+            }
+
+            inline operator std::size_t() const {
+                return this->hash();
+            }
+
 
             inline friend std::ostream& operator <<(std::ostream& os, const Predicate& p) {
                 
@@ -87,9 +115,9 @@ namespace qasp {
                     os << "(";
 
                     for(size_t i = 0; i < p.arity() - 1; i++)
-                        os << "_,";
+                        os << "u___,";
 
-                    os << "_)";
+                    os << "u___)";
 
                 }
 
@@ -101,7 +129,10 @@ namespace qasp {
         private:
             std::string __name;
             std::size_t __arity;
+            std::size_t __hash;
             int __sign;
+            bool __ground;
+            
 
     };
 

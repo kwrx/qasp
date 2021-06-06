@@ -87,7 +87,7 @@ namespace qasp {
                 return this->name() == b.name();
             }
 
-            inline friend std::ostream& operator <<(std::ostream& os, const Atom& a) {
+            inline friend std::ostream& operator <<(std::ostream& os, const Atom& a) noexcept {
                 return os << a.predicate(), os;
             }
 
@@ -99,7 +99,7 @@ namespace qasp {
             std::string __predicate;
             std::string __name {};
 
-            inline void extract_name() {
+            inline void extract_name() noexcept {
 
                 auto found = __predicate.find('(');
 

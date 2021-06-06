@@ -25,7 +25,7 @@
 class SilentOutputBuilder : public WaspOutputBuilder
 {
     public:
-        inline SilentOutputBuilder();
+        inline SilentOutputBuilder(Solver& solver);
 //        virtual void onProgramIncoherent();        
         virtual void greetings();
         virtual void startModel();
@@ -42,7 +42,7 @@ class SilentOutputBuilder : public WaspOutputBuilder
         unsigned int nbOfModels;
 };
 
-SilentOutputBuilder::SilentOutputBuilder() : WaspOutputBuilder(), nbOfModels( 0 )
+SilentOutputBuilder::SilentOutputBuilder(Solver& solver) : WaspOutputBuilder(solver), nbOfModels( 0 )
 {
 }
 

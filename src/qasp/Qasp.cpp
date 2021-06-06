@@ -49,10 +49,6 @@ std::string Qasp::run() {
 
     __qasp_quiet__ = !!options().quiet;
 
-#if !defined(HAVE_MODE_COUNTER_EXAMPLE)
-    if(unlikely(options().mode == QASP_SOLVING_MODE_COUNTER_EXAMPLE))
-        throw std::invalid_argument("missing QASP_SOLVING_MODE_COUNTER_EXAMPLE support");
-#endif
 
 #if !defined(HAVE_MODE_LOOK_AHEAD)
     if(unlikely(options().mode == QASP_SOLVING_MODE_LOOK_AHEAD))
@@ -74,8 +70,10 @@ std::string Qasp::run() {
     __result = qasp.model();
 
 
-
-    __PERF_PRINT_ALL();
+#if defined(HAVE_PERFORMANCE)
+    if(!options().quiet)
+        __PERF_PRINT_ALL();
+#endif
 
     if(coherent) {
         

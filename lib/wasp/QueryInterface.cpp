@@ -184,7 +184,7 @@ QueryInterface::computeCandidates()
     for( unsigned int i = 1; i <= solver.numberOfVariables(); i++ )
     {
         Var v = i;
-        if( VariableNames::isHidden( v ) )
+        if( solver.getVariableNames().isHidden( v ) )
             continue;
 
         assert_msg( !solver.hasBeenEliminated( v ), "Variable " << Literal( v, POSITIVE ) << " has been deleted" );        

@@ -22,13 +22,16 @@
 #include "../util/WaspConstants.h"
 #include "../stl/Vector.h"
 
+
+class Solver;
+
 #include <iostream>
 using namespace std;
 
 class OutputBuilder
 {
     public:
-        OutputBuilder() {}
+        OutputBuilder(Solver& __solver) : solver(__solver) {}
         virtual ~OutputBuilder() {}
         virtual void startModel() = 0;
         virtual void printVariable( Var v, bool isTrue ) = 0;
@@ -42,6 +45,8 @@ class OutputBuilder
         virtual void onFinish();
         virtual void onKill();
         virtual void foundModel(){}
+    protected:
+        Solver& solver;
     
 };
 
