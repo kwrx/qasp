@@ -64,6 +64,8 @@ namespace qasp::solver {
 
                 }
 
+                answer.sort();
+
                 LOG(__FILE__, TRACE) << "<LISTENER> Found an answer set: " << answer << std::endl;
 
             }

@@ -86,7 +86,7 @@ static std::string parseValue(const std::vector<Token>::iterator& it) {
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
 
-static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, std::vector<Predicate>& predicates) {
+static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, Predicates& predicates) {
 
 
     #define VALID_NAME(it)          \
@@ -167,7 +167,13 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
 
 
-                predicates.emplace_back(name.str(), extensions.str(), sign);
+                Predicate&& predicate = Predicate(name.str(), extensions.str(), sign);
+
+                if(!predicates.contains(predicate))
+                    predicates.emplace_back(predicate);
+                
+            
+
 
                 sign = PREDICATE_POSITIVE;
 
@@ -362,7 +368,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 std::ostringstream identifier;
                 std::ostringstream source;
-                std::vector<Predicate> predicates;
+                Predicates predicates;
 
 
 #ifdef DEBUG

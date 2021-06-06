@@ -59,7 +59,7 @@ const AnswerSet& ClaspSolver::commit(const OutputTable& output, const Model& mod
 
     LOG(__FILE__, TRACE) << "<LISTENER> Found an answer set: " << answer << std::endl;
 
-    return answer;
+    return answer.sort();
     
 }
 

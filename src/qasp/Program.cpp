@@ -122,8 +122,6 @@ std::unique_ptr<Solver> Program::solve(const AnswerSet& answer) const noexcept {
     assert(!ground().empty());
 
 
-    std::vector<AnswerSet> output;
-
     Assumptions positive;
     Assumptions negative;
 

@@ -70,8 +70,10 @@ std::string Qasp::run() {
     __result = qasp.model();
 
 
-
-    __PERF_PRINT_ALL();
+#if defined(HAVE_PERFORMANCE)
+    if(!options().quiet)
+        __PERF_PRINT_ALL();
+#endif
 
     if(coherent) {
         

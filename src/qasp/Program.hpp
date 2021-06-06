@@ -24,6 +24,7 @@
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
 #include "Predicate.hpp"
+#include "Predicates.hpp"
 #include "solver/Solver.hpp"
 #include "utils/Performance.hpp"
 
@@ -56,7 +57,7 @@ namespace qasp {
     class Program {
         public:
 
-            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::vector<Predicate> predicates = {}, const std::vector<Program> subprograms = {})
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const Predicates predicates = {}, const std::vector<Program> subprograms = {})
                 : __id(id)
                 , __type(type)
                 , __source(std::move(source))
@@ -117,7 +118,9 @@ namespace qasp {
             }
 
 
+
             const Program& groundize(Assumptions assumptions = {});
+
             std::unique_ptr<::solver::Solver> solve(const AnswerSet& answer = {}) const noexcept;
 
 
@@ -128,7 +131,7 @@ namespace qasp {
             std::string __source;
             std::string __ground;
             std::vector<Program> __subprograms;
-            std::vector<Predicate> __predicates;
+            Predicates __predicates;
 
             std::unordered_map<std::string, Atom> __atoms {};
             atom_index_t __atoms_index_offset = 0;

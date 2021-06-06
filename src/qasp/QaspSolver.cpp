@@ -71,7 +71,7 @@ void QaspSolver::init() {
 
         } else {
 
-            LOG(__FILE__, WARN) << "Unpredictable constraint: found non ground program with "
+            LOG(__FILE__, WARN) << "Unpredictable constraint: found @constraint program with "
                                 << no_ground << " predicates non ground" << std::endl;
 
         }
@@ -87,7 +87,7 @@ void QaspSolver::init() {
 
 bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(checkings);
 
-    LOG(__FILE__, INFO) << "Checking coherency for answerset(" << answer << ")" << std::endl;
+    LOG(__FILE__, INFO) << "Checking coherency for answerset: " << answer << std::endl;
 
     if(unlikely(!constraint().has_value()))
         return true;
@@ -174,8 +174,9 @@ void QaspSolver::promote_answer(const AnswerSet& answer) noexcept {
 
     LOG(__FILE__, TRACE) << "Add to solution answer: " << answer << std::endl;
 
-    if(std::find(__solution.begin(), __solution.end(), answer) == __solution.end())
+    if(std::find(__solution.begin(), __solution.end(), answer) == __solution.end()) { __PERF_INC(solutions_found);
         return (void) __solution.emplace_back(answer);
+    }
 
 
     __PERF_INC(solutions_discarded);

@@ -25,7 +25,7 @@ set(HAVE_WASP_RESET             1)
 
 ## Logger
 set(HAVE_PRETTY_LOGGER          1)
-set(HAVE_PERFORMANCE            1)
+set(HAVE_PERFORMANCE            0)
 
 # Build Test Options
 set(ENABLE_COVERAGE             0)
@@ -57,7 +57,6 @@ enable_testing()
 add_subdirectory(src)
 add_subdirectory(test/regular)
 add_subdirectory(test/lookahead)
-add_subdirectory(test/other)
 
 install(TARGETS qaspcli qasp
     RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
