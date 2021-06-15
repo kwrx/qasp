@@ -11,6 +11,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        
     - uses: s-weigand/setup-conda@v1.0.5
 
     - name: Install Dependencies
