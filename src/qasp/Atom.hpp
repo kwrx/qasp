@@ -79,6 +79,10 @@ namespace qasp {
                 return this->__name;
             }
 
+            inline bool operator <(const Atom& b) const {
+                return this->predicate() < b.predicate();
+            }
+
             inline bool operator ==(const Atom& b) const {
                 return this->predicate() == b.predicate();
             }
@@ -86,6 +90,7 @@ namespace qasp {
             inline bool operator ==(const Predicate& b) const {
                 return this->name() == b.name();
             }
+
 
             inline friend std::ostream& operator <<(std::ostream& os, const Atom& a) noexcept {
                 return os << a.predicate(), os;

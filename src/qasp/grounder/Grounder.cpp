@@ -41,7 +41,7 @@ using namespace qasp::grounder;
 
 static std::shared_ptr<Grounder> __instance;
 
-std::shared_ptr<Grounder> Grounder::instance() {
+std::shared_ptr<Grounder> Grounder::instance() noexcept {
 
     if(unlikely(!__instance)) {
 #if defined(HAVE_GRINGO)
@@ -70,11 +70,39 @@ std::string Grounder::generate(const std::string& source) {
         return cache.get(hash);
     }
 
+
     return cache.emplace(hash, execute(source))
          , cache.get(hash);
 
 #else
     return execute(source);
+#endif
+
+}
+
+
+std::string Grounder::generate(const std::string& source, std::string output) noexcept {
+
+#if defined(HAVE_CACHE)
+
+    std::size_t hash = std::hash<std::string>()(source);
+
+    return cache.insert_or_assign(hash, std::move(output))
+         , cache.get(hash);
+
+#endif
+
+    return std::move(output);
+
+}
+
+
+const bool Grounder::generated(const std::string& source) noexcept {
+
+#if defined(HAVE_CACHE)
+    return cache.contains(std::hash<std::string>()(source));
+#else
+    return false;
 #endif
 
 }

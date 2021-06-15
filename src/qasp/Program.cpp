@@ -47,7 +47,32 @@ using namespace qasp::solver;
 #define SMODELS_RULE_BPLUS                  "B+"
 #define SMODELS_RULE_BMINUS                 "B-"
 
+#define SMODELS_PREDICATE_CONSTRAINT        1
 
+
+
+void Program::merge(const Program& other) noexcept {
+
+    assert(!other.source().empty());
+    
+    assert(other.type() == ProgramType::TYPE_EXISTS
+        || other.type() == ProgramType::TYPE_CONSTRAINTS);
+
+
+    std::ostringstream source {};
+    source << this->source();
+    source << other.source();
+
+
+
+    for(const auto& i : other.predicates())
+        this->__predicates.emplace_back(i);
+
+    this->__source = source.str();
+    this->__merged = true;
+    
+
+}
 
 
 const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(grounding);
@@ -56,8 +81,8 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
                         << " assumptions(" << assumptions << ")" << std::endl;
 
     assert(!source().empty());
-    assert(ground().empty());
-    assert(atoms().empty());
+    assert( ground().empty());
+    assert( atoms().empty());
 
 
     std::ostringstream input;
@@ -117,6 +142,138 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 }
 
 
+const Program& Program::rewrite() noexcept {
+
+    assert(!source().empty());
+    assert(!ground().empty());
+
+
+
+    std::ostringstream input;
+
+    input << source()
+          << std::endl
+          << assumptions()
+          << "\n%% #qasp:rewritten\n";
+
+
+
+    if(Grounder::instance()->generated(input.str())) { __PERF_INC(rewriting_cached);
+        
+        this->__ground = Grounder::instance()->generate(input.str());
+        this->__rewritten = true;
+    
+
+    } else { __PERF_TIMING(rewriting);
+
+
+        std::istringstream reader(ground());
+        std::ostringstream output {};
+
+        atom_index_t constraint = this->__atoms_index_offset++;
+
+
+        auto read = [&] (std::function<void(const atom_index_t& index)> parse) {
+
+            while(reader.good()) {
+
+                atom_index_t index;
+                reader >> index;
+
+                if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
+                    break;
+
+                parse(index);
+
+            }
+
+        };
+
+
+        // Rewrite constraint rules
+        read([&] (const auto& index) {
+
+            output << index;
+        
+
+            switch(index) {
+            
+                case SMODELS_RULE_TYPE_BASIC: {
+
+
+                    atom_index_t predicate;
+                    reader >> predicate;
+
+                    atom_index_t literals;
+                    reader >> literals;
+
+
+                    if(literals && predicate == SMODELS_PREDICATE_CONSTRAINT) {
+
+                        output << " "
+                               << constraint;
+
+                    } else {
+
+                        output << " "
+                               << predicate;
+
+                    }
+
+
+                    output << " "
+                           << literals;
+
+
+                }
+                
+                default:
+                    break;
+
+            }
+
+
+            while(reader.peek() != '\n' && reader.good())
+                output.put(reader.get());
+
+            output << std::endl;
+
+            
+        });
+
+
+
+        output << SMODELS_RULE_TYPE_BASIC       << " "
+               << SMODELS_PREDICATE_CONSTRAINT  << " "
+               << 1                             << " "
+               << 1                             << " "
+               << constraint                    << std::endl;
+
+        output << SMODELS_RULE_TYPE_SEPARATOR;
+
+
+        
+        assert(reader.good());
+
+        while(reader.peek() && reader.good())
+            output.put(reader.get());
+
+
+
+        LOG(__FILE__, TRACE) << "Rewritten program #" << id()
+                            << ":\n" << output.str() << std::endl;
+
+
+        this->__ground = Grounder::instance()->generate(input.str(), std::move(output.str()));
+        this->__rewritten = true;
+
+    }
+
+    return *this;
+
+}
+
+
 std::unique_ptr<Solver> Program::solve(const AnswerSet& answer) const noexcept {
     
     assert(!ground().empty());
@@ -160,7 +317,8 @@ std::unique_ptr<Solver> Program::solve(const AnswerSet& answer) const noexcept {
                         << " answer(" << answer << "),"
                         << " assumptions(" << assumptions() << "),"
                         << " positive(" << positive << "),"
-                        << " negative(" << negative << ")" << std::endl;
+                        << " negative(" << negative << "),"
+                        << " rewritten(" << rewritten() << ")" << std::endl;
 
 
     return Solver::create(ground(), positive, negative);

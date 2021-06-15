@@ -15,7 +15,7 @@ jobs:
     - name: Install Dependencies
       shell: bash
       working-directory: ${{github.workspace}}
-      run: sudo apt update && sudo apt install libboost-dev ninja-build && conda install -c potassco clingo
+      run: sudo apt update && sudo apt install re2c bison flex libboost-dev ninja-build && conda install -c potassco clingo
 
     - name: Create Build Environment (Debug)
       run: cmake -E make_directory ${{github.workspace}}/debug

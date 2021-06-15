@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include "../Context.hpp"
 #include "../Program.hpp"
 
 #include <qasp/qasp.h>
@@ -52,7 +53,7 @@ namespace qasp::parser {
                 return this->__sources;
             }
 
-            qasp::Program parse(const qasp::Options& options) const;
+            qasp::Context parse(const qasp::Options& options) const;
 
         private:
             std::vector<std::string> __sources;

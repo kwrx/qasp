@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <limits>
 #include <cstdlib>
 #include <cassert>
 #include <csignal>
@@ -50,6 +51,9 @@ static void show_usage(int argc, char** argv) {
         << "Process qasp SOURCES and blabla...\n\n"
 #if defined(HAVE_MODE_LOOK_AHEAD)
         << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
+#endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        << "    -l, --counter-example       proving satisfiability by counter example\n"
 #endif
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
@@ -162,6 +166,9 @@ int main(int argc, char** argv) {
 #if defined(HAVE_MODE_LOOK_AHEAD)
         { "look-ahead",      no_argument,       NULL, 'l' },
 #endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+        { "counter-example", no_argument,       NULL, 'c' },
+#endif
 #if defined(__unix__)
         { "time-limit",      required_argument, NULL, 't' },
 #endif
@@ -188,7 +195,12 @@ int main(int argc, char** argv) {
 #endif
 #if defined(HAVE_MODE_LOOK_AHEAD)
             case 'l':
-                options.mode = QASP_SOLVING_MODE_LOOK_AHEAD;
+                options.mode |= QASP_SOLVING_MODE_LOOK_AHEAD;
+                break;
+#endif
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+            case 'c':
+                options.mode |= QASP_SOLVING_MODE_COUNTER_EXAMPLE;
                 break;
 #endif
 #if defined(__unix__)

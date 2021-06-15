@@ -22,6 +22,7 @@
 #include "Program.hpp"
 #include "Atom.hpp"
 #include "QaspSolver.hpp"
+#include "Context.hpp"
 #include "parser/Parser.hpp"
 
 #include <qasp/qasp.h>
@@ -51,19 +52,24 @@ std::string Qasp::run() {
 
 
 #if !defined(HAVE_MODE_LOOK_AHEAD)
-    if(unlikely(options().mode == QASP_SOLVING_MODE_LOOK_AHEAD))
+    if(unlikely(options().mode & QASP_SOLVING_MODE_LOOK_AHEAD))
         throw std::invalid_argument("missing QASP_SOLVING_MODE_LOOK_AHEAD support");
+#endif
+
+#if !defined(HAVE_MODE_COUNTER_EXAMPLE)
+    if(unlikely(options().mode & QASP_SOLVING_MODE_COUNTER_EXAMPLE))
+        throw std::invalid_argument("missing QASP_SOLVING_MODE_COUNTER_EXAMPLE support");
 #endif
 
 
     Parser parser(sources());
-    Program program = parser.parse(options());
+    Context context = parser.parse(options());
 
-    if(program.subprograms().empty())
+    if(context.programs().empty())
         return {};
         
 
-    QaspSolver qasp(*this, program);
+    QaspSolver qasp(*this, std::move(context));
 
     bool coherent = qasp.run();
 

@@ -109,17 +109,20 @@ namespace qasp {
                 return this->__assumptions = std::move(assumptions), *this;
             }
 
-            inline const auto& last() const {
-                return this->__last;
+            inline const auto& merged() const {
+                return this->__merged;
             }
 
-            inline void last(bool last) {
-                this->__last = std::move(last);
+            inline const auto& rewritten() const {
+                return this->__rewritten;
             }
 
 
+
+            void merge(const Program& other) noexcept;
 
             const Program& groundize(Assumptions assumptions = {});
+            const Program& rewrite() noexcept;
 
             std::unique_ptr<::solver::Solver> solve(const AnswerSet& answer = {}) const noexcept;
 
@@ -136,7 +139,8 @@ namespace qasp {
             std::unordered_map<std::string, Atom> __atoms {};
             atom_index_t __atoms_index_offset = 0;
             Assumptions __assumptions {};
-            bool __last = false;
+            bool __merged = false;
+            bool __rewritten = false;
 
 
             inline const atom_index_t map_index(const Atom& atom) const noexcept { __PERF_INC(mapping);

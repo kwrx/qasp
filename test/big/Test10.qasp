@@ -101,3 +101,13 @@ x20 | nx20.
 :- x3, nx7, nx19, nx4, nx18.
 :- x7, x15, nx9, nx6, nx20.
 :- x9, x5, x2, nx15, nx1.
+
+
+% time build/bin/qasp test/big/Test10.qasp > /dev/null                                                      
+% build/bin/qasp test/big/Test10.qasp > /dev/null  93,31s user 0,05s system 99% cpu 1:33,48 total
+% time build/bin/qasp test/big/Test10.qasp -c > /dev/null                                                   
+% build/bin/qasp test/big/Test10.qasp -c > /dev/null  5,28s user 0,02s system 99% cpu 5,311 total
+% time build/bin/qasp test/big/Test10.qasp -l > /dev/null                                                   
+% build/bin/qasp test/big/Test10.qasp -l > /dev/null  97,70s user 0,05s system 99% cpu 1:37,89 total
+% time build/bin/qasp test/big/Test10.qasp -c -l > /dev/null                                                
+% build/bin/qasp test/big/Test10.qasp -c -l > /dev/null  5,29s user 0,02s system 99% cpu 5,318 total

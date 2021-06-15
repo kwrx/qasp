@@ -57,7 +57,7 @@ std::string GringoGrounder::execute(const std::string& source) const {
     Gringo::Logger debug = {
 #if defined(DEBUG)
         [](const auto warn, const auto message) {
-            LOG(__FILE__, INFO) << "[GRINGO] " << message << std::endl;
+            LOG(__FILE__, TRACE) << "[GRINGO] " << message << std::endl;
         }
 #endif
     };
@@ -68,7 +68,7 @@ std::string GringoGrounder::execute(const std::string& source) const {
 
         bool incremental = false;
 
-#if defined(DEBUG)
+#if defined(DEBUG) && DEBUG_LEVEL <= TRACE
         debug.enable(Gringo::Warnings::OperationUndefined,  true);
         debug.enable(Gringo::Warnings::AtomUndefined,       true);
         debug.enable(Gringo::Warnings::VariableUnbounded,   true);

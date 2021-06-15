@@ -30,6 +30,7 @@
 #cmakedefine HAVE_THREADS               @HAVE_THREADS@
 #cmakedefine HAVE_CACHE                 @HAVE_CACHE@
 #cmakedefine HAVE_MODE_LOOK_AHEAD       @HAVE_MODE_LOOK_AHEAD@
+#cmakedefine HAVE_MODE_COUNTER_EXAMPLE  @HAVE_MODE_COUNTER_EXAMPLE@
 #cmakedefine HAVE_WASP_ASSUMPTIONS      @HAVE_WASP_ASSUMPTIONS@
 #cmakedefine HAVE_WASP_RESET            @HAVE_WASP_RESET@
 #cmakedefine HAVE_PRETTY_LOGGER         @HAVE_PRETTY_LOGGER@

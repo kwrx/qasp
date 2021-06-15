@@ -54,7 +54,7 @@ namespace qasp::utils {
                 std::scoped_lock<std::mutex> guard(m_lock);
 #endif
                 return this->std::unordered_map<T, D>::find(id)->second;
-
+                
             }
 
 
@@ -77,6 +77,18 @@ namespace qasp::utils {
 
                 this->std::unordered_map<T, D>::emplace(id, args...);
             }
+
+
+            inline void insert_or_assign(const T& id, D value) noexcept {
+
+#if defined(HAVE_THREADS)
+                std::scoped_lock<std::mutex> guard(m_lock);
+#endif
+
+                this->std::unordered_map<T, D>::insert_or_assign(id, std::move(value));
+            }
+
+
 
         private:
 

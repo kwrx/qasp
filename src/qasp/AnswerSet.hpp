@@ -102,13 +102,7 @@ namespace qasp {
 
 
             inline const auto& sort() {
-
-                return std::sort(std::begin(*this), std::end(*this), 
-                    [] (const auto& i, const auto& j) { 
-                        return i.predicate() < j.predicate(); 
-                    }
-                ), *this;
-
+                return std::sort(std::begin(*this), std::end(*this)), *this;
             }
 
 

@@ -18,6 +18,7 @@ set(HAVE_CLASP                  0)
 set(HAVE_THREADS                1)
 set(HAVE_CACHE                  1)
 set(HAVE_MODE_LOOK_AHEAD        1)
+set(HAVE_MODE_COUNTER_EXAMPLE   1)
 
 ## Wasp
 set(HAVE_WASP_ASSUMPTIONS       1)
@@ -55,8 +56,9 @@ configure_file(
 enable_testing()
 
 add_subdirectory(src)
-add_subdirectory(test/regular)
-add_subdirectory(test/lookahead)
+#add_subdirectory(test/big)
+add_subdirectory(test/little)
+
 
 install(TARGETS qaspcli qasp
     RUNTIME PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE
