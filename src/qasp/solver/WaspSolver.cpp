@@ -131,6 +131,7 @@ std::optional<AnswerSet> WaspSolver::first() noexcept { __PERF_TIMING(solving);
 
 }
 
+
 std::optional<AnswerSet> WaspSolver::enumerate() noexcept { __PERF_TIMING(solving);
 
     auto& s = wasp.getSolver();

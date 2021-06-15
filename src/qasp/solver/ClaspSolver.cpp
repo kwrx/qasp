@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <optional>
 #include <clasp/solver.h>
 
 
@@ -106,6 +107,7 @@ std::optional<AnswerSet> ClaspSolver::first() noexcept {
     return { commit(clasp.ctx.output, *this->handle->model()) };
 
 }
+
 
 std::optional<AnswerSet> ClaspSolver::enumerate() noexcept {
     

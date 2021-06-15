@@ -65,6 +65,10 @@
     __PERF_PRINT(solutions_found);                                      \
     __PERF_PRINT(solutions_discarded);                                  \
     __PERF_PRINT(checks_failed);                                        \
+    __PERF_PRINT(rewriting);                                            \
+    __PERF_PRINT(rewriting_cached);                                     \
+    __PERF_PRINT(context_prepare);                                      \
+    __PERF_PRINT(context_merging);                                      \
 }
 
 
@@ -126,6 +130,10 @@ namespace qasp::utils {
             PERF_DECL_T(solutions_found);
             PERF_DECL_T(solutions_discarded);
             PERF_DECL_T(checks_failed);
+            PERF_DECL_T(rewriting);
+            PERF_DECL_T(rewriting_cached);
+            PERF_DECL_T(context_prepare);
+            PERF_DECL_T(context_merging);
     };
 
     class __trace_performance_timing {

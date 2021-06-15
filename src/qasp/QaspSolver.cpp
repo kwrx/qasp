@@ -34,73 +34,56 @@ using namespace qasp::grounder;
 using namespace qasp::solver;
 
 
+
 void QaspSolver::init() {
 
-    if(unlikely(program().subprograms().empty()))
-        throw std::invalid_argument("no programs found");
+    __context.prepare();
 
 
-    const auto& found = std::find_if(program().subprograms().begin(), program().subprograms().end(), [] (const auto& i) {
-        return i.type() == TYPE_CONSTRAINTS;
-    });
+    switch(context().last()->type()) {
 
-    if(found != program().subprograms().end()) {
+        case ProgramType::TYPE_EXISTS:
 
-        Program constraint = *found;
+            if(context().programs().size() > 1)
+                __context.merge();
 
-        if(constraint.source().empty())
-            throw std::invalid_argument("constraint program declared but empty");
+            break;
 
+        case ProgramType::TYPE_FORALL:
 
-#if defined(HAVE_MODE_LOOK_AHEAD)
-
-        size_t no_ground = 0;
-
-        for(const auto& i : constraint.predicates())
-            no_ground += !i.ground();
-
-
-        if(no_ground == 0) {
-
-            Assumptions assumptions {};
-
-            for(const auto& i : constraint.predicates())
-                assumptions.emplace_back(-1, i.arity(), static_cast<std::string>(i));  
-
-            constraint.groundize(assumptions);
-
-        } else {
-
-            LOG(__FILE__, WARN) << "Unpredictable constraint: found @constraint program with "
-                                << no_ground << " predicates non ground" << std::endl;
-
-        }
-
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+            if(qasp().options().mode & QASP_SOLVING_MODE_COUNTER_EXAMPLE)
+                __context.merge();
 #endif
 
-        this->__constraint.emplace(std::move(constraint));
-        
-    }
+            break;
 
+        default:
+            throw std::logic_error("BUG: invalid program type");
+
+    }  
 
 }
+
+
 
 bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(checkings);
 
     LOG(__FILE__, INFO) << "Checking coherency for answerset: " << answer << std::endl;
 
-    if(unlikely(!constraint().has_value()))
+    if(unlikely(!context().constraint()))
         return true;
 
 
+
 #if defined(HAVE_MODE_LOOK_AHEAD)
-    if(constraint()->ground().empty()) {
+    if(context().constraint()->ground().empty()) {
 #endif
 
         Assumptions assumptions;
         assumptions.insert(assumptions.begin(), answer.begin(), answer.end());
 
-        Program program = constraint().value();
+        Program program = *context().constraint();
         program.groundize(assumptions);
 
 
@@ -109,7 +92,7 @@ bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(c
 #if defined(HAVE_MODE_LOOK_AHEAD)
     } else {
 
-        return constraint()->solve(answer)->coherent();
+        return context().constraint()->solve(answer)->coherent();
 
     }
 #endif
@@ -121,36 +104,35 @@ bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(c
 
 bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept { __PERF_TIMING(depends);
 
-    assert(chain != __program.subprograms().end());
+    assert(chain != std::prev(context().end()));
     assert(!answer.empty());
 
 
-    for(auto it = chain + 1; it != __program.subprograms().end(); it++) {
+    for(auto it = chain + 1; it != context().end(); it++) {
 
-        if(unlikely(it->type() == TYPE_CONSTRAINTS)) {
+       for(const auto& i : it->predicates()) {
 
-            for(const auto& i : it->predicates()) {
+            const auto& found = std::find(answer.begin(), answer.end(), i);
 
-                const auto& found = std::find(answer.begin(), answer.end(), i);
+            if(i.positive() && found != answer.end())
+                return true;
 
-                if(i.negative() && found == answer.end())
-                    return true; 
+            if(i.negative() && found == answer.end())
+                return true; 
 
-            }    
+        }
 
-        } else {
-            
-            for(const auto& i : it->predicates()) {
+    }
 
-                const auto& found = std::find(answer.begin(), answer.end(), i);
 
-                if(i.positive() && found != answer.end())
-                    return true;
+    if(context().constraint()) {
 
-                if(i.negative() && found == answer.end())
-                    return true; 
+        for(const auto& i : context().constraint()->predicates()) {
 
-            }
+            const auto& found = std::find(answer.begin(), answer.end(), i);
+
+            if(i.negative() && found == answer.end())
+                return true; 
 
         }
 
@@ -185,13 +167,14 @@ void QaspSolver::promote_answer(const AnswerSet& answer) noexcept {
 
 
 
-bool QaspSolver::check_answer(const std::vector<Program>::iterator& chain, const Program& program, const AnswerSet& answer) const noexcept {
+bool QaspSolver::check_answer(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept {
 
-    bool should_not_check = !program.last();
+
+    bool should_not_check = (chain != std::prev(context().end()));
 
 #if defined(HAVE_MODE_LOOK_AHEAD)
 
-        if(unlikely((qasp().options().mode == QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check))
+        if(unlikely((qasp().options().mode & QASP_SOLVING_MODE_LOOK_AHEAD) && should_not_check))
             should_not_check = depends(chain, answer);
 
 #endif
@@ -204,13 +187,8 @@ bool QaspSolver::check_answer(const std::vector<Program>::iterator& chain, const
 bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) noexcept { __PERF_TIMING(executions);
 
 
-    if(unlikely(chain == program().subprograms().end()))
+    if(unlikely(chain == context().end()))
         return true;
-
-
-    if(unlikely(chain->type() == TYPE_CONSTRAINTS))
-        return execute(chain + 1, std::move(assumptions), std::move(answer));
-
 
 
 
@@ -218,11 +196,24 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
     program.groundize(assumptions);
 
 
+#if defined(HAVE_MODE_COUNTER_EXAMPLE)
+
+    if(program.merged() && program.type() == TYPE_FORALL)
+        program.rewrite();
+
+#endif
+
+
 
     auto solution = program.solve(answer);
 
     
     if(likely(solution->coherent())) {
+
+
+        if(unlikely(program.merged()))
+            return program.type() == TYPE_EXISTS;
+
 
 
         size_t success = 0;
@@ -248,7 +239,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
                 for(const auto& i : buffer) {
 
 
-                    if(!check_answer(chain, program, i)) { __PERF_INC(checks_failed);
+                    if(!check_answer(chain, i)) { __PERF_INC(checks_failed);
                     
                         assert(program.type() == TYPE_FORALL 
                             || program.type() == TYPE_EXISTS);
@@ -268,7 +259,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
                         success++;
 
-                        if(unlikely(chain == __program.subprograms().begin()))
+                        if(unlikely(chain == context().begin()))
                             promote_answer(i);
                         
                         else if(unlikely(program.type() == TYPE_EXISTS))
@@ -306,17 +297,18 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
             return false;
 
         }
-
+        
 
     } else {
 
         if(program.type() != ProgramType::TYPE_FORALL)
-            return false;       
+            return false;    
 
     }
 
 
     return true;
+
 
 }
 
@@ -325,7 +317,7 @@ bool QaspSolver::run() { __PERF_TIMING(running);
 
     assert(solution().empty());
 
-    if(!execute(__program.subprograms().begin()))
+    if(!execute(__context.begin()))
         return model(MODEL_INCOHERENT), false;
 
     return model(MODEL_COHERENT), true;

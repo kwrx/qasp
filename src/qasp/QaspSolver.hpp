@@ -23,6 +23,7 @@
 #include "Program.hpp"
 #include "AnswerSet.hpp"
 #include "Atom.hpp"
+#include "Context.hpp"
 #include "utils/Cache.hpp"
 
 #include <qasp/qasp.h>
@@ -32,17 +33,13 @@ namespace qasp {
     class QaspSolver {
         public:
 
-            QaspSolver(Qasp qasp, Program program)
+            QaspSolver(Qasp qasp, Context context)
                 : __qasp(std::move(qasp))
-                , __program(std::move(program))
+                , __context(std::move(context))
                 , __model(MODEL_UNKNOWN) { init(); }
 
-            inline const auto& program() const {
-                return this->__program;
-            }
-
-            inline const auto& constraint() const {
-                return this->__constraint;
+            inline const auto& context() const {
+                return this->__context;
             }
 
             inline const auto& solution() const {
@@ -62,16 +59,15 @@ namespace qasp {
         private:
 
             Qasp __qasp;
-            Program __program;
+            Context __context;
             ProgramModel __model;
-            std::optional<Program> __constraint {};
             std::vector<AnswerSet> __solution {};
 
             void init();
             bool check(const AnswerSet& answer) const noexcept;
             bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {}) noexcept;
             
-            bool check_answer(const std::vector<Program>::iterator& chain, const Program& program, const AnswerSet& answer) const noexcept;
+            bool check_answer(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept;
             void promote_answer(const AnswerSet& answer) noexcept;
 
 #if defined(HAVE_MODE_LOOK_AHEAD)

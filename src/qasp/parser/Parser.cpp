@@ -20,6 +20,7 @@
 
 #include "Parser.hpp"
 #include "ParserException.hpp"
+#include "../Context.hpp"
 #include "../utils/Performance.hpp"
 
 #include <iostream>
@@ -211,11 +212,9 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
 #endif
 
-static std::vector<Program> parseSources(const std::vector<std::string>& sources) { __PERF_TIMING(parsing);
+static std::vector<Program> parseSources(const std::vector<std::string>& sources, std::vector<Program>& programs, std::optional<Program>& constraint) { __PERF_TIMING(parsing);
 
     std::vector<Token> tokens;
-    std::vector<Program> programs;
-
 
     auto tokenize = [&](std::istream& fd, const std::string& source) {
 
@@ -422,7 +421,7 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
                 else if(identifier.str() == ANNOTATION_FORALL)
                     programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str(), predicates);
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str(), predicates);
+                    constraint.emplace(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str(), predicates);
                 else {
 
 #ifdef DEBUG
@@ -453,9 +452,14 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 }
 
 
-Program Parser::parse(const qasp::Options& options) const {
+Context Parser::parse(const qasp::Options& options) const {
 
-    std::vector<Program> programs = parseSources(this->sources());
+    std::vector<Program> programs;
+    std::optional<Program> constraint;
+
+    parseSources(this->sources(), programs, constraint);
+    
+    
     std::ostringstream source;
 
     for(const auto& program : programs) {
@@ -470,17 +474,6 @@ Program Parser::parse(const qasp::Options& options) const {
 
 
 
-    for(auto it = programs.rbegin(); it != programs.rend(); it++) {
-
-        if(unlikely(it->type() == ProgramType::TYPE_CONSTRAINTS))
-            continue;
-
-        it->last(true);
-        break;
-
-    }
-
-
-    return Program(-1, ProgramType::TYPE_COMMON, source.str(), {}, programs);
+    return Context(source.str(), std::move(programs), std::move(constraint));
 
 }

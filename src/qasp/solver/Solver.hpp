@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <string>
+#include <optional>
 #include <cassert>
 
 

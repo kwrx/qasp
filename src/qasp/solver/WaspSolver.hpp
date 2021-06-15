@@ -27,6 +27,7 @@
 
 #include <wasp/WaspFacade.h>
 #include <string>
+#include <optional>
 
 
 namespace qasp::solver {

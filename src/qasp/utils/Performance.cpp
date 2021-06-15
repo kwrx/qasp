@@ -47,5 +47,9 @@ using namespace qasp::utils;
     PERF_VALUE_T(solutions_found);
     PERF_VALUE_T(solutions_discarded);
     PERF_VALUE_T(checks_failed);
+    PERF_VALUE_T(rewriting);
+    PERF_VALUE_T(rewriting_cached);
+    PERF_VALUE_T(context_prepare);
+    PERF_VALUE_T(context_merging);
 
 #endif
