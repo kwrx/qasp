@@ -53,7 +53,7 @@ static void show_usage(int argc, char** argv) {
         << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
 #endif
 #if defined(HAVE_MODE_COUNTER_EXAMPLE)
-        << "    -l, --counter-example       proving satisfiability by counter example\n"
+        << "    -c, --counter-example       proving satisfiability by counter example\n"
 #endif
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"

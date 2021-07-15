@@ -151,17 +151,11 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
 
 
-void QaspSolver::promote_answer(const AnswerSet& answer) noexcept {
-
+void QaspSolver::promote_answer(const AnswerSet& answer) noexcept { __PERF_INC(solutions_found);
 
     LOG(__FILE__, TRACE) << "Add to solution answer: " << answer << std::endl;
 
-    if(std::find(__solution.begin(), __solution.end(), answer) == __solution.end()) { __PERF_INC(solutions_found);
-        return (void) __solution.emplace_back(answer);
-    }
-
-
-    __PERF_INC(solutions_discarded);
+    return (void) __solution.emplace_back(answer);
 
 }
 
@@ -193,7 +187,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
 
     Program program = (*chain);
-    program.groundize(assumptions);
+    //program.groundize(assumptions);
 
 
 #if defined(HAVE_MODE_COUNTER_EXAMPLE)
@@ -317,8 +311,18 @@ bool QaspSolver::run() { __PERF_TIMING(running);
 
     assert(solution().empty());
 
+
     if(!execute(__context.begin()))
         return model(MODEL_INCOHERENT), false;
+
+
+
+    { __PERF_TIMING(solutions_check);
+
+        std::sort(__solution.begin(), __solution.end());
+        std::unique(__solution.begin(), __solution.end());
+    
+    }
 
     return model(MODEL_COHERENT), true;
 
