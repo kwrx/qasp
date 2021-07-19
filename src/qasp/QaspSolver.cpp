@@ -193,8 +193,6 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
         for(auto it = solution->begin(); it != solution->end(); ++it) {
 
 
-            Assumptions knowledge(assumptions);
-
             if(!check_answer(chain, *it)) { __PERF_INC(checks_failed);
                     
                 assert(program.type() == TYPE_FORALL 
@@ -211,7 +209,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
             }
 
 
-            if(execute(chain + 1, knowledge, *it)) {
+            if(execute(chain + 1, assumptions, *it)) {
 
                 success++;
 

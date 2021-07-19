@@ -36,7 +36,6 @@
 #define QASP_OPTIONS_DEFAULT_QUIET          0
 #define QASP_OPTIONS_DEFAULT_CPUS           8
 #define QASP_OPTIONS_DEFAULT_MODE           QASP_SOLVING_MODE_REGULAR
-#define QASP_OPTIONS_DEFAULT_BUFSIZ         64
 
 
 
@@ -52,7 +51,6 @@ namespace qasp {
         uint16_t quiet  = QASP_OPTIONS_DEFAULT_QUIET;
         uint16_t cpus   = QASP_OPTIONS_DEFAULT_CPUS;
         uint16_t mode   = QASP_OPTIONS_DEFAULT_MODE;
-        uint16_t bufsiz = QASP_OPTIONS_DEFAULT_BUFSIZ;
 
     };
 
@@ -70,9 +68,7 @@ namespace qasp {
                 : __sources({ "-" }) {}
 
         
-            /**
-             * @brief Set options to current qasp instance
-             */
+
             inline void options(qasp::Options&& options) {
                 __options = std::move(options);
             }
@@ -111,7 +107,6 @@ typedef struct {
     uint16_t cpus;
     uint16_t quiet;
     uint16_t mode;
-    uint16_t bufsiz;
 } qasp_options_t;
 
 extern int qasp_set_options(qasp_options_t* options);

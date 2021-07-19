@@ -58,7 +58,6 @@ static void show_usage(int argc, char** argv) {
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
 #endif
-        << "    -b N, --buffer-size=N       set solver buffer size of each iteration to N models.\n"
 #if defined(__unix__)
         << "    -t N, --time-limit=N        set time limit to N seconds.\n"
 #endif
@@ -172,7 +171,6 @@ int main(int argc, char** argv) {
 #if defined(__unix__)
         { "time-limit",      required_argument, NULL, 't' },
 #endif
-        { "buffer-size",     required_argument, NULL, 'b' },
         { "help",            no_argument,       NULL, 'h' },
         { "version",         no_argument,       NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -182,7 +180,7 @@ int main(int argc, char** argv) {
     qasp::Options options;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qj:clt:b:hv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:clt:hv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
@@ -209,9 +207,6 @@ int main(int argc, char** argv) {
                     alarm(atoi(optarg));
                 break;
 #endif
-            case 'b':
-                options.bufsiz = atoi(optarg);
-                break;
             case 'v':
                 show_version(argc, argv);
                 break;
@@ -229,11 +224,6 @@ int main(int argc, char** argv) {
     if(unlikely(options.cpus < 1)) {
         options.cpus = std::numeric_limits<decltype(options.cpus)>().max();
     }
-
-    if(unlikely(options.bufsiz < 1)) {
-        options.bufsiz = 1;
-    }
-
 
 
 

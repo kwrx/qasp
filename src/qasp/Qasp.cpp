@@ -82,13 +82,21 @@ std::string Qasp::run() {
 #endif
 
     if(coherent) {
+
+        if(options().quiet) {
+
+            return "COHERENT\n";
+
+        } else {
         
-        std::ostringstream output;
+            std::ostringstream output;
 
-        for(const auto& answer : qasp.solution())
-            output << answer << std::endl;
+            for(const auto& answer : qasp.solution())
+                output << answer << std::endl;
 
-        return output.str();
+            return output.str();
+
+        }
 
     }
 

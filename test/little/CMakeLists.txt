@@ -1,4 +1,4 @@
-file(GLOB SOURCES "*.asp")
+file(GLOB SOURCES "*.qasp")
 
 foreach(SOURCE ${SOURCES})
 
