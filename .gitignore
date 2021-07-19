@@ -39,3 +39,5 @@
 
 # Big Test
 /extra/test/
+/extra/hyperfine/
+/test/other/

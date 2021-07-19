@@ -75,27 +75,7 @@ bool QaspSolver::check(const AnswerSet& answer) const noexcept { __PERF_TIMING(c
         return true;
 
 
-
-#if defined(HAVE_MODE_LOOK_AHEAD)
-    if(context().constraint()->ground().empty()) {
-#endif
-
-        Assumptions assumptions;
-        assumptions.insert(assumptions.begin(), answer.begin(), answer.end());
-
-        Program program = *context().constraint();
-        program.groundize(assumptions);
-
-
-        return program.solve(answer)->coherent();
-
-#if defined(HAVE_MODE_LOOK_AHEAD)
-    } else {
-
-        return context().constraint()->solve(answer)->coherent();
-
-    }
-#endif
+    return context().constraint()->solve(answer)->coherent();
 
 }
 
@@ -151,17 +131,11 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
 
 
-void QaspSolver::promote_answer(const AnswerSet& answer) noexcept {
-
+void QaspSolver::promote_answer(const AnswerSet& answer) noexcept { __PERF_INC(solutions_found);
 
     LOG(__FILE__, TRACE) << "Add to solution answer: " << answer << std::endl;
 
-    if(std::find(__solution.begin(), __solution.end(), answer) == __solution.end()) { __PERF_INC(solutions_found);
-        return (void) __solution.emplace_back(answer);
-    }
-
-
-    __PERF_INC(solutions_discarded);
+    return (void) __solution.emplace_back(answer);
 
 }
 
@@ -192,13 +166,11 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
 
 
-    Program program = (*chain);
-    program.groundize(assumptions);
-
+    Program program = (*chain);    
 
 #if defined(HAVE_MODE_COUNTER_EXAMPLE)
 
-    if(program.merged() && program.type() == TYPE_FORALL)
+    if(program.merged() && (program.type() == TYPE_FORALL))
         program.rewrite();
 
 #endif
@@ -218,73 +190,44 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
         size_t success = 0;
 
-        for(auto it = solution->begin(); it != solution->end(); ) {
+        for(auto it = solution->begin(); it != solution->end(); ++it) {
 
 
-            std::vector<AnswerSet> buffer {};
-
-            for(size_t i = 0; it != solution->end() && i < qasp().options().bufsiz; ++i, ++it)
-                buffer.emplace_back(*it);
-
-
-            Assumptions knowledge(assumptions);
-
-            for(const auto& i : buffer)
-                knowledge.insert(knowledge.end(), i.begin(), i.end());
-
-
-
-            const auto dispatch = [&] (const auto& buffer) -> bool {
-
-                for(const auto& i : buffer) {
-
-
-                    if(!check_answer(chain, i)) { __PERF_INC(checks_failed);
+            if(!check_answer(chain, *it)) { __PERF_INC(checks_failed);
                     
-                        assert(program.type() == TYPE_FORALL 
-                            || program.type() == TYPE_EXISTS);
+                assert(program.type() == TYPE_FORALL 
+                    || program.type() == TYPE_EXISTS);
 
-                        
-                        if(program.type() == TYPE_FORALL) { 
-                            success = 0; 
-                            return false;
-                        }
-
-                        continue;
-
-                    }
-
-
-                    if(execute(chain + 1, knowledge, i)) {
-
-                        success++;
-
-                        if(unlikely(chain == context().begin()))
-                            promote_answer(i);
-                        
-                        else if(unlikely(program.type() == TYPE_EXISTS))
-                            return false;
-
-
-                    } else {
-
-                        if(program.type() == TYPE_FORALL) { 
-                            success = 0; 
-                            return false;
-                        }
-
-                    }
-
+                
+                if(program.type() == TYPE_FORALL) { 
+                    success = 0; 
+                    break;
                 }
 
+                continue;
 
-                return true;
-
-            };
+            }
 
 
-            if(!dispatch(buffer))
-                break;
+            if(execute(chain + 1, assumptions, *it)) {
+
+                success++;
+
+                if(unlikely(chain == context().begin()))
+                    promote_answer(*it);
+                
+                else if(unlikely(program.type() == TYPE_EXISTS))
+                    break;
+
+
+            } else {
+
+                if(program.type() == TYPE_FORALL) { 
+                    success = 0; 
+                    break;
+                }
+
+            }
 
         }
 
@@ -317,8 +260,18 @@ bool QaspSolver::run() { __PERF_TIMING(running);
 
     assert(solution().empty());
 
+
     if(!execute(__context.begin()))
         return model(MODEL_INCOHERENT), false;
+
+
+
+    { __PERF_TIMING(solutions_check);
+
+        std::sort(__solution.begin(), __solution.end());
+        std::unique(__solution.begin(), __solution.end());
+    
+    }
 
     return model(MODEL_COHERENT), true;
 

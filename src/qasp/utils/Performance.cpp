@@ -45,7 +45,7 @@ using namespace qasp::utils;
     PERF_VALUE_T(mapping);
     PERF_VALUE_T(answerset_comparing);
     PERF_VALUE_T(solutions_found);
-    PERF_VALUE_T(solutions_discarded);
+    PERF_VALUE_T(solutions_check);
     PERF_VALUE_T(checks_failed);
     PERF_VALUE_T(rewriting);
     PERF_VALUE_T(rewriting_cached);

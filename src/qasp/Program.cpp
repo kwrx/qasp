@@ -81,8 +81,6 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
                         << " assumptions(" << assumptions << ")" << std::endl;
 
     assert(!source().empty());
-    assert( ground().empty());
-    assert( atoms().empty());
 
 
     std::ostringstream input;
@@ -142,7 +140,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 }
 
 
-const Program& Program::rewrite() noexcept {
+const Program& Program::rewrite() noexcept { __PERF_TIMING(rewriting);
 
     assert(!source().empty());
     assert(!ground().empty());
@@ -164,7 +162,7 @@ const Program& Program::rewrite() noexcept {
         this->__rewritten = true;
     
 
-    } else { __PERF_TIMING(rewriting);
+    } else {
 
 
         std::istringstream reader(ground());

@@ -112,7 +112,7 @@ std::string GringoGrounder::execute(const std::string& source) const {
             parser.pushStream("-", Gringo::gringo_make_unique<std::stringstream>(source), debug);
             parser.parse(debug);
 
-            if(debug.hasError())
+            if(unlikely(debug.hasError()))
                 throw std::runtime_error("an error occurred while parsing gringo");
 
 
@@ -129,7 +129,7 @@ std::string GringoGrounder::execute(const std::string& source) const {
             program.rewrite(defines, debug);
             program.check(debug);
 
-            if(debug.hasError())
+            if(unlikely(debug.hasError()))
                 throw std::runtime_error("an error occurred while running gringo");
 
 
