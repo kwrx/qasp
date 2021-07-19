@@ -1,3 +1,9 @@
+# Benchmark
+
+![](img/graph_01.png)
+![](img/graph_02.png)
+
+
 |Test|QASP|QASP (C)|QASP (A)|DEMACS|
 |----|----|--------|--------|------|
 |NuSMV_diam_qdimacs|0.00|0.00|0.00|0.17|
