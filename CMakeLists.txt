@@ -31,6 +31,8 @@ set(HAVE_PERFORMANCE            0)
 # Build Test Options
 set(ENABLE_COVERAGE             0)
 set(ENABLE_PROFILING            0)
+set(ENABLE_NATIVE               0)
+set(ENABLE_STATIC               1)
 
 ######################################
 
