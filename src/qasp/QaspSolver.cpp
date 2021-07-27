@@ -131,11 +131,15 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
 
 
-void QaspSolver::promote_answer(const AnswerSet& answer) noexcept { __PERF_INC(solutions_found);
+bool QaspSolver::promote_answer(const AnswerSet& answer) noexcept { __PERF_INC(solutions_found);
+
+    if(unlikely(__solution.size() >= qasp().options().models))
+        return false;
+
 
     LOG(__FILE__, TRACE) << "Add to solution answer: " << answer << std::endl;
 
-    return (void) __solution.emplace_back(answer);
+    return __solution.emplace_back(answer), true;
 
 }
 
@@ -213,10 +217,12 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
 
                 success++;
 
-                if(unlikely(chain == context().begin()))
-                    promote_answer(*it);
-                
-                else if(unlikely(program.type() == TYPE_EXISTS))
+                if(unlikely(chain == context().begin())) {
+                 
+                    if(!promote_answer(*it))
+                        break;
+
+                } else if(unlikely(program.type() == TYPE_EXISTS))
                     break;
 
 

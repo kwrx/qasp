@@ -46,15 +46,19 @@ void Context::prepare() { __PERF_TIMING(context_prepare);
 
 void Context::merge() noexcept { __PERF_TIMING(context_merging);
 
-    auto program = programs().back();
-            
-    program.merge(*constraint());
-    program.groundize(program.assumptions());
+    if(constraint()) {
+        
+        auto program = programs().back();
+                
+        program.merge(*constraint());
+        program.groundize(program.assumptions());
 
-    __programs.pop_back();
-    __programs.emplace_back(program);
+        __programs.pop_back();
+        __programs.emplace_back(program);
 
 
-    LOG(__FILE__, INFO) << "Merged @constraint with program #" << program.id() << std::endl;
+        LOG(__FILE__, INFO) << "Merged @constraint with program #" << program.id() << std::endl;
+
+    }
 
 }

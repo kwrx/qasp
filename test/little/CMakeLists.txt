@@ -7,25 +7,25 @@ foreach(SOURCE ${SOURCES})
 
     add_test(
         NAME "[FILE]  ${TEST_PATH}-${TEST_NAME}"
-        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
+        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -n0 | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
         WORKING_DIRECTORY .
     )
 
     add_test(
         NAME "[FILE]  ${TEST_PATH}-${TEST_NAME} --look-ahead"
-        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -l | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
+        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -n0 -l | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
         WORKING_DIRECTORY .
     )
 
     add_test(
         NAME "[FILE]  ${TEST_PATH}-${TEST_NAME} --counter-example"
-        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -c | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
+        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -n0 -c | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
         WORKING_DIRECTORY .
     )
 
     add_test(
         NAME "[FILE]  ${TEST_PATH}-${TEST_NAME} --counter-example --look-ahead"
-        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -l -c | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
+        COMMAND /bin/sh -c "${PROJECT_BINARY_DIR}/bin/qasp ${SOURCE} -n0 -l -c | diff -s ${TEST_PATH}/${TEST_NAME}.expected -"
         WORKING_DIRECTORY .
     )
 

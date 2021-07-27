@@ -55,6 +55,7 @@ static void show_usage(int argc, char** argv) {
 #if defined(HAVE_MODE_COUNTER_EXAMPLE)
         << "    -c, --counter-example       proving satisfiability by counter example\n"
 #endif
+        << "    -n N, --models=N            compute at most N models (0 for all)\n"
 #if defined(HAVE_THREADS)
         << "    -j N, --parallel=N          allow N jobs at once.\n"
 #endif
@@ -171,6 +172,7 @@ int main(int argc, char** argv) {
 #if defined(__unix__)
         { "time-limit",      required_argument, NULL, 't' },
 #endif
+        { "models",          required_argument, NULL, 'n' },
         { "help",            no_argument,       NULL, 'h' },
         { "version",         no_argument,       NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -180,7 +182,7 @@ int main(int argc, char** argv) {
     qasp::Options options;
 
     int c, idx;
-    while((c = getopt_long(argc, argv, "qj:clt:hv", long_options, &idx)) != -1) {
+    while((c = getopt_long(argc, argv, "qj:clt:n:hv", long_options, &idx)) != -1) {
 
         switch(c) {
             case 'q':
@@ -207,9 +209,14 @@ int main(int argc, char** argv) {
                     alarm(atoi(optarg));
                 break;
 #endif
+            case 'n':
+                options.models = atoi(optarg);
+                break;
+
             case 'v':
                 show_version(argc, argv);
                 break;
+
             case 'h':
             case '?':
             default:
@@ -223,6 +230,10 @@ int main(int argc, char** argv) {
 
     if(unlikely(options.cpus < 1)) {
         options.cpus = std::numeric_limits<decltype(options.cpus)>().max();
+    }
+
+    if(unlikely(options.models < 1)) {
+        options.models = std::numeric_limits<decltype(options.models)>().max();
     }
 
 

@@ -36,6 +36,7 @@
 #define QASP_OPTIONS_DEFAULT_QUIET          0
 #define QASP_OPTIONS_DEFAULT_CPUS           8
 #define QASP_OPTIONS_DEFAULT_MODE           QASP_SOLVING_MODE_REGULAR
+#define QASP_OPTIONS_DEFAULT_MODELS         1L
 
 
 
@@ -51,6 +52,7 @@ namespace qasp {
         uint16_t quiet  = QASP_OPTIONS_DEFAULT_QUIET;
         uint16_t cpus   = QASP_OPTIONS_DEFAULT_CPUS;
         uint16_t mode   = QASP_OPTIONS_DEFAULT_MODE;
+        uint64_t models = QASP_OPTIONS_DEFAULT_MODELS;
 
     };
 
@@ -107,6 +109,7 @@ typedef struct {
     uint16_t cpus;
     uint16_t quiet;
     uint16_t mode;
+    uint64_t models;
 } qasp_options_t;
 
 extern int qasp_set_options(qasp_options_t* options);
