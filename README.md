@@ -31,10 +31,10 @@ a | b.
 %@forall
 c | d :- a.
 d :- b.  
-%@constraints
+%@constraint
 :- c, not d.
 ```
-Calculate if exists an *answer set* of **@exists program** such that for each *answer set* of **@forall program** is a *coherent* solution.
+Calculate if exists an *answer set* of **@exists** program such that for each *answer set* of **@forall** program is a *coherent* solution.
 ```shell script
 $ qasp program.asp
 ```
