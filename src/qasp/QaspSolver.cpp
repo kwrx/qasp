@@ -162,7 +162,7 @@ bool QaspSolver::check_answer(const std::vector<Program>::iterator& chain, const
 }
 
 
-bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assumptions, AnswerSet answer) noexcept { __PERF_TIMING(executions);
+bool QaspSolver::execute(std::vector<Program>::iterator chain, AnswerSet answer) noexcept { __PERF_TIMING(executions);
 
 
     if(unlikely(chain == context().end()))
@@ -213,7 +213,7 @@ bool QaspSolver::execute(std::vector<Program>::iterator chain, Assumptions assum
             }
 
 
-            if(execute(chain + 1, assumptions, *it)) {
+            if(execute(chain + 1, *it)) {
 
                 success++;
 

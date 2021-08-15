@@ -94,7 +94,7 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
         (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
 
     #define VALID_EXTENSIONS(it)    \
-        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT))
+        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT) || EXPECT(it, TK_COMMA))
 
 
 

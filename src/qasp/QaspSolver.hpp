@@ -65,7 +65,7 @@ namespace qasp {
 
             void init();
             bool check(const AnswerSet& answer) const noexcept;
-            bool execute(std::vector<Program>::iterator chain, Assumptions assumptions = {}, AnswerSet answer = {}) noexcept;
+            bool execute(std::vector<Program>::iterator chain, AnswerSet answer = {}) noexcept;
             
             bool check_answer(const std::vector<Program>::iterator& chain, const AnswerSet& answer) const noexcept;
             bool promote_answer(const AnswerSet& answer) noexcept;
