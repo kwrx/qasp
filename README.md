@@ -1,6 +1,7 @@
 # qasp
 [![build](https://github.com/kwrx/qasp/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/kwrx/qasp/actions/workflows/cmake-build.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/kwrx/qasp)](https://github.com/kwrx/qasp/releases/latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5227172.svg)](https://doi.org/10.5281/zenodo.5227172)
 [![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)](/LICENSE) 
 
 ## How to install?
