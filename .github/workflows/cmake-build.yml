@@ -18,7 +18,7 @@ jobs:
     - name: Install Dependencies
       shell: bash
       working-directory: ${{github.workspace}}
-      run: sudo apt update && sudo apt install re2c bison flex libboost-dev ninja-build && conda install -c potassco clingo
+      run: sudo apt update && sudo apt install re2c bison flex libboost-dev build-essential && conda install -c potassco clingo
 
     - name: Create Build Environment (Debug)
       run: cmake -E make_directory ${{github.workspace}}/debug
@@ -39,12 +39,12 @@ jobs:
     - name: Configure CMake (Debug)
       shell: bash
       working-directory: ${{github.workspace}}/debug
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug -G Ninja
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug
 
     - name: Configure CMake (Release)
       shell: bash
       working-directory: ${{github.workspace}}/release
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -G Ninja
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release
 
     - name: Build Dependencies (Debug)
       working-directory: ${{github.workspace}}/debug
