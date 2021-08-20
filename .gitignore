@@ -41,3 +41,5 @@
 /extra/test/
 /extra/hyperfine/
 /test/other/
+/test/bench/
+/extra/bench/

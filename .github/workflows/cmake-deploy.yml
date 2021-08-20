@@ -24,10 +24,20 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
 
+    - name: Configure Build Environment
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: git submodule update --init --recursive
+
     - name: Configure CMake
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -G Ninja
+
+    - name: Build Dependencies
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake --build . --config Release -j 8 -t clingo
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -49,8 +59,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          ${{github.workspace}}/build/qasp-*.deb
-          ${{github.workspace}}/build/qasp-*.rpm
           ${{github.workspace}}/build/qasp-*.tar.gz
           ${{github.workspace}}/build/qasp-*.tar.xz
           ${{github.workspace}}/build/qasp-*.zip
