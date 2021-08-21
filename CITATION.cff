@@ -4,7 +4,7 @@ authors:
 - family-names: "Natale"
   given-names: "Antonino"
   orcid: "https://orcid.org/0000-0002-6773-4039"
-title: "Quantifying over ASP"
+title: "Quantifying over ASP: design and implementation of ASP(Q) solver"
 version: 1.0.0
 doi: 10.5281/zenodo.5227172
 date-released: 2021-08-20
