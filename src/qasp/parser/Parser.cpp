@@ -94,7 +94,7 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
         (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
 
     #define VALID_EXTENSIONS(it)    \
-        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT) || EXPECT(it, TK_COMMA))
+        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT) || EXPECT(it, TK_COMMA) || EXPECT(it, TK_LEFT_PAREN) || EXPECT(it, TK_RIGHT_PAREN))
 
 
 
@@ -132,9 +132,23 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
                 if(EXPECT(it, TK_LEFT_PAREN)) {
 
+                    uint16_t scope = 1;
+
                     while(GOOD(++it) && VALID_EXTENSIONS(it)) {
-                        extensions << VALUE(it);
+
+                        if(unlikely(EXPECT(it, TK_LEFT_PAREN)))
+                            scope++;
+
+                        if(unlikely(EXPECT(it, TK_RIGHT_PAREN)))
+                            scope--;
+
+                        if(unlikely(scope == 0))
+                            break;
+
+                        extensions << VALUE(it);                  
+
                     }
+
 
                     if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
 
@@ -143,6 +157,8 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
                         throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it));
 
                     }
+
+                    
 
                 } else {
 
