@@ -152,12 +152,13 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
                     if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
 
-                        LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list" << std::endl;
+                        LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list, found: " << VALUE(it) << std::endl;
 
                         throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it));
 
                     }
 
+                    it++;
                     
 
                 } else {
@@ -169,7 +170,7 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
                             continue;
                         }
 
-                        LOG(__FILE__, WARN) << "Expected a LEFT_PAREN, DOT or COMMA after predicate name" << std::endl;
+                        LOG(__FILE__, WARN) << "Expected a LEFT_PAREN, DOT or COMMA after predicate name, found: " << VALUE(it) << std::endl;
                         break;
 
                     }
@@ -203,7 +204,7 @@ static std::string parsePredicates(const std::vector<Token>& tokens, std::vector
 
                 else {
 
-                    LOG(__FILE__, ERROR) << "Expected a DOT or COMMA after predicate" << std::endl;
+                    LOG(__FILE__, ERROR) << "Expected a DOT or COMMA after predicate, found " << VALUE(it) << std::endl;
                     break;
 
                 }
