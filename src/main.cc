@@ -46,9 +46,10 @@
 
 static void show_usage(int argc, char** argv) {
 
-    std::cout 
-        << "Use: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n"
-        << "Process qasp SOURCES and blabla...\n\n"
+    std::cout
+        << QASP_PROGRAM_GREETINGS << "\n"
+        << "usage: " << QASP_PROGRAM_NAME << " [OPTIONS] SOURCES...\n\n"
+        << "Process qasp SOURCES and computes quantified models.\n\n"
 #if defined(HAVE_MODE_LOOK_AHEAD)
         << "    -l, --look-ahead            proving satisfiability by looking ahead\n"
 #endif
@@ -78,7 +79,7 @@ static void show_version(int argc, char** argv) {
         << " (asp-utils) "
         << QASP_VERSION_MAJOR << "."
         << QASP_VERSION_MINOR << "."
-        << QASP_VERSION_PATCH << "."
+        << QASP_VERSION_PATCH << "-"
         << QASP_VERSION_TWEAK << "\n"
         << "Copyright (C) "
         << (&__DATE__[7]) << " Antonino Natale\n"
@@ -86,8 +87,8 @@ static void show_version(int argc, char** argv) {
         << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
         << "Built with "
         << QASP_COMPILER_NAME       << " "
-        << QASP_COMPILER_VERSION    << "(" 
-        << __TIMESTAMP__            << ")\n";
+        << QASP_COMPILER_VERSION    << " "
+        << "(" << __TIMESTAMP__     << ")\n";
 
     
     exit(EXIT_FAILURE);
