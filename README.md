@@ -39,7 +39,7 @@ $ qasp [OPTIONS] SOURCES...
 ```
 Or read from *stdin*
 ```shell script
-$ cat SOURCE | qasp
+$ cat SOURCE | qasp [OPTIONS]
 ```
 **NOTE:** type ```qasp --help``` for more information.
 
@@ -54,9 +54,9 @@ d :- b.
 %@constraint
 :- c, not d.
 ```
-Calculate if exists an *answer set* of **@exists** program such that for each *answer set* of **@forall** program is a *coherent* solution.
+Calculate if exists all *answer set* of **@exists** program such that for each *answer set* of **@forall** program is a *coherent* solution.
 ```shell script
-$ qasp program.asp
+$ qasp -n0 program.asp
 ```
 
 ## License
