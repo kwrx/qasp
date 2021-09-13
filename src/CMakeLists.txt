@@ -1,5 +1,6 @@
 file(GLOB_RECURSE SOURCES "*.cpp")
 file(GLOB_RECURSE HEADERS "*.hpp")
+file(GLOB_RECURSE PUBHDRS "${CMAKE_SOURCE_DIR}/include/qasp/qasp.*")
 
 add_library(qasp ${SOURCES} ${HEADERS})
 add_executable(qaspcli main.cc)
@@ -43,3 +44,6 @@ target_compile_options(qaspcli
 
 set_target_properties(qaspcli 
     PROPERTIES OUTPUT_NAME "qasp")
+
+set_target_properties(qaspcli
+    PROPERTIES PUBLIC_HEADER "${PUBHDRS}")
