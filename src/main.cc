@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <csignal>
+#include <cstring>
 #include <getopt.h>
 
 #include <qasp/qasp.h>
@@ -79,7 +80,7 @@ static void show_version(int argc, char** argv) {
         << " (asp-utils) "
         << QASP_VERSION_MAJOR << "."
         << QASP_VERSION_MINOR << "."
-        << QASP_VERSION_PATCH << "-"
+        << QASP_VERSION_PATCH << (strlen(QASP_VERSION_TWEAK) > 0 ? "-" : "")
         << QASP_VERSION_TWEAK << "\n"
         << "Copyright (C) "
         << (&__DATE__[7]) << " Antonino Natale\n"
