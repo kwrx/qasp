@@ -90,14 +90,14 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
     for(auto it = chain + 1; it != context().end(); it++) {
 
-       for(const auto& i : it->predicates()) {
+       for(const auto& i : it->dependencies()) {
 
-            const auto& found = std::find(answer.begin(), answer.end(), i);
+            const auto& found = std::find(answer.begin(), answer.end(), i.first);
 
-            if(i.positive() && found != answer.end())
+            if((i.second & DEPENDENCY_SIGN_POSITIVE) && found != answer.end())
                 return true;
 
-            if(i.negative() && found == answer.end())
+            if((i.second & DEPENDENCY_SIGN_NEGATIVE) && found == answer.end())
                 return true; 
 
         }
@@ -107,11 +107,11 @@ bool QaspSolver::depends(const std::vector<Program>::iterator& chain, const Answ
 
     if(context().constraint()) {
 
-        for(const auto& i : context().constraint()->predicates()) {
+        for(const auto& i : context().constraint()->dependencies()) {
 
-            const auto& found = std::find(answer.begin(), answer.end(), i);
+            const auto& found = std::find(answer.begin(), answer.end(), i.first);
 
-            if(i.negative() && found == answer.end())
+            if((i.second & DEPENDENCY_SIGN_NEGATIVE) && found == answer.end())
                 return true; 
 
         }

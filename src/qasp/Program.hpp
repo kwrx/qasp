@@ -23,8 +23,6 @@
 #include "Atom.hpp"
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
-#include "Predicate.hpp"
-#include "Predicates.hpp"
 #include "solver/Solver.hpp"
 #include "utils/Performance.hpp"
 
@@ -33,6 +31,11 @@
 #include <tuple>
 #include <unordered_map>
 #include <memory>
+
+
+#define DEPENDENCY_SIGN_UNDEFINED                0
+#define DEPENDENCY_SIGN_POSITIVE                 1
+#define DEPENDENCY_SIGN_NEGATIVE                 2
 
 
 namespace qasp {
@@ -57,12 +60,12 @@ namespace qasp {
     class Program {
         public:
 
-            Program(pid_t id, const qasp::ProgramType type, const std::string source, const Predicates predicates = {}, const std::vector<Program> subprograms = {})
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::unordered_map<std::string, const int> dependencies = {}, const std::vector<Program> subprograms = {})
                 : __id(id)
                 , __type(type)
                 , __source(std::move(source))
                 , __subprograms(std::move(subprograms))
-                , __predicates(std::move(predicates)) {}
+                , __dependencies(std::move(dependencies)) {}
 
 
             inline const auto& id() const {
@@ -81,8 +84,8 @@ namespace qasp {
                 return this->__atoms;
             }
 
-            inline const auto& predicates() const {
-                return this->__predicates;
+            inline const auto& dependencies() const {
+                return this->__dependencies;
             }
 
             inline const auto& subprograms() const {
@@ -134,9 +137,9 @@ namespace qasp {
             std::string __source;
             std::string __ground;
             std::vector<Program> __subprograms;
-            Predicates __predicates;
 
             std::unordered_map<std::string, Atom> __atoms {};
+            std::unordered_map<std::string, const int> __dependencies {};
             atom_index_t __atoms_index_offset = 0;
             Assumptions __assumptions {};
             bool __merged = false;

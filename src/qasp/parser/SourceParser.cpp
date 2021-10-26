@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Parser.hpp"
+#include "SourceParser.hpp"
 #include "ParserException.hpp"
 #include "../Context.hpp"
 #include "../utils/Performance.hpp"
@@ -84,150 +84,6 @@ static std::string parseValue(const std::vector<Token>::iterator& it) {
 
 }
 
-
-#if defined(HAVE_MODE_LOOK_AHEAD)
-
-static std::string parsePredicates(const std::vector<Token>& tokens, std::vector<Token>::iterator& it, Predicates& predicates) {
-
-
-    #define VALID_NAME(it)          \
-        (EXPECT(it, TK_SOURCE) && (isalnum(VALUE(it)) || VALUE(it) == '_'))
-
-    #define VALID_EXTENSIONS(it)    \
-        (EXPECT(it, TK_SOURCE) || EXPECT(it, TK_DOT) || EXPECT(it, TK_COMMA) || EXPECT(it, TK_LEFT_PAREN) || EXPECT(it, TK_RIGHT_PAREN))
-
-
-
-    std::ostringstream source;
-
-    auto sign = PREDICATE_POSITIVE;
-    auto begin = it;
-
-
-
-    do {
-
-        if(EXPECT(it, TK_BODY)) {
-
-            
-            do {
-
-                while(GOOD(++it) && isspace(VALUE(it)))
-                    ;
-
-                if(unlikely(!VALID_NAME(it)))
-                    break; // FIXME: parse aggregate functions
-
-
-
-                std::ostringstream name;
-                std::ostringstream extensions;
-
-
-                name << VALUE(it);
-
-                while(GOOD(++it) && VALID_NAME(it)) {
-                    name << VALUE(it);
-                }
-
-                if(EXPECT(it, TK_LEFT_PAREN)) {
-
-                    uint16_t scope = 1;
-
-                    while(GOOD(++it) && VALID_EXTENSIONS(it)) {
-
-                        if(unlikely(EXPECT(it, TK_LEFT_PAREN)))
-                            scope++;
-
-                        if(unlikely(EXPECT(it, TK_RIGHT_PAREN)))
-                            scope--;
-
-                        if(unlikely(scope == 0))
-                            break;
-
-                        extensions << VALUE(it);                  
-
-                    }
-
-
-                    if(unlikely(!EXPECT(it, TK_RIGHT_PAREN))) {
-
-                        LOG(__FILE__, ERROR) << "Expected a RIGHT_PAREN after extensions list, found: " << VALUE(it) << std::endl;
-
-                        throw ParserException((*it).tk_source, (*it).tk_line, (*it).tk_column, VALUE(it));
-
-                    }
-
-                    it++;
-                    
-
-                } else {
-
-                    if(unlikely(!EXPECT(it, TK_DOT) && !EXPECT(it, TK_COMMA))) {
-
-                        if(name.str() == "not") {
-                            sign *= PREDICATE_NEGATIVE;
-                            continue;
-                        }
-
-                        LOG(__FILE__, WARN) << "Expected a LEFT_PAREN, DOT or COMMA after predicate name, found: " << VALUE(it) << std::endl;
-                        break;
-
-                    }
-
-                }
-
-                // FIXME
-                // LOG(__FILE__, TRACE) << "<PARSER> Found Predicate with name: " << name.str()
-                //                      << " and extensions: (" << extensions.str() << ")"
-                //                      << " in " << (*begin).tk_source
-                //                      << " at " << (*begin).tk_line << ":" << (*begin).tk_column << std::endl;
-
-
-
-                Predicate&& predicate = Predicate(name.str(), extensions.str(), sign);
-
-                if(!predicates.contains(predicate))
-                    predicates.emplace_back(predicate);
-                
-            
-
-
-                sign = PREDICATE_POSITIVE;
-
-
-                if(EXPECT(it, TK_COMMA))
-                    continue;
-
-                else if(EXPECT(it, TK_DOT))
-                    break;
-
-                else {
-
-                    LOG(__FILE__, ERROR) << "Expected a DOT or COMMA after predicate, found " << VALUE(it) << std::endl;
-                    break;
-
-                }
-
-
-            } while(true);
-
-        }
-
-    } while(0);
-
-
-    for(; begin != it; begin++) {
-        source << parseValue(begin);
-    }
-        
-    source << parseValue(begin);
-
-    return source.str();
-
-}
-
-#endif
 
 static std::vector<Program> parseSources(const std::vector<std::string>& sources, std::vector<Program>& programs, std::optional<Program>& constraint) { __PERF_TIMING(parsing);
 
@@ -384,7 +240,6 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 std::ostringstream identifier;
                 std::ostringstream source;
-                Predicates predicates;
 
 
 #ifdef DEBUG
@@ -411,15 +266,8 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
                 }
 
 
-                while(GOOD(++it) && !EXPECT(it, TK_ANNOTATION)) {
-
-#if defined(HAVE_MODE_LOOK_AHEAD)
-                    source << parsePredicates(tokens, it, predicates);
-#else
+                while(GOOD(++it) && !EXPECT(it, TK_ANNOTATION))
                     source << parseValue(it);
-#endif
-
-                }
 
                 it--;
 
@@ -434,11 +282,14 @@ static std::vector<Program> parseSources(const std::vector<std::string>& sources
 
                 
                 if(identifier.str() == ANNOTATION_EXISTS)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_EXISTS, source.str(), predicates);
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_EXISTS, source.str());
+
                 else if(identifier.str() == ANNOTATION_FORALL)
-                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str(), predicates);
+                    programs.emplace_back(programs.size() + 1, ProgramType::TYPE_FORALL, source.str());
+
                 else if(identifier.str() == ANNOTATION_CONSTRAINTS)
-                    constraint.emplace(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str(), predicates);
+                    constraint.emplace(programs.size() + 1, ProgramType::TYPE_CONSTRAINTS, source.str());
+                    
                 else {
 
 #ifdef DEBUG

@@ -65,8 +65,8 @@ void Program::merge(const Program& other) noexcept {
 
 
 
-    for(const auto& i : other.predicates())
-        this->__predicates.emplace_back(i);
+    for(const auto& i : other.dependencies())
+        this->__dependencies.emplace(i);
 
     this->__source = source.str();
     this->__merged = true;
@@ -90,8 +90,16 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
           << assumptions;
 
 
+
     std::string output = Grounder::instance()->generate(input.str());
     std::istringstream reader(output);
+
+    std::unordered_set<atom_index_t> bpositive;
+    std::unordered_set<atom_index_t> bnegative;
+
+    atom_index_t ignored;
+
+
 
 
     auto read = [&] (std::function<void(const atom_index_t& index)> parse) {
@@ -111,10 +119,152 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
     };
 
 
-    // Ignore first declarations
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+    auto extract = [&] (size_t literals, size_t negative) {
+
+        for(size_t i = 0; i < literals; ++i) {
+
+            atom_index_t predicate;
+            reader >> predicate;
+
+            if(i < negative)
+                bnegative.emplace(predicate);
+            else
+                bpositive.emplace(predicate);
+
+        }
+
+    };
+
+#endif
+
+
+    // Parse predicate bodies
     read([&] (const auto& index) { 
+        
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+        switch(index) {
+            
+            case SMODELS_RULE_TYPE_BASIC: {
+
+                // Ignore head
+                reader >> ignored;
+
+                size_t literals;
+                size_t negative;
+
+                reader >> literals;
+                reader >> negative;
+
+                extract(literals, negative);
+
+            } break;
+
+
+            case SMODELS_RULE_TYPE_CONSTRAINT: {
+
+                // Ignore head
+                reader >> ignored;
+
+                size_t literals;
+                size_t negative;
+
+                reader >> literals;
+                reader >> negative;
+
+                // Ignore bound
+                reader >> ignored;
+
+                extract(literals, negative);
+
+            } break;
+
+
+            case SMODELS_RULE_TYPE_CHOICE:
+            case SMODELS_RULE_TYPE_DISJUNCTIVE: {
+
+                size_t heads;
+                reader >> heads;
+
+                // Ignore heads
+                for(size_t i = 0; i < heads; ++i)
+                    reader >> ignored;
+                
+
+                
+                size_t literals;
+                size_t negative;
+
+                reader >> literals;
+                reader >> negative;
+
+                extract(literals, negative);
+
+            } break;
+
+            
+            case SMODELS_RULE_TYPE_WEIGHT: {
+
+                // Ignore head
+                reader >> ignored;
+
+                // Ignore bound
+                reader >> ignored;
+
+                size_t literals;
+                size_t negative;
+
+                reader >> literals;
+                reader >> negative;
+
+                extract(literals, negative);
+
+                // Ignore weights
+                reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            }; break;
+
+
+            case SMODELS_RULE_TYPE_MINIMIZE: {
+
+                // Ignore head
+                reader >> ignored;
+
+                size_t literals;
+                size_t negative;
+
+                reader >> literals;
+                reader >> negative;
+
+                extract(literals, negative);
+
+                // Ignore weights
+                reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                
+            }; break;
+
+
+            default:
+
+                LOG(__FILE__, ERROR) << "Found a unknown rule type (" << index << ") "
+                                     << "in smodels output for program #" << this->id() 
+                                     << std::endl << output << std::endl;
+
+                throw std::runtime_error("unknown rule type found in smodels output");
+
+        }
+
+#else
+
+        // Ignore rules
         reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+#endif
+
     });
+
 
     // Parse predicate index map
     read([&] (const auto& index) {
@@ -129,7 +279,22 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
         this->__atoms.emplace(predicate, Atom { index, predicate });
         this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);
 
+        
+        auto p = bpositive.find(index) != bpositive.end();
+        auto n = bnegative.find(index) != bnegative.end();
+
+        if(p || n) {
+
+            this->__dependencies.emplace(predicate, 
+                (p ? DEPENDENCY_SIGN_POSITIVE : 0) | 
+                (n ? DEPENDENCY_SIGN_NEGATIVE : 0) );
+
+        }
+
+            
+
     });
+
    
 
     this->__ground = std::move(output);

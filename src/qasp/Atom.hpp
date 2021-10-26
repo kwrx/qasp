@@ -23,7 +23,6 @@
 #include <string>
 #include <algorithm>
 
-#include "Predicate.hpp"
 
 namespace qasp {
 
@@ -87,8 +86,12 @@ namespace qasp {
                 return this->predicate() == b.predicate();
             }
 
-            inline bool operator ==(const Predicate& b) const {
-                return this->name() == b.name();
+            inline bool operator ==(const atom_index_t& b) const {
+                return this->index() == b;
+            }
+
+            inline bool operator ==(const std::string& predicate) const {
+                return this->predicate() == predicate;
             }
 
 
