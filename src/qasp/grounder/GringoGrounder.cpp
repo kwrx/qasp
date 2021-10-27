@@ -21,6 +21,7 @@
 #if defined(HAVE_GRINGO)
 
 #include "GringoGrounder.hpp"
+#include "../Program.hpp"
 
 #include <gringo/ground/program.hh>
 #include <gringo/input/programbuilder.hh>
@@ -106,6 +107,9 @@ std::string GringoGrounder::execute(const std::string& source) const {
         Gringo::Input::NongroundProgramBuilder builder { Gringo::g_scripts(), program, output, defines, false };
         Gringo::Input::NonGroundParser parser { builder, incremental };
 
+        std::vector<std::pair<std::string, int>> occurrencies;
+
+
 
         {
 
@@ -135,13 +139,26 @@ std::string GringoGrounder::execute(const std::string& source) const {
 
             params.add("base", {});
 
-            program.toGround({ Gringo::Sig("base", 0, {}) }, output.data, debug)
-                .ground(params, Gringo::g_scripts(), output, debug);
+
+            auto ground = program.toGround({ Gringo::Sig("base", 0, {}) }, output.data, debug);
+
+            ground.ground(params, Gringo::g_scripts(), output, debug);
+            ground.occurrencies(occurrencies);
 
 
-        }
+        }        
 
         output.endStep({ nullptr, 0 });
+
+        oss << "0" << std::endl;
+
+        for(const auto& dep : occurrencies) {
+
+            oss << SMODELS_RULE_TYPE_DEPENDENCY
+                << " " << dep.second
+                << " " << dep.first << std::endl;
+
+        }
 
 
     } catch(std::exception const& e) {
@@ -152,6 +169,11 @@ std::string GringoGrounder::execute(const std::string& source) const {
         throw std::runtime_error("an error occurred while running gringo");
 
     }
+
+    
+
+    LOG(__FILE__, INFO) << "Ground output: " << std::endl
+                        << oss.str() << std::endl;
 
     return oss.str();
 

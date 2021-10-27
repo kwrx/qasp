@@ -23,6 +23,7 @@
 #include "Atom.hpp"
 #include "Assumptions.hpp"
 #include "AnswerSet.hpp"
+#include "Dependency.hpp"
 #include "solver/Solver.hpp"
 #include "utils/Performance.hpp"
 
@@ -33,9 +34,21 @@
 #include <memory>
 
 
-#define DEPENDENCY_SIGN_UNDEFINED                0
-#define DEPENDENCY_SIGN_POSITIVE                 1
-#define DEPENDENCY_SIGN_NEGATIVE                 2
+
+#define SMODELS_RULE_TYPE_SEPARATOR             0
+#define SMODELS_RULE_TYPE_BASIC                 1
+#define SMODELS_RULE_TYPE_CONSTRAINT            2
+#define SMODELS_RULE_TYPE_CHOICE                3
+#define SMODELS_RULE_TYPE_WEIGHT                5
+#define SMODELS_RULE_TYPE_MINIMIZE              6
+#define SMODELS_RULE_TYPE_DISJUNCTIVE           8
+#define SMODELS_RULE_TYPE_DEPENDENCY            99
+
+#define SMODELS_RULE_BPLUS                      "B+"
+#define SMODELS_RULE_BMINUS                     "B-"
+
+#define SMODELS_PREDICATE_CONSTRAINT            1
+
 
 
 namespace qasp {
@@ -60,7 +73,7 @@ namespace qasp {
     class Program {
         public:
 
-            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::unordered_map<std::string, const int> dependencies = {}, const std::vector<Program> subprograms = {})
+            Program(pid_t id, const qasp::ProgramType type, const std::string source, const std::unordered_set<Dependency, DependencyHash> dependencies = {}, const std::vector<Program> subprograms = {})
                 : __id(id)
                 , __type(type)
                 , __source(std::move(source))
@@ -139,7 +152,7 @@ namespace qasp {
             std::vector<Program> __subprograms;
 
             std::unordered_map<std::string, Atom> __atoms {};
-            std::unordered_map<std::string, const int> __dependencies {};
+            std::unordered_set<Dependency, DependencyHash> __dependencies {};
             atom_index_t __atoms_index_offset = 0;
             Assumptions __assumptions {};
             bool __merged = false;

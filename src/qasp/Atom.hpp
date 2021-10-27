@@ -23,6 +23,7 @@
 #include <string>
 #include <algorithm>
 
+#include "Dependency.hpp"
 
 namespace qasp {
 
@@ -92,6 +93,11 @@ namespace qasp {
 
             inline bool operator ==(const std::string& predicate) const {
                 return this->predicate() == predicate;
+            }
+
+            inline bool operator ==(const Dependency& dependency) const {
+                return this->name()  == dependency.name()
+                    && this->arity() == dependency.arity();
             }
 
 
