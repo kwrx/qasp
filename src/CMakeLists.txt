@@ -18,20 +18,20 @@ if(${HAVE_GRINGO})
 
     target_include_directories(qasp 
         PRIVATE 
-            "${CMAKE_SOURCE_DIR}/extra/potassco/clingo/libclingo"
-            "${CMAKE_SOURCE_DIR}/extra/potassco/clingo/libgringo"
-            "${CMAKE_SOURCE_DIR}/extra/potassco/clingo/libreify"
-            "${CMAKE_SOURCE_DIR}/extra/potassco/clingo/clasp"
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/clasp"
-            "${CMAKE_SOURCE_DIR}/extra/potassco/clingo/clasp/libpotassco")
+            "${CMAKE_SOURCE_DIR}/lib/clingo/libclingo"
+            "${CMAKE_SOURCE_DIR}/lib/clingo/libgringo"
+            "${CMAKE_SOURCE_DIR}/lib/clingo/libreify"
+            "${CMAKE_SOURCE_DIR}/lib/clingo/clasp"
+            "${CMAKE_BINARY_DIR}/lib/clingo/clasp"
+            "${CMAKE_SOURCE_DIR}/lib/clingo/clasp/libpotassco")
 
     target_link_libraries(qasp
         PRIVATE
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/lib/libclingo.a"
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/lib/libgringo.a"
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/lib/libclasp.a"
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/lib/libreify.a"
-            "${CMAKE_BINARY_DIR}/extra/potassco/clingo/lib/libpotassco.a")
+            "${CMAKE_BINARY_DIR}/lib/clingo/lib/libclingo.a"
+            "${CMAKE_BINARY_DIR}/lib/clingo/lib/libgringo.a"
+            "${CMAKE_BINARY_DIR}/lib/clingo/lib/libclasp.a"
+            "${CMAKE_BINARY_DIR}/lib/clingo/lib/libreify.a"
+            "${CMAKE_BINARY_DIR}/lib/clingo/lib/libpotassco.a")
 
 endif()
 
