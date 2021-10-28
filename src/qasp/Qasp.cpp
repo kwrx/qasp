@@ -23,7 +23,7 @@
 #include "Atom.hpp"
 #include "QaspSolver.hpp"
 #include "Context.hpp"
-#include "parser/Parser.hpp"
+#include "parser/SourceParser.hpp"
 
 #include <qasp/qasp.h>
 #include <iostream>

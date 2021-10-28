@@ -76,10 +76,6 @@ namespace qasp {
                 return std::find(this->begin(), this->end(), atom) != this->end();
             }
 
-            inline const bool contains(const Predicate& predicate) const noexcept {
-                return std::find(this->begin(), this->end(), predicate) != this->end();
-            }
-
 
 
             template <typename ...T>

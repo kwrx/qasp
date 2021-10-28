@@ -36,20 +36,6 @@ using namespace qasp::grounder;
 using namespace qasp::solver;
 
 
-#define SMODELS_RULE_TYPE_SEPARATOR         0
-#define SMODELS_RULE_TYPE_BASIC             1
-#define SMODELS_RULE_TYPE_CONSTRAINT        2
-#define SMODELS_RULE_TYPE_CHOICE            3
-#define SMODELS_RULE_TYPE_WEIGHT            5
-#define SMODELS_RULE_TYPE_MINIMIZE          6
-#define SMODELS_RULE_TYPE_DISJUNCTIVE       8
-
-#define SMODELS_RULE_BPLUS                  "B+"
-#define SMODELS_RULE_BMINUS                 "B-"
-
-#define SMODELS_PREDICATE_CONSTRAINT        1
-
-
 
 void Program::merge(const Program& other) noexcept {
 
@@ -65,8 +51,8 @@ void Program::merge(const Program& other) noexcept {
 
 
 
-    for(const auto& i : other.predicates())
-        this->__predicates.emplace_back(i);
+    for(const auto& i : other.dependencies())
+        this->__dependencies.emplace(i);
 
     this->__source = source.str();
     this->__merged = true;
@@ -90,6 +76,7 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
           << assumptions;
 
 
+
     std::string output = Grounder::instance()->generate(input.str());
     std::istringstream reader(output);
 
@@ -98,8 +85,17 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
 
         while(reader.good()) {
 
-            atom_index_t index;
-            reader >> index;
+            std::string row;
+            reader >> row;
+
+            if(row == "B+")
+                continue;
+
+            if(row == "B-")
+                continue;
+
+
+            atom_index_t index = atoll(row.c_str());
 
             if(unlikely(index == SMODELS_RULE_TYPE_SEPARATOR))
                 break;
@@ -111,10 +107,12 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
     };
 
 
-    // Ignore first declarations
+
+    // Ignore rules
     read([&] (const auto& index) { 
         reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     });
+
 
     // Parse predicate index map
     read([&] (const auto& index) {
@@ -122,15 +120,90 @@ const Program& Program::groundize(Assumptions assumptions) { __PERF_TIMING(groun
         std::string predicate;
         reader >> predicate;
 
-        LOG(__FILE__, TRACE) << "Extracted from smodels atom with index " << index
+        LOG(__FILE__, TRACE) << "Extracted from smodels an atom with index " << index
                              << " and predicate " << predicate << std::endl;
 
 
         this->__atoms.emplace(predicate, Atom { index, predicate });
-        this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);
+        this->__atoms_index_offset = std::max(this->__atoms_index_offset, index + 1);  
 
     });
-   
+
+
+#if defined(HAVE_MODE_LOOK_AHEAD)
+
+    // Ignore B+
+    read([&] (const auto& index) {
+        reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    });
+
+    // Ignore B-
+    read([&] (const auto& index) {
+        reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    });
+    
+    // Ignore ending
+    read([&] (const auto& index) {
+        reader.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    });
+
+    
+    // Parse (if exists) body occurrencies
+    read([&] (const auto& index) {
+
+        switch(index) {
+
+            case SMODELS_RULE_TYPE_DEPENDENCY: {
+
+                bool positive;
+                reader >> positive;
+
+                std::string predicate;
+                reader >> predicate;
+
+
+                LOG(__FILE__, TRACE) << "Extracted from smodels a " << (positive ? "positive" : "negative")
+                                     << " dependency " << predicate << std::endl;
+
+
+
+                const auto& occurrency = std::find(std::begin(this->dependencies()), std::end(this->dependencies()), predicate);
+                
+                if(occurrency != this->dependencies().end()) {
+
+                    size_t sign = occurrency->sign();
+
+                    if(positive)
+                        sign |= DEPENDENCY_SIGN_POSITIVE;
+                    else
+                        sign |= DEPENDENCY_SIGN_NEGATIVE;
+
+                    this->__dependencies.emplace(occurrency->predicate(), sign);
+
+                } else {
+
+                    this->__dependencies.emplace(predicate, positive
+                        ? DEPENDENCY_SIGN_POSITIVE
+                        : DEPENDENCY_SIGN_NEGATIVE);
+
+                }
+
+
+            } break;
+
+            default:
+
+                LOG(__FILE__, ERROR) << "Unknown dependency rule found " << index
+                                     << " from program #" << this->id()  << std::endl;
+
+                throw std::runtime_error("unknown dependency found");
+
+
+        }
+
+    });
+
+#endif 
 
     this->__ground = std::move(output);
     this->__assumptions = std::move(assumptions);
