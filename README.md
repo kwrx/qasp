@@ -21,7 +21,7 @@ $ git submodule update --init --recursive
 
 # Configure
 $ mkdir -p build
-$ cmake -DCMAKE_BUILD_TYPE=Release -B build
+$ cmake -DCMAKE_BUILD_TYPE=Release -B build .
 
 # Build
 $ cmake --build build -t clingo
